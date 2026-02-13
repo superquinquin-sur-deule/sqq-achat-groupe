@@ -2,11 +2,15 @@ package fr.sqq.achatgroupe.infrastructure.in.rest.backoffice;
 
 import fr.sqq.achatgroupe.application.port.in.GenerateSupplierOrderUseCase;
 import fr.sqq.achatgroupe.application.port.in.GenerateSupplierOrderUseCase.SupplierOrderLine;
+import fr.sqq.achatgroupe.application.service.SupplierOrderExcelGenerator;
 import fr.sqq.achatgroupe.infrastructure.in.rest.dto.DataResponse;
 import fr.sqq.achatgroupe.infrastructure.in.rest.dto.SupplierOrderLineResponse;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 
+import java.io.IOException;
+import java.time.LocalDate;
 import java.util.List;
 
 @Path("/api/backoffice/supplier-orders")
@@ -15,9 +19,12 @@ import java.util.List;
 public class BackofficeSupplierOrderResource {
 
     private final GenerateSupplierOrderUseCase generateSupplierOrder;
+    private final SupplierOrderExcelGenerator excelGenerator;
 
-    public BackofficeSupplierOrderResource(GenerateSupplierOrderUseCase generateSupplierOrder) {
+    public BackofficeSupplierOrderResource(GenerateSupplierOrderUseCase generateSupplierOrder,
+                                           SupplierOrderExcelGenerator excelGenerator) {
         this.generateSupplierOrder = generateSupplierOrder;
+        this.excelGenerator = excelGenerator;
     }
 
     @GET
@@ -27,5 +34,20 @@ public class BackofficeSupplierOrderResource {
         }
         List<SupplierOrderLine> lines = generateSupplierOrder.generateSupplierOrder(venteId);
         return new DataResponse<>(BackofficeSupplierOrderRestMapper.toResponse(lines));
+    }
+
+    @GET
+    @Path("/xlsx")
+    @Produces("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+    public Response getSupplierOrderXlsx(@QueryParam("venteId") Long venteId) throws IOException {
+        if (venteId == null) {
+            throw new BadRequestException("venteId is required");
+        }
+        List<SupplierOrderLine> lines = generateSupplierOrder.generateSupplierOrder(venteId);
+        byte[] xlsx = excelGenerator.generate(lines);
+        String filename = "bon-fournisseur-" + LocalDate.now() + ".xlsx";
+        return Response.ok(xlsx)
+                .header("Content-Disposition", "attachment; filename=\"" + filename + "\"")
+                .build();
     }
 }
