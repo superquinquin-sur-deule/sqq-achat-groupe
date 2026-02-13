@@ -5,6 +5,7 @@ import fr.sqq.achatgroupe.application.port.in.GetDashboardStatsUseCase.SlotOrder
 import fr.sqq.achatgroupe.domain.model.planning.TimeSlot;
 import fr.sqq.achatgroupe.infrastructure.in.rest.dto.DashboardStatsResponse;
 import fr.sqq.achatgroupe.infrastructure.in.rest.dto.SlotDistribution;
+import fr.sqq.achatgroupe.infrastructure.in.rest.dto.TopProductResponse;
 
 import java.util.List;
 import java.util.Map;
@@ -29,12 +30,17 @@ public class AdminDashboardRestMapper {
                 })
                 .toList();
 
+        List<TopProductResponse> topProducts = stats.topProducts().stream()
+                .map(tp -> new TopProductResponse(tp.productName(), tp.totalQuantity()))
+                .toList();
+
         return new DashboardStatsResponse(
                 stats.totalOrders(),
                 stats.totalAmount(),
                 stats.pickupRate(),
                 stats.averageBasket(),
-                distribution
+                distribution,
+                topProducts
         );
     }
 }

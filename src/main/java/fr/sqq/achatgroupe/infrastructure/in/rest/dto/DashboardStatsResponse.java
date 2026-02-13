@@ -8,6 +8,7 @@ public record DashboardStatsResponse(
         BigDecimal totalAmount,
         double pickupRate,
         BigDecimal averageBasket,
-        List<SlotDistribution> slotDistribution
+        List<SlotDistribution> slotDistribution,
+        List<TopProductResponse> topProducts
 ) {
 }

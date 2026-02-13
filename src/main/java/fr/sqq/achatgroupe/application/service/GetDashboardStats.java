@@ -2,20 +2,26 @@ package fr.sqq.achatgroupe.application.service;
 
 import fr.sqq.achatgroupe.application.port.in.GetDashboardStatsUseCase;
 import fr.sqq.achatgroupe.application.port.out.OrderRepository;
+import fr.sqq.achatgroupe.application.port.out.ProductRepository;
+import fr.sqq.achatgroupe.domain.model.catalog.Product;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @ApplicationScoped
 public class GetDashboardStats implements GetDashboardStatsUseCase {
 
     private final OrderRepository orderRepository;
+    private final ProductRepository productRepository;
 
-    public GetDashboardStats(OrderRepository orderRepository) {
+    public GetDashboardStats(OrderRepository orderRepository, ProductRepository productRepository) {
         this.orderRepository = orderRepository;
+        this.productRepository = productRepository;
     }
 
     @Override
@@ -38,6 +44,16 @@ public class GetDashboardStats implements GetDashboardStatsUseCase {
                 .map(sc -> new SlotOrderCount(sc.slotId(), sc.orderCount()))
                 .toList();
 
-        return new DashboardStats(totalOrders, totalAmount, pickupRate, averageBasket, slotDistribution);
+        Map<Long, String> productNames = productRepository.findAllByVenteId(venteId).stream()
+                .collect(Collectors.toMap(Product::id, Product::name));
+
+        List<TopProductStat> topProducts = orderRepository.findTopSellingProducts(venteId, 3).stream()
+                .map(tp -> new TopProductStat(
+                        tp.productId(),
+                        productNames.getOrDefault(tp.productId(), "Produit #" + tp.productId()),
+                        tp.totalQuantity()))
+                .toList();
+
+        return new DashboardStats(totalOrders, totalAmount, pickupRate, averageBasket, slotDistribution, topProducts);
     }
 }

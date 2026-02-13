@@ -12,8 +12,11 @@ public interface GetDashboardStatsUseCase {
             BigDecimal totalAmount,
             double pickupRate,
             BigDecimal averageBasket,
-            List<SlotOrderCount> slotDistribution
+            List<SlotOrderCount> slotDistribution,
+            List<TopProductStat> topProducts
     ) {}
 
     record SlotOrderCount(Long slotId, long orderCount) {}
+
+    record TopProductStat(Long productId, String productName, long totalQuantity) {}
 }

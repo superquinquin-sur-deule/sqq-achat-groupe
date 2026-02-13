@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 import StatCard from '@/components/admin/StatCard.vue'
+import Card from '@/components/ui/Card.vue'
 import { fetchDashboardStats } from '@/api/admin'
 import { useVenteStore } from '@/stores/venteStore'
 import { storeToRefs } from 'pinia'
@@ -64,6 +65,43 @@ watch(selectedVenteId, (id) => { if (id) loadData(id) }, { immediate: true })
           :value="formatCurrency(stats.averageBasket)"
         />
       </div>
+
+      <!-- Podium top 3 produits -->
+      <Card v-if="stats.topProducts.length > 0" class="mb-8">
+        <h2 class="mb-6 text-center text-lg font-semibold text-dark">Top produits vendus</h2>
+        <div class="flex items-end justify-center gap-3">
+          <!-- 2e place -->
+          <div v-if="stats.topProducts.length >= 2" class="flex w-28 flex-col items-center">
+            <p class="mb-2 truncate text-center text-sm font-medium text-dark" :title="stats.topProducts[1].productName">
+              {{ stats.topProducts[1].productName }}
+            </p>
+            <div class="flex h-24 w-full items-end justify-center rounded-t-lg bg-brown/20">
+              <span class="pb-2 text-lg font-bold text-brown">{{ stats.topProducts[1].totalQuantity }}</span>
+            </div>
+            <div class="w-full rounded-b-lg bg-brown py-1 text-center text-sm font-bold text-white">2e</div>
+          </div>
+          <!-- 1ere place -->
+          <div class="flex w-28 flex-col items-center">
+            <p class="mb-2 truncate text-center text-sm font-medium text-dark" :title="stats.topProducts[0].productName">
+              {{ stats.topProducts[0].productName }}
+            </p>
+            <div class="flex h-36 w-full items-end justify-center rounded-t-lg bg-primary/20">
+              <span class="pb-2 text-xl font-bold text-primary">{{ stats.topProducts[0].totalQuantity }}</span>
+            </div>
+            <div class="w-full rounded-b-lg bg-primary py-1 text-center text-sm font-bold text-white">1er</div>
+          </div>
+          <!-- 3e place -->
+          <div v-if="stats.topProducts.length >= 3" class="flex w-28 flex-col items-center">
+            <p class="mb-2 truncate text-center text-sm font-medium text-dark" :title="stats.topProducts[2].productName">
+              {{ stats.topProducts[2].productName }}
+            </p>
+            <div class="flex h-16 w-full items-end justify-center rounded-t-lg bg-dark/10">
+              <span class="pb-2 text-lg font-bold text-dark">{{ stats.topProducts[2].totalQuantity }}</span>
+            </div>
+            <div class="w-full rounded-b-lg bg-dark py-1 text-center text-sm font-bold text-white">3e</div>
+          </div>
+        </div>
+      </Card>
 
       <div class="overflow-x-auto rounded-xl border border-gray-200 bg-white">
         <table class="w-full" data-testid="slot-distribution-table">

@@ -25,5 +25,9 @@ public interface OrderRepository {
 
     List<Order> findPaidByVenteId(Long venteId);
 
+    List<TopProduct> findTopSellingProducts(Long venteId, int limit);
+
     record SlotOrderCount(Long slotId, long orderCount) {}
+
+    record TopProduct(Long productId, long totalQuantity) {}
 }

@@ -3,6 +3,7 @@ package fr.sqq.achatgroupe.infrastructure.out.persistence;
 import fr.sqq.achatgroupe.domain.model.order.Order;
 import fr.sqq.achatgroupe.application.port.out.OrderRepository;
 import fr.sqq.achatgroupe.application.port.out.OrderRepository.SlotOrderCount;
+import fr.sqq.achatgroupe.application.port.out.OrderRepository.TopProduct;
 import fr.sqq.achatgroupe.infrastructure.out.persistence.entity.OrderEntity;
 import fr.sqq.achatgroupe.infrastructure.out.persistence.mapper.OrderPersistenceMapper;
 import io.quarkus.hibernate.orm.panache.PanacheRepositoryBase;
@@ -71,6 +72,18 @@ public class OrderPanacheRepository implements OrderRepository, PanacheRepositor
                 .getResultList();
         return rows.stream()
                 .map(row -> new SlotOrderCount((Long) row[0], (Long) row[1]))
+                .toList();
+    }
+
+    @Override
+    public List<TopProduct> findTopSellingProducts(Long venteId, int limit) {
+        List<Object[]> rows = getEntityManager()
+                .createQuery("SELECT oi.productId, SUM(oi.quantity) FROM OrderItemEntity oi JOIN oi.order o WHERE o.venteId = ?1 AND o.status IN ('PAID', 'PICKED_UP') GROUP BY oi.productId ORDER BY SUM(oi.quantity) DESC", Object[].class)
+                .setParameter(1, venteId)
+                .setMaxResults(limit)
+                .getResultList();
+        return rows.stream()
+                .map(row -> new TopProduct((Long) row[0], ((Number) row[1]).longValue()))
                 .toList();
     }
 }

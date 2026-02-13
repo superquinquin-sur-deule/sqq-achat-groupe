@@ -4,10 +4,16 @@ export interface SlotDistribution {
   orderCount: number
 }
 
+export interface TopProduct {
+  productName: string
+  totalQuantity: number
+}
+
 export interface DashboardStats {
   totalOrders: number
   totalAmount: number
   pickupRate: number
   averageBasket: number
   slotDistribution: SlotDistribution[]
+  topProducts: TopProduct[]
 }
