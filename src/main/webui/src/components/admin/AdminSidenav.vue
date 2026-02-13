@@ -66,7 +66,8 @@ function onVenteChange(event: Event) {
     ]"
   >
     <!-- Logo / titre -->
-    <div class="flex h-16 items-center px-6">
+    <div class="flex h-16 items-center gap-3 px-6">
+      <img src="/logo.svg" alt="SuperQuinquin" class="h-8 w-8" />
       <span class="text-lg font-bold text-white">SuperQuinquin</span>
     </div>
 
