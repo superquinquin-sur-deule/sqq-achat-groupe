@@ -1,14 +1,13 @@
 package fr.sqq.achatgroupe.infrastructure.in.rest.dto;
 
+import jakarta.validation.constraints.NotBlank;
+
 import java.time.Instant;
 
-public record VenteResponse(
-        Long id,
-        String name,
+public record CreateAdminVenteRequest(
+        @NotBlank String name,
         String description,
-        String status,
         Instant startDate,
-        Instant endDate,
-        Instant createdAt
+        Instant endDate
 ) {
 }

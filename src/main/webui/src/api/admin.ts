@@ -1,7 +1,7 @@
 import { api, ApiError } from './client'
 import type { AdminProduct, CreateProductData, UpdateProductData, ImportResult } from '@/types/product'
 import type { AdminTimeSlot, CreateTimeSlotData, UpdateTimeSlotData } from '@/types/timeSlot'
-import type { CampaignStatus } from '@/types/campaign'
+import type { AdminVente } from '@/types/vente'
 import type { DashboardStats } from '@/types/dashboard'
 
 export interface UserInfo {
@@ -101,28 +101,55 @@ export async function deleteTimeSlot(id: number, force?: boolean): Promise<void>
   await api.delete(`/api/admin/timeslots/${id}${query}`)
 }
 
-// --- Campaign ---
+// --- Admin Ventes ---
 
-interface CampaignStatusResponse {
-  data: CampaignStatus
+interface AdminVenteResponse {
+  data: AdminVente
 }
 
-interface CampaignVenteListResponse {
-  data: CampaignStatus[]
+interface AdminVenteListResponse {
+  data: AdminVente[]
 }
 
-export async function fetchCampaignVentes(): Promise<CampaignStatus[]> {
-  const response = await api.get<CampaignVenteListResponse>('/api/admin/campaign/ventes')
+export async function fetchAdminVentes(): Promise<AdminVente[]> {
+  const response = await api.get<AdminVenteListResponse>('/api/admin/ventes')
   return response.data
 }
 
-export async function fetchCampaignStatus(venteId: number): Promise<CampaignStatus> {
-  const response = await api.get<CampaignStatusResponse>(`/api/admin/campaign?venteId=${venteId}`)
+export async function createAdminVente(data: {
+  name: string
+  description: string
+  startDate: string | null
+  endDate: string | null
+}): Promise<AdminVente> {
+  const response = await api.post<AdminVenteResponse>('/api/admin/ventes', data)
   return response.data
 }
 
-export async function updateCampaignStatus(venteId: number, active: boolean): Promise<CampaignStatus> {
-  const response = await api.put<CampaignStatusResponse>('/api/admin/campaign', { venteId, active })
+export async function updateAdminVente(
+  id: number,
+  data: {
+    name: string
+    description: string
+    startDate: string | null
+    endDate: string | null
+  },
+): Promise<AdminVente> {
+  const response = await api.put<AdminVenteResponse>(`/api/admin/ventes/${id}`, data)
+  return response.data
+}
+
+export async function deleteAdminVente(id: number): Promise<void> {
+  await api.delete(`/api/admin/ventes/${id}`)
+}
+
+export async function activateVente(id: number): Promise<AdminVente> {
+  const response = await api.put<AdminVenteResponse>(`/api/admin/ventes/${id}/activate`)
+  return response.data
+}
+
+export async function deactivateVente(id: number): Promise<AdminVente> {
+  const response = await api.put<AdminVenteResponse>(`/api/admin/ventes/${id}/deactivate`)
   return response.data
 }
 

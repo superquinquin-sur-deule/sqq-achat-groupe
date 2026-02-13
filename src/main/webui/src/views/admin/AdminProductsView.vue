@@ -1,18 +1,20 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, watch } from 'vue'
 import Button from '@/components/ui/Button.vue'
 import ProductForm from '@/components/admin/ProductForm.vue'
 import ProductImportForm from '@/components/admin/ProductImportForm.vue'
 import { fetchProducts, createProduct, updateProduct, deleteProduct, importProducts } from '@/api/admin'
-import { fetchVentes } from '@/api/ventes'
+import { useVenteStore } from '@/stores/venteStore'
+import { storeToRefs } from 'pinia'
 import { useToast } from '@/composables/useToast'
 import type { AdminProduct, CreateProductData, UpdateProductData } from '@/types/product'
 
 const toast = useToast()
+const venteStore = useVenteStore()
+const { selectedVenteId } = storeToRefs(venteStore)
 
 const products = ref<AdminProduct[]>([])
 const loading = ref(false)
-const venteId = ref<number | null>(null)
 const showForm = ref(false)
 const editingProduct = ref<AdminProduct | undefined>(undefined)
 const submitting = ref(false)
@@ -21,15 +23,10 @@ const showImportForm = ref(false)
 const importing = ref(false)
 const importFormRef = ref<InstanceType<typeof ProductImportForm> | null>(null)
 
-async function loadData() {
+async function loadData(venteId: number) {
   loading.value = true
   try {
-    const ventes = await fetchVentes()
-    const firstVente = ventes[0]
-    if (firstVente) {
-      venteId.value = firstVente.id
-      products.value = await fetchProducts(venteId.value)
-    }
+    products.value = await fetchProducts(venteId)
   } catch {
     toast.error('Erreur lors du chargement des produits')
   } finally {
@@ -37,7 +34,7 @@ async function loadData() {
   }
 }
 
-onMounted(loadData)
+watch(selectedVenteId, (id) => { if (id) loadData(id) }, { immediate: true })
 
 function openCreateForm() {
   editingProduct.value = undefined
@@ -57,10 +54,10 @@ function closeImportForm() {
 }
 
 async function onImportSubmit(file: File) {
-  if (!venteId.value) return
+  if (!selectedVenteId.value) return
   importing.value = true
   try {
-    const result = await importProducts(venteId.value, file)
+    const result = await importProducts(selectedVenteId.value, file)
     importFormRef.value?.setResult(result)
     if (result.errors === 0) {
       toast.success(`${result.imported} produit${result.imported > 1 ? 's' : ''} importé${result.imported > 1 ? 's' : ''}`)
@@ -69,7 +66,7 @@ async function onImportSubmit(file: File) {
     } else {
       toast.error('Aucun produit importé')
     }
-    products.value = await fetchProducts(venteId.value)
+    products.value = await fetchProducts(selectedVenteId.value)
   } catch {
     toast.error('Erreur lors de l\'import des produits')
   } finally {
@@ -89,7 +86,7 @@ function closeForm() {
 }
 
 async function onSubmit(data: { name: string; description: string; price: number; supplier: string; stock: number; active: boolean }) {
-  if (!venteId.value) return
+  if (!selectedVenteId.value) return
   submitting.value = true
   try {
     if (editingProduct.value) {
@@ -105,7 +102,7 @@ async function onSubmit(data: { name: string; description: string; price: number
       toast.success('Produit mis à jour')
     } else {
       const createData: CreateProductData = {
-        venteId: venteId.value,
+        venteId: selectedVenteId.value,
         name: data.name,
         description: data.description,
         price: data.price,
@@ -116,7 +113,7 @@ async function onSubmit(data: { name: string; description: string; price: number
       toast.success('Produit créé')
     }
     closeForm()
-    products.value = await fetchProducts(venteId.value)
+    products.value = await fetchProducts(selectedVenteId.value)
   } catch {
     toast.error('Erreur lors de la sauvegarde du produit')
   } finally {
@@ -133,12 +130,12 @@ function cancelDelete() {
 }
 
 async function confirmDelete(id: number) {
-  if (!venteId.value) return
+  if (!selectedVenteId.value) return
   try {
     await deleteProduct(id)
     toast.success('Produit supprimé')
     confirmingDeleteId.value = null
-    products.value = await fetchProducts(venteId.value)
+    products.value = await fetchProducts(selectedVenteId.value)
   } catch {
     toast.error('Erreur lors de la suppression du produit')
   }

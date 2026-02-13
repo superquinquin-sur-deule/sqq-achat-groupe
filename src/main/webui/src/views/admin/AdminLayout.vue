@@ -1,8 +1,16 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import AdminSidenav from '@/components/admin/AdminSidenav.vue'
+import { useVenteStore } from '@/stores/venteStore'
+import { storeToRefs } from 'pinia'
 
 const sidenavOpen = ref(false)
+const venteStore = useVenteStore()
+const { loading } = storeToRefs(venteStore)
+
+onMounted(() => {
+  venteStore.loadVentes()
+})
 </script>
 
 <template>
@@ -26,7 +34,10 @@ const sidenavOpen = ref(false)
 
     <!-- Main content -->
     <main class="mx-auto max-w-7xl px-4 py-6 md:pl-64 print:pl-0 md:px-6">
-      <RouterView />
+      <div v-if="loading" class="py-12 text-center text-brown">
+        Chargement...
+      </div>
+      <RouterView v-else />
     </main>
   </div>
 </template>

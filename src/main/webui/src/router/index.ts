@@ -59,9 +59,9 @@ const router = createRouter({
           component: () => import('@/views/admin/AdminTimeSlotsView.vue'),
         },
         {
-          path: 'campaign',
-          name: 'admin-campaign',
-          component: () => import('@/views/admin/AdminCampaignView.vue'),
+          path: 'ventes',
+          name: 'admin-ventes',
+          component: () => import('@/views/admin/AdminVentesView.vue'),
         },
         {
           path: 'orders',

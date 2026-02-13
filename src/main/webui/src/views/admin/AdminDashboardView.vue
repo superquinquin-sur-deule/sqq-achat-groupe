@@ -1,11 +1,15 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, watch } from 'vue'
 import StatCard from '@/components/admin/StatCard.vue'
-import { fetchDashboardStats, fetchCampaignVentes } from '@/api/admin'
+import { fetchDashboardStats } from '@/api/admin'
+import { useVenteStore } from '@/stores/venteStore'
+import { storeToRefs } from 'pinia'
 import { useToast } from '@/composables/useToast'
 import type { DashboardStats } from '@/types/dashboard'
 
 const toast = useToast()
+const venteStore = useVenteStore()
+const { selectedVenteId } = storeToRefs(venteStore)
 
 const stats = ref<DashboardStats | null>(null)
 const loading = ref(false)
@@ -14,14 +18,10 @@ function formatCurrency(value: number): string {
   return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(value)
 }
 
-async function loadData() {
+async function loadData(venteId: number) {
   loading.value = true
   try {
-    const ventes = await fetchCampaignVentes()
-    const firstVente = ventes[0]
-    if (firstVente) {
-      stats.value = await fetchDashboardStats(firstVente.id)
-    }
+    stats.value = await fetchDashboardStats(venteId)
   } catch {
     toast.error('Erreur lors du chargement des statistiques')
   } finally {
@@ -29,7 +29,7 @@ async function loadData() {
   }
 }
 
-onMounted(loadData)
+watch(selectedVenteId, (id) => { if (id) loadData(id) }, { immediate: true })
 </script>
 
 <template>

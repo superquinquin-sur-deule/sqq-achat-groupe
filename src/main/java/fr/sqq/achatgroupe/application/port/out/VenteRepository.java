@@ -15,4 +15,6 @@ public interface VenteRepository {
     List<Vente> findAllActive();
 
     List<Vente> findAllVentes();
+
+    void deleteById(VenteId id);
 }

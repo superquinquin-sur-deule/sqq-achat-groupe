@@ -18,6 +18,8 @@ public class VenteRestMapper {
                 vente.name(),
                 vente.description(),
                 vente.status().name(),
+                vente.startDate(),
+                vente.endDate(),
                 vente.createdAt()
         );
     }

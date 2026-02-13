@@ -71,20 +71,12 @@ public class BackofficeOrderSteps {
                 .setContentType("application/json")
                 .setBody("{\"data\":{\"name\":\"Test Logistique\",\"email\":\"logistique@test.fr\"}}")));
 
-        // Intercepter l'API ventes pour ne retourner que la vente du test courant
+        // Intercepter l'API admin ventes pour ne retourner que la vente du test courant
         Long venteId = testContext.venteId();
-        page().route("**/api/ventes", route -> {
-            String url = route.request().url();
-            // Laisser passer les requêtes vers /api/ventes/{id} (sous-routes)
-            if (url.matches(".*\\/api\\/ventes\\/\\d+.*")) {
-                route.resume();
-            } else {
-                route.fulfill(new Route.FulfillOptions()
-                        .setStatus(200)
-                        .setContentType("application/json")
-                        .setBody("{\"data\":[{\"id\":" + venteId + ",\"name\":\"Vente Test\",\"description\":\"Test\",\"status\":\"ACTIVE\",\"createdAt\":\"2026-01-01T00:00:00Z\"}]}"));
-            }
-        });
+        page().route("**/api/admin/ventes", route -> route.fulfill(new Route.FulfillOptions()
+                .setStatus(200)
+                .setContentType("application/json")
+                .setBody("{\"data\":[{\"id\":" + venteId + ",\"name\":\"Vente Test\",\"description\":\"Test\",\"status\":\"ACTIVE\",\"startDate\":null,\"endDate\":null,\"createdAt\":\"2026-01-01T00:00:00Z\"}]}")));
 
         page().navigate(PlaywrightHooks.testUrl() + "/admin/orders");
         page().waitForSelector("[data-testid='backoffice-orders-table'], [data-testid='empty-state']", new Page.WaitForSelectorOptions()
@@ -105,7 +97,8 @@ public class BackofficeOrderSteps {
         assertTrue(sidenav.locator("[data-testid='sidenav-dashboard']").isVisible(), "Le lien Dashboard doit être visible");
         assertTrue(sidenav.locator("[data-testid='sidenav-products']").isVisible(), "Le lien Produits doit être visible");
         assertTrue(sidenav.locator("[data-testid='sidenav-timeslots']").isVisible(), "Le lien Créneaux doit être visible");
-        assertTrue(sidenav.locator("[data-testid='sidenav-campaign']").isVisible(), "Le lien Campagne doit être visible");
+        assertTrue(sidenav.locator("[data-testid='sidenav-ventes']").isVisible(), "Le lien Ventes doit être visible");
+        assertTrue(sidenav.locator("[data-testid='sidenav-vente-selector']").isVisible(), "Le sélecteur de vente doit être visible");
         // Back-office links
         assertTrue(sidenav.locator("[data-testid='sidenav-orders']").isVisible(), "Le lien Commandes doit être visible");
         assertTrue(sidenav.locator("[data-testid='sidenav-supplier']").isVisible(), "Le lien Bon fournisseur doit être visible");

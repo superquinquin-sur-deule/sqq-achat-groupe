@@ -1,11 +1,14 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { fetchPreparationList } from '@/api/backoffice'
-import { fetchVentes } from '@/api/ventes'
+import { useVenteStore } from '@/stores/venteStore'
+import { storeToRefs } from 'pinia'
 import { useToast } from '@/composables/useToast'
 import type { PreparationOrder } from '@/types/backoffice'
 
 const toast = useToast()
+const venteStore = useVenteStore()
+const { selectedVenteId } = storeToRefs(venteStore)
 
 const orders = ref<PreparationOrder[]>([])
 const loading = ref(false)
@@ -57,14 +60,10 @@ function handlePrint() {
   window.print()
 }
 
-async function loadData() {
+async function loadData(venteId: number) {
   loading.value = true
   try {
-    const ventes = await fetchVentes()
-    const firstVente = ventes[0]
-    if (firstVente) {
-      orders.value = await fetchPreparationList(firstVente.id)
-    }
+    orders.value = await fetchPreparationList(venteId)
   } catch {
     toast.error('Erreur lors du chargement des listes de préparation')
   } finally {
@@ -72,7 +71,7 @@ async function loadData() {
   }
 }
 
-onMounted(loadData)
+watch(selectedVenteId, (id) => { if (id) loadData(id) }, { immediate: true })
 </script>
 
 <template>

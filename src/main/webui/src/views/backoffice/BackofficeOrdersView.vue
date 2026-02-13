@@ -1,13 +1,16 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { RouterLink } from 'vue-router'
 import { fetchBackofficeOrders } from '@/api/backoffice'
-import { fetchVentes } from '@/api/ventes'
+import { useVenteStore } from '@/stores/venteStore'
+import { storeToRefs } from 'pinia'
 import { useToast } from '@/composables/useToast'
 import { formatPrice, statusLabel, statusClasses } from '@/utils/order-formatters'
 import type { BackofficeOrder } from '@/types/backoffice'
 
 const toast = useToast()
+const venteStore = useVenteStore()
+const { selectedVenteId } = storeToRefs(venteStore)
 
 const orders = ref<BackofficeOrder[]>([])
 const loading = ref(false)
@@ -31,14 +34,10 @@ const filteredOrders = computed(() => {
   return result
 })
 
-async function loadData() {
+async function loadData(venteId: number) {
   loading.value = true
   try {
-    const ventes = await fetchVentes()
-    const firstVente = ventes[0]
-    if (firstVente) {
-      orders.value = await fetchBackofficeOrders(firstVente.id)
-    }
+    orders.value = await fetchBackofficeOrders(venteId)
   } catch {
     toast.error('Erreur lors du chargement des commandes')
   } finally {
@@ -46,7 +45,7 @@ async function loadData() {
   }
 }
 
-onMounted(loadData)
+watch(selectedVenteId, (id) => { if (id) loadData(id) }, { immediate: true })
 </script>
 
 <template>

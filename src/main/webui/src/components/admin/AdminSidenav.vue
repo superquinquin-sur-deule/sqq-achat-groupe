@@ -1,24 +1,28 @@
 <script setup lang="ts">
 import { RouterLink, useRoute } from 'vue-router'
 import { useAuth } from '@/composables/useAuth'
+import { useVenteStore } from '@/stores/venteStore'
+import { storeToRefs } from 'pinia'
 
 defineProps<{ modelValue: boolean }>()
 const emit = defineEmits<{ 'update:modelValue': [value: boolean] }>()
 
 const route = useRoute()
 const { user } = useAuth()
+const venteStore = useVenteStore()
+const { ventes, selectedVenteId } = storeToRefs(venteStore)
 
 const adminLinks = [
   { to: '/admin/dashboard', label: 'Dashboard', testid: 'sidenav-dashboard', icon: 'dashboard' },
   { to: '/admin/products', label: 'Produits', testid: 'sidenav-products', icon: 'products' },
-  { to: '/admin/timeslots', label: 'Cr\u00e9neaux', testid: 'sidenav-timeslots', icon: 'timeslots' },
-  { to: '/admin/campaign', label: 'Campagne', testid: 'sidenav-campaign', icon: 'campaign' },
+  { to: '/admin/timeslots', label: 'Créneaux', testid: 'sidenav-timeslots', icon: 'timeslots' },
+  { to: '/admin/ventes', label: 'Ventes', testid: 'sidenav-ventes', icon: 'ventes' },
 ]
 
 const backofficeLinks = [
   { to: '/admin/orders', label: 'Commandes', testid: 'sidenav-orders', icon: 'orders' },
   { to: '/admin/supplier-order', label: 'Bon fournisseur', testid: 'sidenav-supplier', icon: 'supplier' },
-  { to: '/admin/preparation', label: 'Pr\u00e9paration', testid: 'sidenav-preparation', icon: 'preparation' },
+  { to: '/admin/preparation', label: 'Préparation', testid: 'sidenav-preparation', icon: 'preparation' },
   { to: '/admin/distribution', label: 'Distribution', testid: 'sidenav-distribution', icon: 'distribution' },
 ]
 
@@ -28,6 +32,14 @@ function isActive(to: string) {
 
 function close() {
   emit('update:modelValue', false)
+}
+
+function onVenteChange(event: Event) {
+  const target = event.target as HTMLSelectElement
+  const id = Number(target.value)
+  if (id) {
+    venteStore.selectVente(id)
+  }
 }
 </script>
 
@@ -56,6 +68,20 @@ function close() {
     <!-- Logo / titre -->
     <div class="flex h-16 items-center px-6">
       <span class="text-lg font-bold text-white">SuperQuinquin</span>
+    </div>
+
+    <!-- Vente Selector -->
+    <div v-if="ventes.length > 0" class="px-3 pb-3">
+      <select
+        data-testid="sidenav-vente-selector"
+        :value="selectedVenteId"
+        class="w-full rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-sm text-white focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+        @change="onVenteChange"
+      >
+        <option v-for="v in ventes" :key="v.id" :value="v.id" class="bg-dark text-white">
+          {{ v.name }}
+        </option>
+      </select>
     </div>
 
     <!-- Navigation -->
@@ -92,21 +118,13 @@ function close() {
             <svg v-else-if="link.icon === 'timeslots'" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-5 w-5" aria-hidden="true">
               <path fill-rule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25ZM12.75 6a.75.75 0 0 0-1.5 0v6c0 .414.336.75.75.75h4.5a.75.75 0 0 0 0-1.5h-3.75V6Z" clip-rule="evenodd" />
             </svg>
-            <!-- Campaign -->
-            <svg v-else-if="link.icon === 'campaign'" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-5 w-5" aria-hidden="true">
-              <path d="M16.881 4.345A23.112 23.112 0 0 1 8.25 6H7.5a5.25 5.25 0 0 0-.88 10.427 21.593 21.593 0 0 0 1.378 3.94.75.75 0 1 0 1.33-.692 20.11 20.11 0 0 1-1.15-3.072c.554.054 1.113.084 1.678.09L12 21l1.5-4.33A23.112 23.112 0 0 0 16.881 15a.75.75 0 0 0 .369-.656V5.001a.75.75 0 0 0-.369-.656Z" />
-              <path d="M18.75 7.5v9a.75.75 0 0 0 1.137.643l2.363-1.418V8.275l-2.363-1.418A.75.75 0 0 0 18.75 7.5Z" />
+            <!-- Ventes -->
+            <svg v-else-if="link.icon === 'ventes'" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-5 w-5" aria-hidden="true">
+              <path d="M2.25 2.25a.75.75 0 0 0 0 1.5h1.386c.17 0 .318.114.362.278l2.558 9.592a3.752 3.752 0 0 0-2.806 3.63c0 .414.336.75.75.75h15.75a.75.75 0 0 0 0-1.5H5.378A2.25 2.25 0 0 1 7.5 15h11.218a.75.75 0 0 0 .674-.421 60.358 60.358 0 0 0 2.96-7.228.75.75 0 0 0-.525-.965A60.864 60.864 0 0 0 5.68 4.509l-.232-.867A1.875 1.875 0 0 0 3.636 2.25H2.25ZM3.75 20.25a1.5 1.5 0 1 1 3 0 1.5 1.5 0 0 1-3 0ZM16.5 20.25a1.5 1.5 0 1 1 3 0 1.5 1.5 0 0 1-3 0Z" />
             </svg>
             {{ link.label }}
           </RouterLink>
         </li>
-      </ul>
-
-      <!-- Section Back-office -->
-      <p class="mb-2 px-3 text-xs font-semibold uppercase tracking-wider text-white/40">
-        Back-office
-      </p>
-      <ul class="space-y-1">
         <li v-for="link in backofficeLinks" :key="link.to">
           <RouterLink
             :to="link.to"

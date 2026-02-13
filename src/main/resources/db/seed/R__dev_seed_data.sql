@@ -2,16 +2,19 @@
 -- Only loaded in dev profile via %dev.quarkus.flyway.locations
 
 -- Clean existing seed data (idempotent)
-DELETE FROM order_items WHERE order_id IN (SELECT id FROM orders WHERE customer_email = 'dev@test.fr');
-DELETE FROM orders WHERE customer_email = 'dev@test.fr';
+DELETE FROM order_items WHERE order_id IN (SELECT id FROM orders WHERE vente_id IN (SELECT id FROM ventes WHERE name LIKE '[DEV]%'));
+DELETE FROM payments WHERE order_id IN (SELECT id FROM orders WHERE vente_id IN (SELECT id FROM ventes WHERE name LIKE '[DEV]%'));
+DELETE FROM orders WHERE vente_id IN (SELECT id FROM ventes WHERE name LIKE '[DEV]%');
 DELETE FROM products WHERE vente_id IN (SELECT id FROM ventes WHERE name LIKE '[DEV]%');
 DELETE FROM time_slots WHERE vente_id IN (SELECT id FROM ventes WHERE name LIKE '[DEV]%');
 DELETE FROM ventes WHERE name LIKE '[DEV]%';
 
 -- Vente
-INSERT INTO ventes (id, name, description, status)
-VALUES (9000, '[DEV] Vente de printemps', 'Vente groupée de produits locaux - printemps 2026', 'ACTIVE')
-ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, description = EXCLUDED.description, status = EXCLUDED.status;
+INSERT INTO ventes (id, name, description, status, start_date, end_date)
+VALUES (9000, '[DEV] Vente de printemps', 'Vente groupée de produits locaux - printemps 2026', 'ACTIVE',
+        NOW() - INTERVAL '1 day', NOW() + INTERVAL '60 days')
+ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, description = EXCLUDED.description, status = EXCLUDED.status,
+    start_date = EXCLUDED.start_date, end_date = EXCLUDED.end_date;
 
 -- Products
 INSERT INTO products (id, name, description, price, supplier, stock, active, vente_id) VALUES

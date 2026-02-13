@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onUnmounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { fetchVentes } from '@/api/ventes'
 import type { Vente } from '@/types/vente'
@@ -8,6 +8,9 @@ const router = useRouter()
 const ventes = ref<Vente[]>([])
 const loading = ref(true)
 const error = ref<string | null>(null)
+const now = ref(Date.now())
+
+let timer: ReturnType<typeof setInterval> | null = null
 
 onMounted(async () => {
   try {
@@ -17,7 +20,26 @@ onMounted(async () => {
   } finally {
     loading.value = false
   }
+  timer = setInterval(() => { now.value = Date.now() }, 1000)
 })
+
+onUnmounted(() => {
+  if (timer) clearInterval(timer)
+})
+
+function countdown(endDate: string | null): string | null {
+  if (!endDate) return null
+  const diff = new Date(endDate).getTime() - now.value
+  if (diff <= 0) return 'Terminé'
+  const days = Math.floor(diff / 86_400_000)
+  const hours = Math.floor((diff % 86_400_000) / 3_600_000)
+  const minutes = Math.floor((diff % 3_600_000) / 60_000)
+  const parts: string[] = []
+  if (days > 0) parts.push(`${days}j`)
+  if (hours > 0) parts.push(`${hours}h`)
+  parts.push(`${minutes}min`)
+  return parts.join(' ')
+}
 
 function goToVente(venteId: number) {
   router.push(`/ventes/${venteId}`)
@@ -46,6 +68,14 @@ function goToVente(venteId: number) {
       >
         <h2 class="text-lg font-semibold text-dark">{{ vente.name }}</h2>
         <p v-if="vente.description" class="mt-2 text-sm text-brown">{{ vente.description }}</p>
+        <p
+          v-if="vente.endDate"
+          class="mt-2 text-sm font-medium"
+          :class="countdown(vente.endDate) === 'Terminé' ? 'text-error' : 'text-dark'"
+          data-testid="vente-countdown"
+        >
+          {{ countdown(vente.endDate) === 'Terminé' ? 'Terminé' : `Fin dans ${countdown(vente.endDate)}` }}
+        </p>
       </button>
     </div>
   </section>

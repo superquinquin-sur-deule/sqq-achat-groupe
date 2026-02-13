@@ -4,10 +4,12 @@ import com.microsoft.playwright.Locator;
 import com.microsoft.playwright.Page;
 import com.microsoft.playwright.Route;
 import com.microsoft.playwright.options.WaitForSelectorState;
+import fr.sqq.achatgroupe.acceptance.support.TestContext;
 import io.cucumber.java.fr.Alors;
 import io.cucumber.java.fr.Et;
 import io.cucumber.java.fr.Quand;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -17,6 +19,9 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @ApplicationScoped
 public class AdminImportProductSteps {
+
+    @Inject
+    TestContext testContext;
 
     private Page page() {
         return PlaywrightHooks.page();
@@ -29,6 +34,12 @@ public class AdminImportProductSteps {
                 .setStatus(200)
                 .setContentType("application/json")
                 .setBody("{\"data\":{\"name\":\"Test Admin\",\"email\":\"admin@test.fr\"}}")));
+
+        Long venteId = testContext.venteId();
+        page().route("**/api/admin/ventes", route -> route.fulfill(new Route.FulfillOptions()
+                .setStatus(200)
+                .setContentType("application/json")
+                .setBody("{\"data\":[{\"id\":" + venteId + ",\"name\":\"Vente Test\",\"description\":\"Test\",\"status\":\"ACTIVE\",\"startDate\":null,\"endDate\":null,\"createdAt\":\"2026-01-01T00:00:00Z\"}]}")));
 
         page().navigate(PlaywrightHooks.testUrl() + "/admin/products");
         page().waitForSelector("[data-testid='add-product-btn']", new Page.WaitForSelectorOptions()

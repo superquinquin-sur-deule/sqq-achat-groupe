@@ -8,7 +8,7 @@ Fonctionnalité: Liste des commandes back-office
     Étant donné qu'une vente existe avec des produits et des créneaux
     Et qu'il existe des commandes payées pour cette vente
 
-  Scénario: Affichage de la sidenav d'administration unifiée
+  Scénario: Affichage de la sidenav d'administration unifiée avec sélecteur de vente
     Quand je navigue vers la page backoffice commandes
     Alors je vois la sidenav d'administration
     Et la sidenav contient les sections Administration et Back-office avec tous les liens

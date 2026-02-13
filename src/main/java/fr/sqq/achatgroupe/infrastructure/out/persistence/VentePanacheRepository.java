@@ -30,7 +30,7 @@ public class VentePanacheRepository implements VenteRepository, PanacheRepositor
 
     @Override
     public List<Vente> findAllActive() {
-        return list("status", "ACTIVE").stream()
+        return list("status = 'ACTIVE' AND (startDate IS NULL OR startDate <= CURRENT_TIMESTAMP) AND (endDate IS NULL OR endDate >= CURRENT_TIMESTAMP)").stream()
                 .map(VentePersistenceMapper::toDomain)
                 .toList();
     }
@@ -40,5 +40,10 @@ public class VentePanacheRepository implements VenteRepository, PanacheRepositor
         return listAll(io.quarkus.panache.common.Sort.descending("id")).stream()
                 .map(VentePersistenceMapper::toDomain)
                 .toList();
+    }
+
+    @Override
+    public void deleteById(VenteId id) {
+        delete("id", id.value());
     }
 }

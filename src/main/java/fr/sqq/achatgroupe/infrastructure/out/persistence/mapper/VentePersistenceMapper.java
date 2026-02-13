@@ -15,6 +15,8 @@ public class VentePersistenceMapper {
                 entity.getName(),
                 entity.getDescription(),
                 VenteStatus.valueOf(entity.getStatus()),
+                entity.getStartDate(),
+                entity.getEndDate(),
                 entity.getCreatedAt()
         );
     }
@@ -25,6 +27,8 @@ public class VentePersistenceMapper {
         entity.setName(domain.name());
         entity.setDescription(domain.description());
         entity.setStatus(domain.status().name());
+        entity.setStartDate(domain.startDate());
+        entity.setEndDate(domain.endDate());
         entity.setCreatedAt(domain.createdAt());
         return entity;
     }

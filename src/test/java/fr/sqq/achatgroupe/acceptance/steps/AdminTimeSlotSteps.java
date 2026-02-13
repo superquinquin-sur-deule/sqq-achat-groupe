@@ -35,6 +35,12 @@ public class AdminTimeSlotSteps {
                 .setContentType("application/json")
                 .setBody("{\"data\":{\"name\":\"Test Admin\",\"email\":\"admin@test.fr\"}}")));
 
+        Long venteId = testContext.venteId();
+        page().route("**/api/admin/ventes", route -> route.fulfill(new Route.FulfillOptions()
+                .setStatus(200)
+                .setContentType("application/json")
+                .setBody("{\"data\":[{\"id\":" + venteId + ",\"name\":\"Vente Test\",\"description\":\"Test\",\"status\":\"ACTIVE\",\"startDate\":null,\"endDate\":null,\"createdAt\":\"2026-01-01T00:00:00Z\"}]}")));
+
         if (hasReservationsScenario) {
             // Intercept the timeslots API to modify the response: add a timeslot with reservations
             page().route("**/api/admin/timeslots**", route -> {

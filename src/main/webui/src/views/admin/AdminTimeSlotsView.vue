@@ -1,32 +1,29 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, watch } from 'vue'
 import Button from '@/components/ui/Button.vue'
 import TimeSlotForm from '@/components/admin/TimeSlotForm.vue'
 import { fetchTimeSlots, createTimeSlot, updateTimeSlot, deleteTimeSlot } from '@/api/admin'
-import { fetchVentes } from '@/api/ventes'
+import { useVenteStore } from '@/stores/venteStore'
+import { storeToRefs } from 'pinia'
 import { useToast } from '@/composables/useToast'
 import type { AdminTimeSlot, CreateTimeSlotData, UpdateTimeSlotData } from '@/types/timeSlot'
 
 const toast = useToast()
+const venteStore = useVenteStore()
+const { selectedVenteId } = storeToRefs(venteStore)
 
 const timeSlots = ref<AdminTimeSlot[]>([])
 const loading = ref(false)
-const venteId = ref<number | null>(null)
 const showForm = ref(false)
 const editingTimeSlot = ref<AdminTimeSlot | undefined>(undefined)
 const submitting = ref(false)
 const confirmingDeleteId = ref<number | null>(null)
 const forceDelete = ref(false)
 
-async function loadData() {
+async function loadData(venteId: number) {
   loading.value = true
   try {
-    const ventes = await fetchVentes()
-    const firstVente = ventes[0]
-    if (firstVente) {
-      venteId.value = firstVente.id
-      timeSlots.value = await fetchTimeSlots(venteId.value)
-    }
+    timeSlots.value = await fetchTimeSlots(venteId)
   } catch {
     toast.error('Erreur lors du chargement des créneaux')
   } finally {
@@ -34,7 +31,7 @@ async function loadData() {
   }
 }
 
-onMounted(loadData)
+watch(selectedVenteId, (id) => { if (id) loadData(id) }, { immediate: true })
 
 function openCreateForm() {
   editingTimeSlot.value = undefined
@@ -56,7 +53,7 @@ function closeForm() {
 }
 
 async function onSubmit(data: { date: string; startTime: string; endTime: string; capacity: number }) {
-  if (!venteId.value) return
+  if (!selectedVenteId.value) return
   submitting.value = true
   try {
     if (editingTimeSlot.value) {
@@ -70,7 +67,7 @@ async function onSubmit(data: { date: string; startTime: string; endTime: string
       toast.success('Créneau mis à jour')
     } else {
       const createData: CreateTimeSlotData = {
-        venteId: venteId.value,
+        venteId: selectedVenteId.value,
         date: data.date,
         startTime: data.startTime,
         endTime: data.endTime,
@@ -80,7 +77,7 @@ async function onSubmit(data: { date: string; startTime: string; endTime: string
       toast.success('Créneau créé')
     }
     closeForm()
-    timeSlots.value = await fetchTimeSlots(venteId.value)
+    timeSlots.value = await fetchTimeSlots(selectedVenteId.value)
   } catch {
     toast.error('Erreur lors de la sauvegarde du créneau')
   } finally {
@@ -99,13 +96,13 @@ function cancelDelete() {
 }
 
 async function confirmDeleteAction(slot: AdminTimeSlot) {
-  if (!venteId.value) return
+  if (!selectedVenteId.value) return
   try {
     await deleteTimeSlot(slot.id, slot.reserved > 0 ? true : undefined)
     toast.success('Créneau supprimé')
     confirmingDeleteId.value = null
     forceDelete.value = false
-    timeSlots.value = await fetchTimeSlots(venteId.value)
+    timeSlots.value = await fetchTimeSlots(selectedVenteId.value)
   } catch {
     toast.error('Erreur lors de la suppression du créneau')
   }

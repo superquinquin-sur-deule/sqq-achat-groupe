@@ -97,17 +97,10 @@ public class BackofficeDistributionSteps {
                 .setBody("{\"data\":{\"name\":\"Test Logistique\",\"email\":\"logistique@test.fr\"}}")));
 
         Long venteId = testContext.venteId();
-        page().route("**/api/ventes", route -> {
-            String url = route.request().url();
-            if (url.matches(".*\\/api\\/ventes\\/\\d+.*")) {
-                route.resume();
-            } else {
-                route.fulfill(new Route.FulfillOptions()
-                        .setStatus(200)
-                        .setContentType("application/json")
-                        .setBody("{\"data\":[{\"id\":" + venteId + ",\"name\":\"Vente Test\",\"description\":\"Test\",\"status\":\"ACTIVE\",\"createdAt\":\"2026-01-01T00:00:00Z\"}]}"));
-            }
-        });
+        page().route("**/api/admin/ventes", route -> route.fulfill(new Route.FulfillOptions()
+                .setStatus(200)
+                .setContentType("application/json")
+                .setBody("{\"data\":[{\"id\":" + venteId + ",\"name\":\"Vente Test\",\"description\":\"Test\",\"status\":\"ACTIVE\",\"startDate\":null,\"endDate\":null,\"createdAt\":\"2026-01-01T00:00:00Z\"}]}")));
 
         page().navigate(PlaywrightHooks.testUrl() + "/admin/distribution");
         page().waitForSelector("[data-testid='distribution-order-row'], [data-testid='distribution-empty']",
@@ -308,17 +301,10 @@ public class BackofficeDistributionSteps {
                 .setContentType("application/json")
                 .setBody("{\"data\":{\"name\":\"Test Logistique\",\"email\":\"logistique@test.fr\"}}")));
 
-        page().route("**/api/ventes", route -> {
-            String url = route.request().url();
-            if (url.matches(".*\\/api\\/ventes\\/\\d+.*")) {
-                route.resume();
-            } else {
-                route.fulfill(new Route.FulfillOptions()
-                        .setStatus(200)
-                        .setContentType("application/json")
-                        .setBody("{\"data\":[{\"id\":" + emptyVenteId + ",\"name\":\"Vente Vide\",\"description\":\"Test\",\"status\":\"ACTIVE\",\"createdAt\":\"2026-01-01T00:00:00Z\"}]}"));
-            }
-        });
+        page().route("**/api/admin/ventes", route -> route.fulfill(new Route.FulfillOptions()
+                .setStatus(200)
+                .setContentType("application/json")
+                .setBody("{\"data\":[{\"id\":" + emptyVenteId + ",\"name\":\"Vente Vide\",\"description\":\"Test\",\"status\":\"ACTIVE\",\"startDate\":null,\"endDate\":null,\"createdAt\":\"2026-01-01T00:00:00Z\"}]}")));
 
         page().navigate(PlaywrightHooks.testUrl() + "/admin/distribution");
         page().waitForSelector("[data-testid='distribution-order-row'], [data-testid='distribution-empty']",
