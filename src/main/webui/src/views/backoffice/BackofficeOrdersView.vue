@@ -101,7 +101,7 @@ onMounted(loadData)
           >
             <td class="border-t border-gray-100 px-4 py-3">
               <RouterLink
-                :to="`/backoffice/orders/${order.id}`"
+                :to="`/admin/orders/${order.id}`"
                 class="font-medium text-dark underline decoration-primary/30 hover:decoration-primary"
               >
                 {{ order.orderNumber }}

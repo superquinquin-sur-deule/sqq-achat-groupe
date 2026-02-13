@@ -8,10 +8,10 @@ Fonctionnalité: Liste des commandes back-office
     Étant donné qu'une vente existe avec des produits et des créneaux
     Et qu'il existe des commandes payées pour cette vente
 
-  Scénario: Affichage du layout back-office et de la navigation
+  Scénario: Affichage de la sidenav d'administration unifiée
     Quand je navigue vers la page backoffice commandes
-    Alors je vois le header back-office avec le titre "Back-office"
-    Et je vois la navigation backoffice avec les liens Commandes, Bon fournisseur, Préparation, Distribution
+    Alors je vois la sidenav d'administration
+    Et la sidenav contient les sections Administration et Back-office avec tous les liens
 
   Scénario: Affichage de la liste des commandes
     Quand je navigue vers la page backoffice commandes

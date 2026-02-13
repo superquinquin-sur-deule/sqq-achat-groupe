@@ -99,7 +99,7 @@ public class BackofficePreparationSteps {
             }
         });
 
-        page().navigate(PlaywrightHooks.testUrl() + "/backoffice/preparation");
+        page().navigate(PlaywrightHooks.testUrl() + "/admin/preparation");
         page().waitForSelector("[data-testid='preparation-card'], [data-testid='preparation-empty']",
                 new Page.WaitForSelectorOptions()
                         .setState(WaitForSelectorState.VISIBLE)
@@ -231,7 +231,7 @@ public class BackofficePreparationSteps {
             }
         });
 
-        page().navigate(PlaywrightHooks.testUrl() + "/backoffice/preparation");
+        page().navigate(PlaywrightHooks.testUrl() + "/admin/preparation");
         page().waitForSelector("[data-testid='preparation-card'], [data-testid='preparation-empty']",
                 new Page.WaitForSelectorOptions()
                         .setState(WaitForSelectorState.VISIBLE)

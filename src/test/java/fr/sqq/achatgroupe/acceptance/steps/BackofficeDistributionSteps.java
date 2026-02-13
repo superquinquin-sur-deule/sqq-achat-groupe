@@ -109,7 +109,7 @@ public class BackofficeDistributionSteps {
             }
         });
 
-        page().navigate(PlaywrightHooks.testUrl() + "/backoffice/distribution");
+        page().navigate(PlaywrightHooks.testUrl() + "/admin/distribution");
         page().waitForSelector("[data-testid='distribution-order-row'], [data-testid='distribution-empty']",
                 new Page.WaitForSelectorOptions()
                         .setState(WaitForSelectorState.VISIBLE)
@@ -320,7 +320,7 @@ public class BackofficeDistributionSteps {
             }
         });
 
-        page().navigate(PlaywrightHooks.testUrl() + "/backoffice/distribution");
+        page().navigate(PlaywrightHooks.testUrl() + "/admin/distribution");
         page().waitForSelector("[data-testid='distribution-order-row'], [data-testid='distribution-empty']",
                 new Page.WaitForSelectorOptions()
                         .setState(WaitForSelectorState.VISIBLE)

@@ -86,28 +86,31 @@ public class BackofficeOrderSteps {
             }
         });
 
-        page().navigate(PlaywrightHooks.testUrl() + "/backoffice/orders");
+        page().navigate(PlaywrightHooks.testUrl() + "/admin/orders");
         page().waitForSelector("[data-testid='backoffice-orders-table'], [data-testid='empty-state']", new Page.WaitForSelectorOptions()
                 .setState(WaitForSelectorState.VISIBLE)
                 .setTimeout(15000));
     }
 
-    @Alors("je vois le header back-office avec le titre {string}")
-    public void jeVoisLeHeaderBackofficeAvecLeTitre(String title) {
-        Locator header = page().locator("[data-testid='backoffice-header']");
-        assertTrue(header.isVisible(), "Le header back-office doit être visible");
-        String text = header.textContent();
-        assertTrue(text.contains(title), "Le header doit contenir '" + title + "'");
+    @Alors("je vois la sidenav d'administration")
+    public void jeVoisLaSidenavDAdministration() {
+        Locator sidenav = page().locator("[data-testid='admin-sidenav']");
+        assertTrue(sidenav.isVisible(), "La sidenav d'administration doit être visible");
     }
 
-    @Et("je vois la navigation backoffice avec les liens Commandes, Bon fournisseur, Préparation, Distribution")
-    public void jeVoisLaNavigationBackoffice() {
-        Locator nav = page().locator("[data-testid='backoffice-nav']").first();
-        assertTrue(nav.isVisible(), "La navigation backoffice doit être visible");
-        assertTrue(nav.locator("[data-testid='backoffice-nav-orders']").isVisible(), "Le lien Commandes doit être visible");
-        assertTrue(nav.locator("[data-testid='backoffice-nav-supplier']").isVisible(), "Le lien Bon fournisseur doit être visible");
-        assertTrue(nav.locator("[data-testid='backoffice-nav-preparation']").isVisible(), "Le lien Préparation doit être visible");
-        assertTrue(nav.locator("[data-testid='backoffice-nav-distribution']").isVisible(), "Le lien Distribution doit être visible");
+    @Et("la sidenav contient les sections Administration et Back-office avec tous les liens")
+    public void laSidenavContientLesSectionsAvecTousLesLiens() {
+        Locator sidenav = page().locator("[data-testid='admin-sidenav']");
+        // Administration links
+        assertTrue(sidenav.locator("[data-testid='sidenav-dashboard']").isVisible(), "Le lien Dashboard doit être visible");
+        assertTrue(sidenav.locator("[data-testid='sidenav-products']").isVisible(), "Le lien Produits doit être visible");
+        assertTrue(sidenav.locator("[data-testid='sidenav-timeslots']").isVisible(), "Le lien Créneaux doit être visible");
+        assertTrue(sidenav.locator("[data-testid='sidenav-campaign']").isVisible(), "Le lien Campagne doit être visible");
+        // Back-office links
+        assertTrue(sidenav.locator("[data-testid='sidenav-orders']").isVisible(), "Le lien Commandes doit être visible");
+        assertTrue(sidenav.locator("[data-testid='sidenav-supplier']").isVisible(), "Le lien Bon fournisseur doit être visible");
+        assertTrue(sidenav.locator("[data-testid='sidenav-preparation']").isVisible(), "Le lien Préparation doit être visible");
+        assertTrue(sidenav.locator("[data-testid='sidenav-distribution']").isVisible(), "Le lien Distribution doit être visible");
     }
 
     @Alors("je vois le tableau des commandes backoffice")

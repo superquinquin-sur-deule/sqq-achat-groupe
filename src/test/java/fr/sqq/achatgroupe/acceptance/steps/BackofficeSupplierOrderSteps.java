@@ -91,7 +91,7 @@ public class BackofficeSupplierOrderSteps {
             }
         });
 
-        page().navigate(PlaywrightHooks.testUrl() + "/backoffice/supplier-order");
+        page().navigate(PlaywrightHooks.testUrl() + "/admin/supplier-order");
         page().waitForSelector("[data-testid='supplier-order-table'], [data-testid='supplier-order-empty']",
                 new Page.WaitForSelectorOptions()
                         .setState(WaitForSelectorState.VISIBLE)
@@ -200,7 +200,7 @@ public class BackofficeSupplierOrderSteps {
             }
         });
 
-        page().navigate(PlaywrightHooks.testUrl() + "/backoffice/supplier-order");
+        page().navigate(PlaywrightHooks.testUrl() + "/admin/supplier-order");
         page().waitForSelector("[data-testid='supplier-order-table'], [data-testid='supplier-order-empty']",
                 new Page.WaitForSelectorOptions()
                         .setState(WaitForSelectorState.VISIBLE)

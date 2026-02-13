@@ -63,44 +63,40 @@ const router = createRouter({
           name: 'admin-campaign',
           component: () => import('@/views/admin/AdminCampaignView.vue'),
         },
-      ],
-    },
-    {
-      path: '/backoffice',
-      component: () => import('@/views/backoffice/BackofficeLayout.vue'),
-      meta: { requiresAuth: true },
-      children: [
-        {
-          path: '',
-          redirect: '/backoffice/orders',
-        },
         {
           path: 'orders',
-          name: 'backoffice-orders',
+          name: 'admin-orders',
           component: () => import('@/views/backoffice/BackofficeOrdersView.vue'),
         },
         {
           path: 'orders/:id',
-          name: 'backoffice-order-detail',
+          name: 'admin-order-detail',
           component: () => import('@/views/backoffice/BackofficeOrderDetailView.vue'),
         },
         {
           path: 'supplier-order',
-          name: 'backoffice-supplier-order',
+          name: 'admin-supplier-order',
           component: () => import('@/views/backoffice/BackofficeSupplierOrderView.vue'),
         },
         {
           path: 'preparation',
-          name: 'backoffice-preparation',
+          name: 'admin-preparation',
           component: () => import('@/views/backoffice/BackofficePreparationView.vue'),
         },
         {
           path: 'distribution',
-          name: 'backoffice-distribution',
+          name: 'admin-distribution',
           component: () => import('@/views/backoffice/BackofficeDistributionView.vue'),
         },
       ],
     },
+    // Backward-compatibility redirects
+    { path: '/backoffice', redirect: '/admin/orders' },
+    { path: '/backoffice/orders', redirect: '/admin/orders' },
+    { path: '/backoffice/orders/:id', redirect: (to) => `/admin/orders/${to.params.id}` },
+    { path: '/backoffice/supplier-order', redirect: '/admin/supplier-order' },
+    { path: '/backoffice/preparation', redirect: '/admin/preparation' },
+    { path: '/backoffice/distribution', redirect: '/admin/distribution' },
   ],
 })
 

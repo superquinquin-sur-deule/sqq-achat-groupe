@@ -35,7 +35,7 @@ function formatSlot(slot: { date: string; startTime: string; endTime: string } |
 <template>
   <div>
     <div class="mb-6">
-      <RouterLink to="/backoffice/orders" class="text-sm text-brown hover:text-dark">
+      <RouterLink to="/admin/orders" class="text-sm text-brown hover:text-dark">
         &larr; Retour aux commandes
       </RouterLink>
     </div>
