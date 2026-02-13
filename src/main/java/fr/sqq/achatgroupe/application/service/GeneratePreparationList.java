@@ -65,6 +65,8 @@ public class GeneratePreparationList implements GeneratePreparationListUseCase {
                             order.id(),
                             order.orderNumber().value(),
                             order.customer().name(),
+                            order.customer().email(),
+                            order.customer().phone(),
                             timeSlotLabel,
                             items
                     );

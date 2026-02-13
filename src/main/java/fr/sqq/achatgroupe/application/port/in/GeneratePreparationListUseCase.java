@@ -6,8 +6,8 @@ public interface GeneratePreparationListUseCase {
 
     List<PreparationOrder> generatePreparationList(Long venteId);
 
-    record PreparationOrder(Long orderId, String orderNumber, String customerName, String timeSlotLabel,
-                            List<PreparationItem> items) {}
+    record PreparationOrder(Long orderId, String orderNumber, String customerName, String customerEmail,
+                            String customerPhone, String timeSlotLabel, List<PreparationItem> items) {}
 
     record PreparationItem(String productName, int quantity) {}
 }

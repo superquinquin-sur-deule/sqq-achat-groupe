@@ -57,7 +57,8 @@ const todayFormatted = computed(() => {
 })
 
 function handlePrint() {
-  window.print()
+  if (!selectedVenteId.value) return
+  window.open(`/api/backoffice/preparation/pdf?venteId=${selectedVenteId.value}`, '_blank')
 }
 
 async function loadData(venteId: number) {

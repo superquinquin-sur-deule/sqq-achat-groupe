@@ -2,11 +2,15 @@ package fr.sqq.achatgroupe.infrastructure.in.rest.backoffice;
 
 import fr.sqq.achatgroupe.application.port.in.GeneratePreparationListUseCase;
 import fr.sqq.achatgroupe.application.port.in.GeneratePreparationListUseCase.PreparationOrder;
+import fr.sqq.achatgroupe.application.service.PreparationPdfGenerator;
 import fr.sqq.achatgroupe.infrastructure.in.rest.dto.DataResponse;
 import fr.sqq.achatgroupe.infrastructure.in.rest.dto.PreparationOrderResponse;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 
+import java.io.IOException;
+import java.time.LocalDate;
 import java.util.List;
 
 @Path("/api/backoffice/preparation")
@@ -15,9 +19,12 @@ import java.util.List;
 public class BackofficePreparationResource {
 
     private final GeneratePreparationListUseCase generatePreparationList;
+    private final PreparationPdfGenerator pdfGenerator;
 
-    public BackofficePreparationResource(GeneratePreparationListUseCase generatePreparationList) {
+    public BackofficePreparationResource(GeneratePreparationListUseCase generatePreparationList,
+                                         PreparationPdfGenerator pdfGenerator) {
         this.generatePreparationList = generatePreparationList;
+        this.pdfGenerator = pdfGenerator;
     }
 
     @GET
@@ -27,5 +34,20 @@ public class BackofficePreparationResource {
         }
         List<PreparationOrder> orders = generatePreparationList.generatePreparationList(venteId);
         return new DataResponse<>(BackofficePreparationRestMapper.toResponse(orders));
+    }
+
+    @GET
+    @Path("/pdf")
+    @Produces("application/pdf")
+    public Response getPreparationPdf(@QueryParam("venteId") Long venteId) throws IOException {
+        if (venteId == null) {
+            throw new BadRequestException("venteId is required");
+        }
+        List<PreparationOrder> orders = generatePreparationList.generatePreparationList(venteId);
+        byte[] pdf = pdfGenerator.generate(orders);
+        String filename = "preparation-" + LocalDate.now() + ".pdf";
+        return Response.ok(pdf)
+                .header("Content-Disposition", "inline; filename=\"" + filename + "\"")
+                .build();
     }
 }

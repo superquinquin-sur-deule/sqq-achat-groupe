@@ -43,6 +43,8 @@ export interface PreparationOrder {
   orderId: number
   orderNumber: string
   customerName: string
+  customerEmail: string
+  customerPhone: string
   timeSlotLabel: string
   items: PreparationItem[]
 }

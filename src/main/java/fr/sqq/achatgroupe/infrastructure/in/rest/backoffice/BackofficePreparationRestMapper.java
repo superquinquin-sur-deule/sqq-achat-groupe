@@ -23,6 +23,6 @@ public class BackofficePreparationRestMapper {
                 .map(item -> new PreparationItemResponse(item.productName(), item.quantity()))
                 .toList();
         return new PreparationOrderResponse(order.orderId(), order.orderNumber(), order.customerName(),
-                order.timeSlotLabel(), items);
+                order.customerEmail(), order.customerPhone(), order.timeSlotLabel(), items);
     }
 }
