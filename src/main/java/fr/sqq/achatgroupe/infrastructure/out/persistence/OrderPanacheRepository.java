@@ -1,0 +1,76 @@
+package fr.sqq.achatgroupe.infrastructure.out.persistence;
+
+import fr.sqq.achatgroupe.domain.model.order.Order;
+import fr.sqq.achatgroupe.application.port.out.OrderRepository;
+import fr.sqq.achatgroupe.application.port.out.OrderRepository.SlotOrderCount;
+import fr.sqq.achatgroupe.infrastructure.out.persistence.entity.OrderEntity;
+import fr.sqq.achatgroupe.infrastructure.out.persistence.mapper.OrderPersistenceMapper;
+import io.quarkus.hibernate.orm.panache.PanacheRepositoryBase;
+import jakarta.enterprise.context.ApplicationScoped;
+
+import java.math.BigDecimal;
+import java.time.Instant;
+import java.util.List;
+import java.util.Optional;
+
+@ApplicationScoped
+public class OrderPanacheRepository implements OrderRepository, PanacheRepositoryBase<OrderEntity, Long> {
+
+    @Override
+    public Order save(Order order) {
+        OrderEntity entity = OrderPersistenceMapper.toEntity(order);
+        entity = getEntityManager().merge(entity);
+        return OrderPersistenceMapper.toDomain(entity);
+    }
+
+    @Override
+    public Optional<Order> findOrderById(Long id) {
+        return find("id", id).firstResultOptional()
+                .map(OrderPersistenceMapper::toDomain);
+    }
+
+    @Override
+    public List<Order> findPendingOrdersBefore(Instant cutoff) {
+        return list("status = ?1 and createdAt < ?2", "PENDING", cutoff).stream()
+                .map(OrderPersistenceMapper::toDomain)
+                .toList();
+    }
+
+    @Override
+    public long countPaidByVenteId(Long venteId) {
+        return count("venteId = ?1 and status in ('PAID', 'PICKED_UP')", venteId);
+    }
+
+    @Override
+    public BigDecimal sumTotalPaidByVenteId(Long venteId) {
+        BigDecimal result = getEntityManager()
+                .createQuery("SELECT COALESCE(SUM(o.totalAmount), 0) FROM OrderEntity o WHERE o.venteId = ?1 AND o.status IN ('PAID', 'PICKED_UP')", BigDecimal.class)
+                .setParameter(1, venteId)
+                .getSingleResult();
+        return result != null ? result : BigDecimal.ZERO;
+    }
+
+    @Override
+    public long countPickedUpByVenteId(Long venteId) {
+        return count("venteId = ?1 and status = 'PICKED_UP'", venteId);
+    }
+
+    @Override
+    public List<Order> findPaidByVenteId(Long venteId) {
+        return list("venteId = ?1 AND status IN ?2 ORDER BY createdAt DESC",
+                venteId, List.of("PAID", "PICKED_UP")).stream()
+                .map(OrderPersistenceMapper::toDomain)
+                .toList();
+    }
+
+    @Override
+    public List<SlotOrderCount> countByTimeSlotForVente(Long venteId) {
+        List<Object[]> rows = getEntityManager()
+                .createQuery("SELECT o.timeSlotId, COUNT(o) FROM OrderEntity o WHERE o.venteId = ?1 AND o.status IN ('PAID', 'PICKED_UP') GROUP BY o.timeSlotId", Object[].class)
+                .setParameter(1, venteId)
+                .getResultList();
+        return rows.stream()
+                .map(row -> new SlotOrderCount((Long) row[0], (Long) row[1]))
+                .toList();
+    }
+}

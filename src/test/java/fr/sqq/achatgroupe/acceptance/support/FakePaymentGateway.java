@@ -1,0 +1,71 @@
+package fr.sqq.achatgroupe.acceptance.support;
+
+import fr.sqq.achatgroupe.domain.model.order.Order;
+import fr.sqq.achatgroupe.application.port.out.PaymentGateway;
+import io.quarkus.test.Mock;
+import jakarta.annotation.Priority;
+import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.enterprise.inject.Alternative;
+
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicLong;
+
+@Mock
+@Alternative
+@Priority(1)
+@ApplicationScoped
+public class FakePaymentGateway implements PaymentGateway {
+
+    private static final AtomicLong SESSION_COUNTER = new AtomicLong(0);
+    private static final Map<String, Long> SESSION_TO_ORDER = new ConcurrentHashMap<>();
+    private static String lastSessionId;
+    private static Long lastOrderId;
+    private static String lastCancelUrl;
+    private static PaymentWebhookStatus nextWebhookStatus = PaymentWebhookStatus.SUCCEEDED;
+
+    @Override
+    public PaymentSessionResult createCheckoutSession(Order order, String successUrl, String cancelUrl) {
+        String sessionId = "cs_test_fake_" + SESSION_COUNTER.incrementAndGet();
+        SESSION_TO_ORDER.put(sessionId, order.id());
+        lastSessionId = sessionId;
+        lastOrderId = order.id();
+        lastCancelUrl = cancelUrl;
+
+        String checkoutUrl = "/test-stripe-redirect?session_id=" + sessionId;
+        return new PaymentSessionResult(checkoutUrl, sessionId);
+    }
+
+    @Override
+    public PaymentWebhookResult parseWebhookEvent(String payload, String signature) {
+        Long orderId = Long.parseLong(payload);
+        String paymentIntentId = "pi_test_fake_" + orderId;
+
+        PaymentWebhookStatus status = nextWebhookStatus;
+        return new PaymentWebhookResult(orderId, paymentIntentId, status);
+    }
+
+    public static String getLastSessionId() {
+        return lastSessionId;
+    }
+
+    public static Long getLastOrderId() {
+        return lastOrderId;
+    }
+
+    public static String getLastCancelUrl() {
+        return lastCancelUrl;
+    }
+
+    public static void setNextWebhookStatus(PaymentWebhookStatus status) {
+        nextWebhookStatus = status;
+    }
+
+    public static void reset() {
+        SESSION_TO_ORDER.clear();
+        lastSessionId = null;
+        lastOrderId = null;
+        lastCancelUrl = null;
+        nextWebhookStatus = PaymentWebhookStatus.SUCCEEDED;
+    }
+}

@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: achat-groupe
+  labels:
+    app: achat-groupe
+spec:
+  type: ClusterIP
+  ports:
+    - port: 80
+      targetPort: 8080
+      protocol: TCP
+  selector:
+    app: achat-groupe
