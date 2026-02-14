@@ -55,4 +55,6 @@ export const useCartStore = defineStore('cart', () => {
   }
 
   return { items, venteId, total, itemCount, isEmpty, setVenteId, addItem, updateQuantity, removeItem, clearCart }
+}, {
+  persist: true,
 })

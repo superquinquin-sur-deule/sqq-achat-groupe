@@ -91,6 +91,14 @@ public class CartSteps {
 
     // --- Action steps ---
 
+    @Quand("je recharge la page")
+    public void jeRechargeLaPage() {
+        PlaywrightHooks.page().reload();
+        PlaywrightHooks.page().waitForSelector("[data-testid='product-card']", new Page.WaitForSelectorOptions()
+                .setState(WaitForSelectorState.VISIBLE)
+                .setTimeout(15000));
+    }
+
     @Quand("je clique sur \"Ajouter\" pour le premier produit disponible")
     public void jeCliqueSurAjouterPourLePremierProduit() {
         clickAddOnFirstAvailableProduct();
@@ -144,6 +152,16 @@ public class CartSteps {
                 .setTimeout(5000));
         String count = cartBadge.textContent().trim();
         assertTrue(Integer.parseInt(count) > 0, "Le compteur du panier doit être supérieur à 0");
+    }
+
+    @Alors("le produit est toujours dans mon panier")
+    public void leProduitEstToujoursDansMonPanier() {
+        Locator cartBadge = PlaywrightHooks.page().locator("[data-testid='cart-count']");
+        cartBadge.waitFor(new Locator.WaitForOptions()
+                .setState(WaitForSelectorState.VISIBLE)
+                .setTimeout(5000));
+        String count = cartBadge.textContent().trim();
+        assertTrue(Integer.parseInt(count) > 0, "Le panier doit contenir des articles après rechargement de la page");
     }
 
     @Et("un toast \"Produit ajouté\" apparaît")

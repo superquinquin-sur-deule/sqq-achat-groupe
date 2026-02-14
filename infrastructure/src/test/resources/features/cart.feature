@@ -40,6 +40,14 @@ Fonctionnalité: Panier d'achat
     Et j'ajoute des produits au panier
     Alors le compteur du bouton panier dans le header affiche le nombre correct d'articles
 
+  Scénario: Le panier est conservé après rechargement de la page
+    Étant donné qu'une vente existe avec des produits et des créneaux
+    Et j'ai ajouté un produit au panier depuis le catalogue
+    Quand je recharge la page
+    Alors le produit est toujours dans mon panier
+    Quand je consulte mon panier
+    Alors je vois chaque produit avec son nom, prix unitaire, quantité et sous-total
+
   Scénario: Panier vide avec message et lien vers le catalogue
     Étant donné qu'une vente existe avec des produits et des créneaux
     Quand je navigue vers la page panier
