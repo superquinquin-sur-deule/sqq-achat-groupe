@@ -88,9 +88,7 @@ defineExpose({ setResult })
       tabindex="0"
       :class="[
         'flex flex-col items-center rounded-lg border-2 border-dashed p-8 transition-colors',
-        isDragging
-          ? 'border-primary bg-primary/5'
-          : 'border-gray-300',
+        isDragging ? 'border-primary bg-primary/5' : 'border-gray-300',
       ]"
       @dragover="onDragOver"
       @dragleave="onDragLeave"
@@ -100,19 +98,45 @@ defineExpose({ setResult })
       @keydown.space.prevent="openFilePicker"
     >
       <template v-if="!selectedFile">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="mb-2 h-8 w-8 text-brown" aria-hidden="true">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5" />
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke-width="1.5"
+          stroke="currentColor"
+          class="mb-2 h-8 w-8 text-brown"
+          aria-hidden="true"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5m-13.5-9L12 3m0 0 4.5 4.5M12 3v13.5"
+          />
         </svg>
         <p class="mb-1 text-dark">
           Glissez un fichier CSV ici ou
           <span class="font-medium text-primary underline">Parcourir</span>
         </p>
-        <p class="text-sm text-brown/60">Format attendu : nom, description, prix, fournisseur, stock</p>
+        <p class="text-sm text-brown/60">
+          Format attendu : nom, description, prix, fournisseur, stock
+        </p>
       </template>
       <template v-else>
         <div class="flex items-center gap-2" @click.stop>
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-5 w-5 text-brown" aria-hidden="true">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke-width="1.5"
+            stroke="currentColor"
+            class="h-5 w-5 text-brown"
+            aria-hidden="true"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z"
+            />
           </svg>
           <span class="font-medium text-dark">{{ selectedFile.name }}</span>
           <button
@@ -121,7 +145,15 @@ defineExpose({ setResult })
             aria-label="Supprimer le fichier sélectionné"
             @click="removeFile"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-4 w-4" aria-hidden="true">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke-width="1.5"
+              stroke="currentColor"
+              class="h-4 w-4"
+              aria-hidden="true"
+            >
               <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
             </svg>
           </button>
@@ -137,7 +169,7 @@ defineExpose({ setResult })
       aria-label="Sélectionner un fichier CSV à importer"
       data-testid="import-file-input"
       @change="onFileChange"
-    >
+    />
 
     <div class="mt-4 flex gap-2">
       <Button
@@ -149,23 +181,29 @@ defineExpose({ setResult })
       >
         Importer
       </Button>
-      <Button variant="ghost" @click="emit('cancel')">
-        Annuler
-      </Button>
+      <Button variant="ghost" @click="emit('cancel')"> Annuler </Button>
     </div>
 
     <div v-if="importResult" class="mt-6" data-testid="import-report">
       <h3 class="mb-2 text-base font-bold text-dark">Rapport d'import</h3>
       <p class="mb-3 text-dark">
-        {{ importResult.imported }} produit{{ importResult.imported > 1 ? 's' : '' }} importé{{ importResult.imported > 1 ? 's' : '' }} avec succès.
+        {{ importResult.imported }} produit{{ importResult.imported > 1 ? 's' : '' }} importé{{
+          importResult.imported > 1 ? 's' : ''
+        }}
+        avec succès.
         <template v-if="importResult.errors > 0">
           {{ importResult.errors }} ligne{{ importResult.errors > 1 ? 's' : '' }} en erreur.
         </template>
       </p>
 
-      <div v-if="importResult.errorDetails.length > 0" class="overflow-x-auto rounded-lg border border-gray-200">
+      <div
+        v-if="importResult.errorDetails.length > 0"
+        class="overflow-x-auto rounded-lg border border-gray-200"
+      >
         <table class="w-full" data-testid="import-error-table">
-          <caption class="sr-only">Détails des erreurs d'import</caption>
+          <caption class="sr-only">
+            Détails des erreurs d'import
+          </caption>
           <thead>
             <tr class="bg-surface text-left text-sm text-dark">
               <th class="px-4 py-2 font-medium">Ligne</th>
@@ -185,9 +223,7 @@ defineExpose({ setResult })
         </table>
       </div>
 
-      <Button variant="ghost" class="mt-3" @click="closeReport">
-        Fermer le rapport
-      </Button>
+      <Button variant="ghost" class="mt-3" @click="closeReport"> Fermer le rapport </Button>
     </div>
   </div>
 </template>

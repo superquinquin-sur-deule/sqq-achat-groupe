@@ -12,7 +12,10 @@ const isAdmin = computed(() => route.path.startsWith('/admin'))
 </script>
 
 <template>
-  <a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:bg-primary focus:p-2 focus:text-dark">
+  <a
+    href="#main-content"
+    class="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:bg-primary focus:p-2 focus:text-dark"
+  >
     Aller au contenu principal
   </a>
   <Header v-if="!isAdmin" />

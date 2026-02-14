@@ -35,7 +35,10 @@ export const customFetch = async <T>(url: string, init: RequestInit): Promise<T>
 
   if (!response.ok) {
     const contentType = response.headers.get('content-type')
-    if (contentType?.includes('application/problem+json') || contentType?.includes('application/json')) {
+    if (
+      contentType?.includes('application/problem+json') ||
+      contentType?.includes('application/json')
+    ) {
       const problem: ProblemDetail = await response.json()
       throw new ApiError(problem, response.status)
     }

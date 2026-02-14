@@ -62,7 +62,11 @@ const {
   errorMessage: startTimeError,
   handleBlur: startTimeBlur,
 } = useField<string>('startTime')
-const { value: endTime, errorMessage: endTimeError, handleBlur: endTimeBlur } = useField<string>('endTime')
+const {
+  value: endTime,
+  errorMessage: endTimeError,
+  handleBlur: endTimeBlur,
+} = useField<string>('endTime')
 const {
   value: capacity,
   errorMessage: capacityError,
@@ -138,12 +142,15 @@ const onSubmit = handleSubmit((values) => {
         />
       </div>
       <div class="mt-2 flex gap-2">
-        <Button type="submit" variant="primary" :loading="loading" data-testid="timeslot-submit-btn">
+        <Button
+          type="submit"
+          variant="primary"
+          :loading="loading"
+          data-testid="timeslot-submit-btn"
+        >
           Enregistrer
         </Button>
-        <Button variant="ghost" @click="emit('cancel')">
-          Annuler
-        </Button>
+        <Button variant="ghost" @click="emit('cancel')"> Annuler </Button>
       </div>
     </form>
   </div>

@@ -77,7 +77,11 @@ const {
   errorMessage: startDateError,
   handleBlur: startDateBlur,
 } = useField<string>('startDate')
-const { value: endDate, errorMessage: endDateError, handleBlur: endDateBlur } = useField<string>('endDate')
+const {
+  value: endDate,
+  errorMessage: endDateError,
+  handleBlur: endDateBlur,
+} = useField<string>('endDate')
 
 onMounted(async () => {
   await nextTick()
@@ -146,9 +150,7 @@ const onSubmit = handleSubmit((values) => {
         <Button type="submit" variant="primary" :loading="loading" data-testid="vente-submit-btn">
           Enregistrer
         </Button>
-        <Button variant="ghost" @click="emit('cancel')">
-          Annuler
-        </Button>
+        <Button variant="ghost" @click="emit('cancel')"> Annuler </Button>
       </div>
     </form>
   </div>

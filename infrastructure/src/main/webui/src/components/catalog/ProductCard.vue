@@ -15,7 +15,9 @@ const emit = defineEmits<{
 const isExhausted = computed(() => props.product.stock === 0)
 
 const formattedPrice = computed(() =>
-  new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(props.product.price),
+  new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(
+    props.product.price,
+  ),
 )
 
 function handleAdd() {
@@ -34,9 +36,13 @@ function handleAdd() {
     <Card>
       <h3 class="text-xl font-semibold text-dark">{{ product.name }}</h3>
       <p data-testid="product-supplier" class="mt-1 text-sm text-brown">{{ product.supplier }}</p>
-      <p data-testid="product-description" class="mt-2 text-base text-dark">{{ product.description }}</p>
+      <p data-testid="product-description" class="mt-2 text-base text-dark">
+        {{ product.description }}
+      </p>
       <div class="mt-4 flex items-center justify-between">
-        <p data-testid="product-price" class="text-lg font-medium text-dark">{{ formattedPrice }}</p>
+        <p data-testid="product-price" class="text-lg font-medium text-dark">
+          {{ formattedPrice }}
+        </p>
         <span
           v-if="isExhausted"
           data-testid="exhausted-badge"

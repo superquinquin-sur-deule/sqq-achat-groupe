@@ -1,31 +1,12 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
 import { useRoute, RouterLink } from 'vue-router'
-import { getApiAdminOrdersId } from '@/api/generated/admin-orders/admin-orders'
-import { useToast } from '@/composables/useToast'
+import { useAdminOrderDetailQuery } from '@/composables/api/useAdminOrdersApi'
 import { formatPrice, statusLabel, statusClasses } from '@/utils/order-formatters'
-import type { AdminOrderDetailResponse } from '@/api/generated/model'
 
 const route = useRoute()
-const toast = useToast()
+const orderId = route.params.id as string
 
-const order = ref<AdminOrderDetailResponse | null>(null)
-const loading = ref(false)
-
-async function loadOrder() {
-  const orderId = route.params.id as string
-  loading.value = true
-  try {
-    const response = await getApiAdminOrdersId(orderId)
-    order.value = response.data.data ?? null
-  } catch {
-    toast.error('Erreur lors du chargement de la commande')
-  } finally {
-    loading.value = false
-  }
-}
-
-onMounted(loadOrder)
+const { data: order, isLoading: loading } = useAdminOrderDetailQuery(orderId)
 
 function formatSlot(slot: { date: string; startTime: string; endTime: string } | null): string {
   if (!slot) return 'Créneau inconnu'
@@ -41,20 +22,26 @@ function formatSlot(slot: { date: string; startTime: string; endTime: string } |
       </RouterLink>
     </div>
 
-    <div v-if="loading" class="py-12 text-center text-brown">
-      Chargement de la commande...
-    </div>
+    <div v-if="loading" class="py-12 text-center text-brown">Chargement de la commande...</div>
 
     <div v-else-if="order" class="space-y-6">
       <div class="flex items-center gap-4">
         <h1 class="text-2xl font-bold text-dark">{{ order.orderNumber }}</h1>
-        <span :class="['inline-block rounded-full px-3 py-1 text-sm font-medium', statusClasses(order.status)]">
+        <span
+          :class="[
+            'inline-block rounded-full px-3 py-1 text-sm font-medium',
+            statusClasses(order.status),
+          ]"
+        >
           {{ statusLabel(order.status) }}
         </span>
       </div>
 
       <!-- Coordonnées -->
-      <div class="rounded-xl border border-gray-200 bg-white p-6" data-testid="order-detail-customer">
+      <div
+        class="rounded-xl border border-gray-200 bg-white p-6"
+        data-testid="order-detail-customer"
+      >
         <h2 class="mb-4 text-lg font-semibold text-dark">Coordonnées</h2>
         <dl class="grid grid-cols-1 gap-3 sm:grid-cols-3">
           <div>
@@ -73,16 +60,24 @@ function formatSlot(slot: { date: string; startTime: string; endTime: string } |
       </div>
 
       <!-- Créneau -->
-      <div class="rounded-xl border border-gray-200 bg-white p-6" data-testid="order-detail-timeslot">
+      <div
+        class="rounded-xl border border-gray-200 bg-white p-6"
+        data-testid="order-detail-timeslot"
+      >
         <h2 class="mb-4 text-lg font-semibold text-dark">Créneau de retrait</h2>
         <p class="font-medium text-dark">{{ formatSlot(order.timeSlot) }}</p>
       </div>
 
       <!-- Produits -->
-      <div class="overflow-x-auto rounded-xl border border-gray-200 bg-white" data-testid="order-detail-items">
+      <div
+        class="overflow-x-auto rounded-xl border border-gray-200 bg-white"
+        data-testid="order-detail-items"
+      >
         <h2 class="px-6 pt-6 text-lg font-semibold text-dark">Produits commandés</h2>
         <table class="mt-4 w-full">
-          <caption class="sr-only">Produits de la commande</caption>
+          <caption class="sr-only">
+            Produits de la commande
+          </caption>
           <thead>
             <tr class="bg-dark text-left text-sm text-white">
               <th class="px-6 py-3 font-medium">Produit</th>

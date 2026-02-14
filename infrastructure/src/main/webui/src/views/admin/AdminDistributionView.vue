@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
-import { getApiAdminOrders, putApiAdminOrdersIdPickup } from '@/api/generated/admin-orders/admin-orders'
+import { ref, computed } from 'vue'
 import { useVenteStore } from '@/stores/venteStore'
 import { storeToRefs } from 'pinia'
 import { useToast } from '@/composables/useToast'
+import { useAdminOrdersQuery, usePickupMutation } from '@/composables/api/useAdminOrdersApi'
 import { statusLabel, statusClasses } from '@/utils/order-formatters'
 import type { AdminOrderResponse } from '@/api/generated/model'
 
@@ -11,8 +11,9 @@ const toast = useToast()
 const venteStore = useVenteStore()
 const { selectedVenteId } = storeToRefs(venteStore)
 
-const orders = ref<AdminOrderResponse[]>([])
-const loading = ref(false)
+const { data: orders, isLoading: loading } = useAdminOrdersQuery(selectedVenteId)
+const pickupMutation = usePickupMutation(selectedVenteId)
+
 const searchQuery = ref('')
 const selectedSlot = ref('')
 const showUnpickedOnly = ref(false)
@@ -20,7 +21,7 @@ const pickingUp = ref(new Set<string>())
 
 const uniqueSlots = computed(() => {
   const slots = new Set<string>()
-  for (const order of orders.value) {
+  for (const order of orders.value ?? []) {
     slots.add(order.timeSlotLabel)
   }
   return Array.from(slots).sort()
@@ -28,14 +29,14 @@ const uniqueSlots = computed(() => {
 
 const slotCounts = computed(() => {
   const counts = new Map<string, number>()
-  for (const order of orders.value) {
+  for (const order of orders.value ?? []) {
     counts.set(order.timeSlotLabel, (counts.get(order.timeSlotLabel) ?? 0) + 1)
   }
   return counts
 })
 
 const filteredOrders = computed(() => {
-  let result = orders.value
+  let result = orders.value ?? []
 
   if (showUnpickedOnly.value) {
     result = result.filter((o) => o.status === 'PAID')
@@ -68,44 +69,29 @@ function selectUnpicked() {
 
 async function handlePickup(orderId: string) {
   if (pickingUp.value.has(orderId)) return
-  const order = orders.value.find((o) => o.id === orderId)
+  const orderList = orders.value ?? []
+  const order = orderList.find((o) => o.id === orderId)
   if (!order) return
 
   pickingUp.value.add(orderId)
   const previousStatus = order.status
-  order.status = 'PICKED_UP'
+  ;(order as AdminOrderResponse).status = 'PICKED_UP'
 
   try {
-    await putApiAdminOrdersIdPickup(orderId)
+    await pickupMutation.mutateAsync(orderId)
     toast.success('Commande marquée comme récupérée')
   } catch {
-    order.status = previousStatus
+    ;(order as AdminOrderResponse).status = previousStatus
     toast.error('Erreur lors de la mise à jour de la commande')
   } finally {
     pickingUp.value.delete(orderId)
   }
 }
-
-async function loadData(venteId: number) {
-  loading.value = true
-  try {
-    const response = await getApiAdminOrders({ venteId })
-    orders.value = response.data.data ?? []
-  } catch {
-    toast.error('Erreur lors du chargement des commandes')
-  } finally {
-    loading.value = false
-  }
-}
-
-watch(selectedVenteId, (id) => { if (id) loadData(id) }, { immediate: true })
 </script>
 
 <template>
   <div>
-    <h1 class="mb-6 text-2xl font-bold text-dark" data-testid="distribution-title">
-      Distribution
-    </h1>
+    <h1 class="mb-6 text-2xl font-bold text-dark" data-testid="distribution-title">Distribution</h1>
 
     <!-- Slot Filter -->
     <div class="mb-4 flex flex-wrap gap-2" data-testid="distribution-slot-filter">
@@ -119,7 +105,7 @@ watch(selectedVenteId, (id) => { if (id) loadData(id) }, { immediate: true })
         data-testid="distribution-slot-all-btn"
         @click="selectAll"
       >
-        Toutes ({{ orders.length }})
+        Toutes ({{ (orders ?? []).length }})
       </button>
       <button
         v-for="slot in uniqueSlots"
@@ -161,13 +147,11 @@ watch(selectedVenteId, (id) => { if (id) loadData(id) }, { immediate: true })
     </div>
 
     <!-- Loading -->
-    <div v-if="loading" class="py-12 text-center text-brown">
-      Chargement des commandes...
-    </div>
+    <div v-if="loading" class="py-12 text-center text-brown">Chargement des commandes...</div>
 
     <!-- Empty state -->
     <div
-      v-else-if="orders.length === 0"
+      v-else-if="!orders || orders.length === 0"
       class="rounded-xl border border-gray-200 bg-white p-12 text-center"
       data-testid="distribution-empty"
     >
@@ -180,7 +164,10 @@ watch(selectedVenteId, (id) => { if (id) loadData(id) }, { immediate: true })
         {{ filteredOrders.length }} commande{{ filteredOrders.length > 1 ? 's' : '' }}
       </p>
 
-      <div v-if="filteredOrders.length === 0" class="rounded-xl border border-gray-200 bg-white p-8 text-center">
+      <div
+        v-if="filteredOrders.length === 0"
+        class="rounded-xl border border-gray-200 bg-white p-8 text-center"
+      >
         <p class="text-brown">Aucune commande ne correspond à votre recherche.</p>
       </div>
 
@@ -200,7 +187,10 @@ watch(selectedVenteId, (id) => { if (id) loadData(id) }, { immediate: true })
           </div>
           <div class="flex items-center gap-3">
             <span
-              :class="['inline-block rounded-full px-2 py-0.5 text-xs font-medium', statusClasses(order.status)]"
+              :class="[
+                'inline-block rounded-full px-2 py-0.5 text-xs font-medium',
+                statusClasses(order.status),
+              ]"
               data-testid="distribution-order-status"
             >
               {{ statusLabel(order.status) }}

@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { onMounted } from 'vue'
+import { computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useCartStore } from '@/stores/cartStore'
 import { useCheckoutStore } from '@/stores/checkoutStore'
 import { useToast } from '@/composables/useToast'
+import { useVenteTimeslotsQuery } from '@/composables/api/useTimeslotsApi'
 import { ApiError } from '@/api/mutator/custom-fetch'
 import Stepper from '@/components/ui/Stepper.vue'
 import CheckoutForm from '@/components/checkout/CheckoutForm.vue'
@@ -17,6 +18,12 @@ const checkoutStore = useCheckoutStore()
 const toast = useToast()
 const venteId = Number(route.params.venteId)
 
+const { data: timeSlots, isLoading: isLoadingTimeSlots } = useVenteTimeslotsQuery(venteId)
+
+const selectedTimeSlot = computed(
+  () => (timeSlots.value ?? []).find((s) => s.id === checkoutStore.selectedTimeSlotId) ?? null,
+)
+
 const steps = [
   { label: 'Panier' },
   { label: 'Coordonnées' },
@@ -24,21 +31,12 @@ const steps = [
   { label: 'Récapitulatif' },
 ]
 
-onMounted(async () => {
+onMounted(() => {
   if (cartStore.isEmpty) {
     router.replace(`/ventes/${venteId}`)
     return
   }
   checkoutStore.reset()
-  try {
-    await checkoutStore.loadTimeSlots(venteId)
-  } catch (e: unknown) {
-    if (e instanceof ApiError) {
-      toast.error(e.message)
-    } else if (e instanceof Error) {
-      toast.error('Impossible de charger les créneaux de retrait.')
-    }
-  }
 })
 
 function handleCustomerSubmit(info: { name: string; email: string; phone: string }) {
@@ -78,18 +76,18 @@ async function handleConfirm() {
 
     <TimeSlotPicker
       v-else-if="checkoutStore.currentStep === 3"
-      :time-slots="checkoutStore.timeSlots"
+      :time-slots="timeSlots ?? []"
       :selected-id="checkoutStore.selectedTimeSlotId"
-      :is-loading="checkoutStore.isLoadingTimeSlots"
+      :is-loading="isLoadingTimeSlots"
       @select="checkoutStore.selectTimeSlot"
       @continue="handleTimeSlotContinue"
       @back="checkoutStore.currentStep = 2"
     />
 
     <OrderSummary
-      v-else-if="checkoutStore.currentStep === 4 && checkoutStore.selectedTimeSlot"
+      v-else-if="checkoutStore.currentStep === 4 && selectedTimeSlot"
       :customer-info="checkoutStore.customerInfo"
-      :time-slot="checkoutStore.selectedTimeSlot"
+      :time-slot="selectedTimeSlot"
       :items="cartStore.items"
       :total="cartStore.total"
       :is-submitting="checkoutStore.isSubmitting"

@@ -1,17 +1,38 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import type { OrderDetailResponse, PaymentStatusResponse } from '@/api/generated/model'
-import { getApiOrdersId, getApiOrdersIdPaymentStatus, postApiOrdersIdPayment } from '@/api/generated/orders/orders'
+import { useOrderDetailQuery, usePaymentStatusQuery } from '@/composables/api/useOrdersApi'
+import { postApiOrdersIdPayment, getApiOrdersIdPaymentStatus } from '@/api/generated/orders/orders'
 import Card from '@/components/ui/Card.vue'
 import Button from '@/components/ui/Button.vue'
 
 const route = useRoute()
 const router = useRouter()
-const order = ref<OrderDetailResponse | null>(null)
-const paymentStatus = ref<PaymentStatusResponse | null>(null)
-const isLoading = ref(true)
 const isRetrying = ref(false)
+
+const orderId = route.query.orderId as string | undefined
+if (!orderId) {
+  router.replace('/')
+}
+
+const { data: order, isLoading: isLoadingOrder } = useOrderDetailQuery(orderId ?? '', !!orderId)
+const { data: paymentStatus, isLoading: isLoadingStatus } = usePaymentStatusQuery(
+  orderId ?? '',
+  !!orderId,
+)
+
+const isLoading = computed(() => isLoadingOrder.value || isLoadingStatus.value)
+
+const isCancelled = computed(() => {
+  if (!paymentStatus.value) return false
+  return paymentStatus.value.orderStatus === 'CANCELLED' || !paymentStatus.value.canRetry
+})
+
+watch([order, paymentStatus], () => {
+  if (!order.value && !isLoading.value && orderId) {
+    router.replace('/')
+  }
+})
 
 function formatPrice(price: number): string {
   return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(price)
@@ -23,10 +44,13 @@ function formatTime(time: string): string {
 
 function formatDate(dateStr: string): string {
   const date = new Date(dateStr + 'T00:00:00')
-  return date.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
+  return date.toLocaleDateString('fr-FR', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  })
 }
-
-const isCancelled = ref(false)
 
 async function retryPayment() {
   if (!order.value) return
@@ -38,39 +62,18 @@ async function retryPayment() {
     const cancelUrl = `${baseUrl}/payment-error?orderId=${order.value.id}`
 
     const paymentResponse = await postApiOrdersIdPayment(order.value.id, { successUrl, cancelUrl })
-    window.location.href = (paymentResponse.data as { data: { checkoutUrl: string } }).data.checkoutUrl
+    window.location.href = (
+      paymentResponse.data as { data: { checkoutUrl: string } }
+    ).data.checkoutUrl
   } catch {
     isRetrying.value = false
-    // If max attempts exceeded, reload status
-    const orderId = route.query.orderId as string
-    const statusResponse = await getApiOrdersIdPaymentStatus(orderId)
-    paymentStatus.value = statusResponse.data.data ?? null
-    isCancelled.value = !paymentStatus.value?.canRetry
+    if (orderId) {
+      const statusResponse = await getApiOrdersIdPaymentStatus(orderId)
+      // Force a local update — paymentStatus from query won't auto-update since we're not invalidating
+      paymentStatus.value = statusResponse.data.data ?? null
+    }
   }
 }
-
-onMounted(async () => {
-  const orderId = route.query.orderId as string | undefined
-  if (!orderId) {
-    router.replace('/')
-    return
-  }
-
-  try {
-    const [orderResponse, statusResponse] = await Promise.all([
-      getApiOrdersId(orderId),
-      getApiOrdersIdPaymentStatus(orderId),
-    ])
-    order.value = orderResponse.data.data ?? null
-    const statusData = statusResponse.data.data ?? null
-    paymentStatus.value = statusData
-    isCancelled.value = statusData?.orderStatus === 'CANCELLED' || !statusData?.canRetry
-  } catch {
-    router.replace('/')
-  } finally {
-    isLoading.value = false
-  }
-})
 </script>
 
 <template>
@@ -85,16 +88,36 @@ onMounted(async () => {
         aria-label="Chargement"
       >
         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
-        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+        <path
+          class="opacity-75"
+          fill="currentColor"
+          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+        />
       </svg>
     </div>
 
     <!-- Cancellation mode -->
-    <div v-else-if="isCancelled" class="flex flex-col items-center gap-6" data-testid="payment-cancelled">
+    <div
+      v-else-if="isCancelled"
+      class="flex flex-col items-center gap-6"
+      data-testid="payment-cancelled"
+    >
       <!-- X circle icon -->
       <div class="flex h-16 w-16 items-center justify-center rounded-full bg-gray-400">
-        <svg class="h-8 w-8 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" aria-hidden="true">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        <svg
+          class="h-8 w-8 text-white"
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke-width="2.5"
+          stroke="currentColor"
+          aria-hidden="true"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+          />
         </svg>
       </div>
 
@@ -111,11 +134,27 @@ onMounted(async () => {
     </div>
 
     <!-- Retry mode -->
-    <div v-else-if="order && paymentStatus" class="flex flex-col items-center gap-6" data-testid="payment-error">
+    <div
+      v-else-if="order && paymentStatus"
+      class="flex flex-col items-center gap-6"
+      data-testid="payment-error"
+    >
       <!-- Warning icon -->
       <div class="flex h-16 w-16 items-center justify-center rounded-full bg-orange-400">
-        <svg class="h-8 w-8 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" aria-hidden="true">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+        <svg
+          class="h-8 w-8 text-white"
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke-width="2.5"
+          stroke="currentColor"
+          aria-hidden="true"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"
+          />
         </svg>
       </div>
 
@@ -148,7 +187,8 @@ onMounted(async () => {
       <!-- Time slot -->
       <div v-if="order.timeSlot" class="w-full rounded-xl bg-primary px-6 py-4">
         <p class="text-lg font-semibold text-dark">
-          {{ formatDate(order.timeSlot.date) }} · {{ formatTime(order.timeSlot.startTime) }} — {{ formatTime(order.timeSlot.endTime) }}
+          {{ formatDate(order.timeSlot.date) }} · {{ formatTime(order.timeSlot.startTime) }} —
+          {{ formatTime(order.timeSlot.endTime) }}
         </p>
       </div>
 

@@ -1,27 +1,18 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, computed } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { getApiVentes } from '@/api/generated/ventes/ventes'
-import type { VenteResponse } from '@/api/generated/model'
+import { useVentesQuery } from '@/composables/api/useVentesApi'
 
 const router = useRouter()
-const ventes = ref<VenteResponse[]>([])
-const loading = ref(true)
-const error = ref<string | null>(null)
+const { data: ventes, isLoading: loading, isError } = useVentesQuery()
 const now = ref(Date.now())
 
 let timer: ReturnType<typeof setInterval> | null = null
 
-onMounted(async () => {
-  try {
-    const response = await getApiVentes()
-    ventes.value = response.data.data ?? []
-  } catch {
-    error.value = 'Impossible de charger les ventes'
-  } finally {
-    loading.value = false
-  }
-  timer = setInterval(() => { now.value = Date.now() }, 1000)
+onMounted(() => {
+  timer = setInterval(() => {
+    now.value = Date.now()
+  }, 1000)
 })
 
 onUnmounted(() => {
@@ -53,9 +44,9 @@ function goToVente(venteId: number) {
 
     <div v-if="loading" class="text-center text-brown">Chargement...</div>
 
-    <div v-else-if="error" class="text-center text-red-600">{{ error }}</div>
+    <div v-else-if="isError" class="text-center text-red-600">Impossible de charger les ventes</div>
 
-    <div v-else-if="ventes.length === 0" class="text-center text-brown">
+    <div v-else-if="!ventes || ventes.length === 0" class="text-center text-brown">
       Aucune vente en cours pour le moment.
     </div>
 
@@ -75,7 +66,11 @@ function goToVente(venteId: number) {
           :class="countdown(vente.endDate) === 'Terminé' ? 'text-error' : 'text-dark'"
           data-testid="vente-countdown"
         >
-          {{ countdown(vente.endDate) === 'Terminé' ? 'Terminé' : `Fin dans ${countdown(vente.endDate)}` }}
+          {{
+            countdown(vente.endDate) === 'Terminé'
+              ? 'Terminé'
+              : `Fin dans ${countdown(vente.endDate)}`
+          }}
         </p>
       </button>
     </div>

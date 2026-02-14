@@ -23,14 +23,12 @@ function goToCheckout() {
 <template>
   <Card>
     <div class="space-y-0">
-      <CartItemComponent
-        v-for="item in cartStore.items"
-        :key="item.productId"
-        :item="item"
-      />
+      <CartItemComponent v-for="item in cartStore.items" :key="item.productId" :item="item" />
     </div>
 
-    <div class="mt-4 rounded-lg bg-surface border-t-2 border-primary p-4 flex items-center justify-between">
+    <div
+      class="mt-4 rounded-lg bg-surface border-t-2 border-primary p-4 flex items-center justify-between"
+    >
       <span class="text-xl font-bold text-dark">Total</span>
       <span data-testid="cart-total" class="text-xl font-bold text-dark">{{ formattedTotal }}</span>
     </div>

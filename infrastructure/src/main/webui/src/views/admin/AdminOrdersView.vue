@@ -1,30 +1,27 @@
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
+import { ref, computed } from 'vue'
 import { RouterLink } from 'vue-router'
-import { getApiAdminOrders } from '@/api/generated/admin-orders/admin-orders'
 import { useVenteStore } from '@/stores/venteStore'
 import { storeToRefs } from 'pinia'
-import { useToast } from '@/composables/useToast'
+import { useAdminOrdersQuery } from '@/composables/api/useAdminOrdersApi'
 import { formatPrice, statusLabel, statusClasses } from '@/utils/order-formatters'
 import AdminTable from '@/components/admin/AdminTable.vue'
-import type { AdminOrderResponse } from '@/api/generated/model'
 
-const toast = useToast()
 const venteStore = useVenteStore()
 const { selectedVenteId } = storeToRefs(venteStore)
 
-const orders = ref<AdminOrderResponse[]>([])
-const loading = ref(false)
+const { data: orders, isLoading: loading } = useAdminOrdersQuery(selectedVenteId)
+
 const searchQuery = ref('')
 const selectedSlot = ref('')
 
 const uniqueSlots = computed(() => {
-  const slots = new Set(orders.value.map((o) => o.timeSlotLabel))
+  const slots = new Set((orders.value ?? []).map((o) => o.timeSlotLabel))
   return Array.from(slots).sort()
 })
 
 const filteredOrders = computed(() => {
-  let result = orders.value
+  let result = orders.value ?? []
   if (searchQuery.value.trim()) {
     const query = searchQuery.value.trim().toLowerCase()
     result = result.filter((o) => o.customerName.toLowerCase().includes(query))
@@ -34,20 +31,6 @@ const filteredOrders = computed(() => {
   }
   return result
 })
-
-async function loadData(venteId: number) {
-  loading.value = true
-  try {
-    const response = await getApiAdminOrders({ venteId })
-    orders.value = response.data.data ?? []
-  } catch {
-    toast.error('Erreur lors du chargement des commandes')
-  } finally {
-    loading.value = false
-  }
-}
-
-watch(selectedVenteId, (id) => { if (id) loadData(id) }, { immediate: true })
 </script>
 
 <template>
@@ -72,11 +55,13 @@ watch(selectedVenteId, (id) => { if (id) loadData(id) }, { immediate: true })
       </select>
     </div>
 
-    <div v-if="loading" class="py-12 text-center text-brown">
-      Chargement des commandes...
-    </div>
+    <div v-if="loading" class="py-12 text-center text-brown">Chargement des commandes...</div>
 
-    <div v-else-if="orders.length === 0" class="rounded-xl border border-gray-200 bg-white p-12 text-center" data-testid="empty-state">
+    <div
+      v-else-if="!orders || orders.length === 0"
+      class="rounded-xl border border-gray-200 bg-white p-12 text-center"
+      data-testid="empty-state"
+    >
       <p class="text-brown">Aucune commande payée pour cette vente.</p>
     </div>
 
@@ -103,9 +88,16 @@ watch(selectedVenteId, (id) => { if (id) loadData(id) }, { immediate: true })
         <td class="border-t border-gray-100 px-4 py-3 text-dark">{{ order.customerName }}</td>
         <td class="border-t border-gray-100 px-4 py-3 text-dark">{{ order.customerEmail }}</td>
         <td class="border-t border-gray-100 px-4 py-3 text-dark">{{ order.timeSlotLabel }}</td>
-        <td class="border-t border-gray-100 px-4 py-3 text-dark">{{ formatPrice(order.totalAmount) }}</td>
+        <td class="border-t border-gray-100 px-4 py-3 text-dark">
+          {{ formatPrice(order.totalAmount) }}
+        </td>
         <td class="border-t border-gray-100 px-4 py-3" data-testid="backoffice-order-status">
-          <span :class="['inline-block rounded-full px-2 py-0.5 text-xs font-medium', statusClasses(order.status)]">
+          <span
+            :class="[
+              'inline-block rounded-full px-2 py-0.5 text-xs font-medium',
+              statusClasses(order.status),
+            ]"
+          >
             {{ statusLabel(order.status) }}
           </span>
         </td>

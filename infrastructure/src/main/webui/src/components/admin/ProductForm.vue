@@ -13,7 +13,16 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
-  submit: [data: { name: string; description: string; price: number; supplier: string; stock: number; active: boolean }]
+  submit: [
+    data: {
+      name: string
+      description: string
+      price: number
+      supplier: string
+      stock: number
+      active: boolean
+    },
+  ]
   cancel: []
 }>()
 
@@ -23,9 +32,18 @@ const schema = toTypedSchema(
   z.object({
     name: z.string().min(1, 'Merci de saisir un nom de produit'),
     description: z.string().optional().default(''),
-    price: z.string().min(1, 'Merci de saisir un prix').refine((v) => !isNaN(Number(v)) && Number(v) > 0, 'Le prix doit être supérieur à 0'),
+    price: z
+      .string()
+      .min(1, 'Merci de saisir un prix')
+      .refine((v) => !isNaN(Number(v)) && Number(v) > 0, 'Le prix doit être supérieur à 0'),
     supplier: z.string().min(1, 'Merci de saisir un fournisseur'),
-    stock: z.string().min(1, 'Merci de saisir un stock').refine((v) => !isNaN(Number(v)) && Number(v) >= 0 && Number.isInteger(Number(v)), 'Le stock ne peut pas être négatif'),
+    stock: z
+      .string()
+      .min(1, 'Merci de saisir un stock')
+      .refine(
+        (v) => !isNaN(Number(v)) && Number(v) >= 0 && Number.isInteger(Number(v)),
+        'Le stock ne peut pas être négatif',
+      ),
   }),
 )
 
@@ -49,9 +67,17 @@ const { handleSubmit } = useForm({
 })
 
 const { value: name, errorMessage: nameError, handleBlur: nameBlur } = useField<string>('name')
-const { value: description, errorMessage: descriptionError, handleBlur: descriptionBlur } = useField<string>('description')
+const {
+  value: description,
+  errorMessage: descriptionError,
+  handleBlur: descriptionBlur,
+} = useField<string>('description')
 const { value: price, errorMessage: priceError, handleBlur: priceBlur } = useField<string>('price')
-const { value: supplier, errorMessage: supplierError, handleBlur: supplierBlur } = useField<string>('supplier')
+const {
+  value: supplier,
+  errorMessage: supplierError,
+  handleBlur: supplierBlur,
+} = useField<string>('supplier')
 const { value: stock, errorMessage: stockError, handleBlur: stockBlur } = useField<string>('stock')
 
 const firstInput = ref<InstanceType<typeof Input> | null>(null)
@@ -107,7 +133,12 @@ const onSubmit = handleSubmit((values) => {
           ]"
           @blur="descriptionBlur"
         />
-        <p v-if="descriptionError" id="product-description-error" class="text-sm text-red-600" role="alert">
+        <p
+          v-if="descriptionError"
+          id="product-description-error"
+          class="text-sm text-red-600"
+          role="alert"
+        >
           {{ descriptionError }}
         </p>
       </div>
@@ -148,9 +179,7 @@ const onSubmit = handleSubmit((values) => {
         <Button type="submit" variant="primary" :loading="loading">
           {{ isEdit ? 'Enregistrer les modifications' : 'Créer le produit' }}
         </Button>
-        <Button variant="ghost" @click="emit('cancel')">
-          Annuler
-        </Button>
+        <Button variant="ghost" @click="emit('cancel')"> Annuler </Button>
       </div>
     </form>
   </div>

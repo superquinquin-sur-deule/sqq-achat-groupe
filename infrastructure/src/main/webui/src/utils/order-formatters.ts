@@ -1,5 +1,7 @@
 export function formatPrice(amount: number): string {
-  return amount.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €'
+  return (
+    amount.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €'
+  )
 }
 
 export function statusLabel(status: string): string {
@@ -7,7 +9,5 @@ export function statusLabel(status: string): string {
 }
 
 export function statusClasses(status: string): string {
-  return status === 'PICKED_UP'
-    ? 'bg-blue-100 text-blue-800'
-    : 'bg-green-100 text-green-800'
+  return status === 'PICKED_UP' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800'
 }

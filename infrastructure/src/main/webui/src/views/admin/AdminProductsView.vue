@@ -1,21 +1,35 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { ref } from 'vue'
 import Button from '@/components/ui/Button.vue'
 import ProductForm from '@/components/admin/ProductForm.vue'
 import ProductImportForm from '@/components/admin/ProductImportForm.vue'
-import { getApiAdminProducts, postApiAdminProducts, putApiAdminProductsId, deleteApiAdminProductsId, postApiAdminProductsImport } from '@/api/generated/admin-products/admin-products'
 import { useVenteStore } from '@/stores/venteStore'
 import { storeToRefs } from 'pinia'
 import { useToast } from '@/composables/useToast'
+import {
+  useAdminProductsQuery,
+  useCreateProductMutation,
+  useUpdateProductMutation,
+  useDeleteProductMutation,
+  useImportProductsMutation,
+} from '@/composables/api/useAdminProductsApi'
 import AdminTable from '@/components/admin/AdminTable.vue'
-import type { AdminProductResponse, CreateProductRequest, UpdateProductRequest } from '@/api/generated/model'
+import type {
+  AdminProductResponse,
+  CreateProductRequest,
+  UpdateProductRequest,
+} from '@/api/generated/model'
 
 const toast = useToast()
 const venteStore = useVenteStore()
 const { selectedVenteId } = storeToRefs(venteStore)
 
-const products = ref<AdminProductResponse[]>([])
-const loading = ref(false)
+const { data: products, isLoading: loading } = useAdminProductsQuery(selectedVenteId)
+const createMutation = useCreateProductMutation(selectedVenteId)
+const updateMutation = useUpdateProductMutation(selectedVenteId)
+const deleteMutation = useDeleteProductMutation(selectedVenteId)
+const importMutation = useImportProductsMutation(selectedVenteId)
+
 const showForm = ref(false)
 const editingProduct = ref<AdminProductResponse | undefined>(undefined)
 const submitting = ref(false)
@@ -23,20 +37,6 @@ const confirmingDeleteId = ref<number | null>(null)
 const showImportForm = ref(false)
 const importing = ref(false)
 const importFormRef = ref<InstanceType<typeof ProductImportForm> | null>(null)
-
-async function loadData(venteId: number) {
-  loading.value = true
-  try {
-    const response = await getApiAdminProducts({ venteId })
-    products.value = response.data.data ?? []
-  } catch {
-    toast.error('Erreur lors du chargement des produits')
-  } finally {
-    loading.value = false
-  }
-}
-
-watch(selectedVenteId, (id) => { if (id) loadData(id) }, { immediate: true })
 
 function openCreateForm() {
   editingProduct.value = undefined
@@ -59,21 +59,29 @@ async function onImportSubmit(file: File) {
   if (!selectedVenteId.value) return
   importing.value = true
   try {
-    const response = await postApiAdminProductsImport({ file, venteId: selectedVenteId.value })
-    const result = response.data as { data: { imported: number; errors: number; errorDetails: Array<{ line: number; reason: string }> } }
+    const response = await importMutation.mutateAsync(file)
+    const result = response.data as {
+      data: {
+        imported: number
+        errors: number
+        errorDetails: Array<{ line: number; reason: string }>
+      }
+    }
     const importResult = result.data
     importFormRef.value?.setResult(importResult)
     if (importResult.errors === 0) {
-      toast.success(`${importResult.imported} produit${importResult.imported > 1 ? 's' : ''} importé${importResult.imported > 1 ? 's' : ''}`)
+      toast.success(
+        `${importResult.imported} produit${importResult.imported > 1 ? 's' : ''} importé${importResult.imported > 1 ? 's' : ''}`,
+      )
     } else if (importResult.imported > 0) {
-      toast.warning(`${importResult.imported} produit${importResult.imported > 1 ? 's' : ''} importé${importResult.imported > 1 ? 's' : ''}, ${importResult.errors} erreur${importResult.errors > 1 ? 's' : ''}`)
+      toast.warning(
+        `${importResult.imported} produit${importResult.imported > 1 ? 's' : ''} importé${importResult.imported > 1 ? 's' : ''}, ${importResult.errors} erreur${importResult.errors > 1 ? 's' : ''}`,
+      )
     } else {
       toast.error('Aucun produit importé')
     }
-    const productsResponse = await getApiAdminProducts({ venteId: selectedVenteId.value })
-    products.value = productsResponse.data.data ?? []
   } catch {
-    toast.error('Erreur lors de l\'import des produits')
+    toast.error("Erreur lors de l'import des produits")
   } finally {
     importing.value = false
   }
@@ -90,7 +98,14 @@ function closeForm() {
   editingProduct.value = undefined
 }
 
-async function onSubmit(data: { name: string; description: string; price: number; supplier: string; stock: number; active: boolean }) {
+async function onSubmit(data: {
+  name: string
+  description: string
+  price: number
+  supplier: string
+  stock: number
+  active: boolean
+}) {
   if (!selectedVenteId.value) return
   submitting.value = true
   try {
@@ -103,7 +118,7 @@ async function onSubmit(data: { name: string; description: string; price: number
         stock: data.stock,
         active: data.active,
       }
-      await putApiAdminProductsId(editingProduct.value.id, updateData)
+      await updateMutation.mutateAsync({ id: editingProduct.value.id, data: updateData })
       toast.success('Produit mis à jour')
     } else {
       const createData: CreateProductRequest = {
@@ -114,12 +129,10 @@ async function onSubmit(data: { name: string; description: string; price: number
         supplier: data.supplier,
         stock: data.stock,
       }
-      await postApiAdminProducts(createData)
+      await createMutation.mutateAsync(createData)
       toast.success('Produit créé')
     }
     closeForm()
-    const productsResponse = await getApiAdminProducts({ venteId: selectedVenteId.value })
-    products.value = productsResponse.data.data ?? []
   } catch {
     toast.error('Erreur lors de la sauvegarde du produit')
   } finally {
@@ -138,18 +151,18 @@ function cancelDelete() {
 async function confirmDelete(id: number) {
   if (!selectedVenteId.value) return
   try {
-    await deleteApiAdminProductsId(id)
+    await deleteMutation.mutateAsync(id)
     toast.success('Produit supprimé')
     confirmingDeleteId.value = null
-    const productsResponse = await getApiAdminProducts({ venteId: selectedVenteId.value })
-    products.value = productsResponse.data.data ?? []
   } catch {
     toast.error('Erreur lors de la suppression du produit')
   }
 }
 
 function formatPrice(price: number): string {
-  return price.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €'
+  return (
+    price.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €'
+  )
 }
 </script>
 
@@ -185,19 +198,19 @@ function formatPrice(price: number): string {
       @cancel="closeForm"
     />
 
-    <div v-if="loading" class="py-12 text-center text-brown">
-      Chargement des produits...
-    </div>
+    <div v-if="loading" class="py-12 text-center text-brown">Chargement des produits...</div>
 
-    <div v-else-if="products.length === 0 && !showForm" class="rounded-xl border border-gray-200 bg-white p-12 text-center" data-testid="empty-state">
+    <div
+      v-else-if="(!products || products.length === 0) && !showForm"
+      class="rounded-xl border border-gray-200 bg-white p-12 text-center"
+      data-testid="empty-state"
+    >
       <p class="mb-4 text-brown">Aucun produit. Ajoutez votre premier produit.</p>
-      <Button variant="primary" @click="openCreateForm">
-        Ajouter un produit
-      </Button>
+      <Button variant="primary" @click="openCreateForm"> Ajouter un produit </Button>
     </div>
 
     <AdminTable
-      v-else-if="products.length > 0"
+      v-else-if="products && products.length > 0"
       :columns="['Nom', 'Prix', 'Fournisseur', 'Stock', 'Statut', 'Actions']"
       caption="Liste des produits"
       dataTestid="product-table"
@@ -216,9 +229,7 @@ function formatPrice(price: number): string {
           <span
             :class="[
               'inline-block rounded-full px-2 py-0.5 text-xs font-medium',
-              product.active
-                ? 'bg-green-100 text-green-700'
-                : 'bg-gray-100 text-gray-600',
+              product.active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600',
             ]"
           >
             {{ product.active ? 'Actif' : 'Inactif' }}
@@ -235,13 +246,7 @@ function formatPrice(price: number): string {
               >
                 Supprimer
               </Button>
-              <Button
-                variant="ghost"
-                size="md"
-                @click="cancelDelete"
-              >
-                Annuler
-              </Button>
+              <Button variant="ghost" size="md" @click="cancelDelete"> Annuler </Button>
             </template>
             <template v-else>
               <Button

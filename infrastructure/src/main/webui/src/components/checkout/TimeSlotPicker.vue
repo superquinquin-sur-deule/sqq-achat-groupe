@@ -38,7 +38,12 @@ function formatTime(time: string): string {
 
 function formatDate(dateStr: string): string {
   const date = new Date(dateStr + 'T00:00:00')
-  return date.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
+  return date.toLocaleDateString('fr-FR', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  })
 }
 </script>
 
@@ -54,7 +59,11 @@ function formatDate(dateStr: string): string {
       <div v-for="group in groupedByDate" :key="group.date" class="flex flex-col gap-2">
         <h3 class="text-base font-medium text-dark">{{ group.formattedDate }}</h3>
 
-        <div role="radiogroup" :aria-label="`Créneaux du ${group.formattedDate}`" class="flex flex-col gap-2">
+        <div
+          role="radiogroup"
+          :aria-label="`Créneaux du ${group.formattedDate}`"
+          class="flex flex-col gap-2"
+        >
           <button
             v-for="slot in group.slots"
             :key="slot.id"
@@ -66,14 +75,17 @@ function formatDate(dateStr: string): string {
               'min-h-[44px] w-full rounded-lg border px-4 py-3 text-left text-sm font-medium transition-colors focus:outline-2 focus:outline-offset-2 focus:outline-dark',
               {
                 'border-primary bg-primary text-dark': selectedId === slot.id,
-                'border-gray-300 bg-white text-dark hover:border-primary': selectedId !== slot.id && slot.remainingPlaces > 0,
-                'cursor-not-allowed border-gray-200 bg-gray-100 text-gray-400': slot.remainingPlaces <= 0,
+                'border-gray-300 bg-white text-dark hover:border-primary':
+                  selectedId !== slot.id && slot.remainingPlaces > 0,
+                'cursor-not-allowed border-gray-200 bg-gray-100 text-gray-400':
+                  slot.remainingPlaces <= 0,
               },
             ]"
             @click="slot.remainingPlaces > 0 && emit('select', slot.id)"
           >
             <span v-if="slot.remainingPlaces > 0">
-              {{ formatTime(slot.startTime) }} — {{ formatTime(slot.endTime) }} · {{ slot.remainingPlaces }} places
+              {{ formatTime(slot.startTime) }} — {{ formatTime(slot.endTime) }} ·
+              {{ slot.remainingPlaces }} places
             </span>
             <span v-else>
               {{ formatTime(slot.startTime) }} — {{ formatTime(slot.endTime) }} · Complet
@@ -94,9 +106,7 @@ function formatDate(dateStr: string): string {
       >
         Continuer
       </Button>
-      <Button variant="secondary" class="w-full sm:w-auto" @click="emit('back')">
-        Retour
-      </Button>
+      <Button variant="secondary" class="w-full sm:w-auto" @click="emit('back')"> Retour </Button>
     </div>
   </div>
 </template>

@@ -1,52 +1,47 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { ref } from 'vue'
 import Button from '@/components/ui/Button.vue'
 import TimeSlotForm from '@/components/admin/TimeSlotForm.vue'
-import { getApiAdminTimeslots, postApiAdminTimeslots, putApiAdminTimeslotsId, deleteApiAdminTimeslotsId } from '@/api/generated/admin-timeslots/admin-timeslots'
 import { useVenteStore } from '@/stores/venteStore'
 import { storeToRefs } from 'pinia'
 import { useToast } from '@/composables/useToast'
+import {
+  useAdminTimeslotsQuery,
+  useCreateTimeslotMutation,
+  useUpdateTimeslotMutation,
+  useDeleteTimeslotMutation,
+} from '@/composables/api/useAdminTimeslotsApi'
 import AdminTable from '@/components/admin/AdminTable.vue'
-import type { TimeSlotResponse, CreateTimeSlotRequest, UpdateTimeSlotRequest } from '@/api/generated/model'
+import type {
+  TimeSlotResponse,
+  CreateTimeSlotRequest,
+  UpdateTimeSlotRequest,
+} from '@/api/generated/model'
 
 const toast = useToast()
 const venteStore = useVenteStore()
 const { selectedVenteId } = storeToRefs(venteStore)
 
-const timeSlots = ref<TimeSlotResponse[]>([])
-const loading = ref(false)
+const { data: timeSlots, isLoading: loading } = useAdminTimeslotsQuery(selectedVenteId)
+const createMutation = useCreateTimeslotMutation(selectedVenteId)
+const updateMutation = useUpdateTimeslotMutation(selectedVenteId)
+const deleteMutationHook = useDeleteTimeslotMutation(selectedVenteId)
+
 const showForm = ref(false)
 const editingTimeSlot = ref<TimeSlotResponse | undefined>(undefined)
 const submitting = ref(false)
 const confirmingDeleteId = ref<number | null>(null)
-const forceDelete = ref(false)
-
-async function loadData(venteId: number) {
-  loading.value = true
-  try {
-    const response = await getApiAdminTimeslots({ venteId })
-    timeSlots.value = response.data.data ?? []
-  } catch {
-    toast.error('Erreur lors du chargement des créneaux')
-  } finally {
-    loading.value = false
-  }
-}
-
-watch(selectedVenteId, (id) => { if (id) loadData(id) }, { immediate: true })
 
 function openCreateForm() {
   editingTimeSlot.value = undefined
   showForm.value = true
   confirmingDeleteId.value = null
-  forceDelete.value = false
 }
 
 function openEditForm(timeSlot: TimeSlotResponse) {
   editingTimeSlot.value = timeSlot
   showForm.value = true
   confirmingDeleteId.value = null
-  forceDelete.value = false
 }
 
 function closeForm() {
@@ -54,7 +49,12 @@ function closeForm() {
   editingTimeSlot.value = undefined
 }
 
-async function onSubmit(data: { date: string; startTime: string; endTime: string; capacity: number }) {
+async function onSubmit(data: {
+  date: string
+  startTime: string
+  endTime: string
+  capacity: number
+}) {
   if (!selectedVenteId.value) return
   submitting.value = true
   try {
@@ -65,7 +65,7 @@ async function onSubmit(data: { date: string; startTime: string; endTime: string
         endTime: data.endTime,
         capacity: data.capacity,
       }
-      await putApiAdminTimeslotsId(editingTimeSlot.value.id, updateData)
+      await updateMutation.mutateAsync({ id: editingTimeSlot.value.id, data: updateData })
       toast.success('Créneau mis à jour')
     } else {
       const createData: CreateTimeSlotRequest = {
@@ -75,12 +75,10 @@ async function onSubmit(data: { date: string; startTime: string; endTime: string
         endTime: data.endTime,
         capacity: data.capacity,
       }
-      await postApiAdminTimeslots(createData)
+      await createMutation.mutateAsync(createData)
       toast.success('Créneau créé')
     }
     closeForm()
-    const response = await getApiAdminTimeslots({ venteId: selectedVenteId.value })
-    timeSlots.value = response.data.data ?? []
   } catch {
     toast.error('Erreur lors de la sauvegarde du créneau')
   } finally {
@@ -90,23 +88,18 @@ async function onSubmit(data: { date: string; startTime: string; endTime: string
 
 function startDelete(id: number) {
   confirmingDeleteId.value = id
-  forceDelete.value = false
 }
 
 function cancelDelete() {
   confirmingDeleteId.value = null
-  forceDelete.value = false
 }
 
 async function confirmDeleteAction(slot: TimeSlotResponse) {
   if (!selectedVenteId.value) return
   try {
-    await deleteApiAdminTimeslotsId(slot.id, slot.reserved > 0 ? { force: true } : undefined)
+    await deleteMutationHook.mutateAsync({ id: slot.id, force: slot.reserved > 0 })
     toast.success('Créneau supprimé')
     confirmingDeleteId.value = null
-    forceDelete.value = false
-    const response = await getApiAdminTimeslots({ venteId: selectedVenteId.value })
-    timeSlots.value = response.data.data ?? []
   } catch {
     toast.error('Erreur lors de la suppression du créneau')
   }
@@ -140,23 +133,19 @@ function formatTime(startTime: string, endTime: string): string {
       @cancel="closeForm"
     />
 
-    <div v-if="loading" class="py-12 text-center text-brown">
-      Chargement des créneaux...
-    </div>
+    <div v-if="loading" class="py-12 text-center text-brown">Chargement des créneaux...</div>
 
     <div
-      v-else-if="timeSlots.length === 0 && !showForm"
+      v-else-if="(!timeSlots || timeSlots.length === 0) && !showForm"
       class="rounded-xl border border-gray-200 bg-white p-12 text-center"
       data-testid="empty-state"
     >
       <p class="mb-4 text-brown">Aucun créneau. Ajoutez votre premier créneau de retrait.</p>
-      <Button variant="primary" @click="openCreateForm">
-        Ajouter un créneau
-      </Button>
+      <Button variant="primary" @click="openCreateForm"> Ajouter un créneau </Button>
     </div>
 
     <AdminTable
-      v-else-if="timeSlots.length > 0"
+      v-else-if="timeSlots && timeSlots.length > 0"
       :columns="['Date', 'Horaire', 'Capacité', 'Réservations', 'Actions']"
       caption="Liste des créneaux de retrait"
       dataTestid="timeslot-table"
@@ -174,9 +163,7 @@ function formatTime(startTime: string, endTime: string): string {
           <span
             :class="[
               'inline-block rounded-full px-2 py-0.5 text-xs font-medium',
-              slot.reserved > 0
-                ? 'bg-green-100 text-green-700'
-                : 'bg-gray-100 text-gray-600',
+              slot.reserved > 0 ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600',
             ]"
           >
             {{ slot.reserved }} / {{ slot.capacity }}
@@ -192,18 +179,17 @@ function formatTime(startTime: string, endTime: string): string {
                 <Button
                   variant="danger"
                   size="md"
-                  :aria-label="'Confirmer la suppression du créneau de ' + slot.startTime + ' à ' + slot.endTime"
+                  :aria-label="
+                    'Confirmer la suppression du créneau de ' +
+                    slot.startTime +
+                    ' à ' +
+                    slot.endTime
+                  "
                   @click="confirmDeleteAction(slot)"
                 >
                   Supprimer
                 </Button>
-                <Button
-                  variant="ghost"
-                  size="md"
-                  @click="cancelDelete"
-                >
-                  Annuler
-                </Button>
+                <Button variant="ghost" size="md" @click="cancelDelete"> Annuler </Button>
               </div>
             </template>
             <template v-else>

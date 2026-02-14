@@ -2,22 +2,26 @@
 import { ref } from 'vue'
 import Button from '@/components/ui/Button.vue'
 import VenteForm from '@/components/admin/VenteForm.vue'
-import {
-  postApiAdminVentes,
-  putApiAdminVentesId,
-  deleteApiAdminVentesId,
-  putApiAdminVentesIdActivate,
-  putApiAdminVentesIdDeactivate,
-} from '@/api/generated/admin-ventes/admin-ventes'
-import { useVenteStore } from '@/stores/venteStore'
-import { storeToRefs } from 'pinia'
 import { useToast } from '@/composables/useToast'
+import {
+  useAdminVentesQuery,
+  useCreateVenteMutation,
+  useUpdateVenteMutation,
+  useDeleteVenteMutation,
+  useActivateVenteMutation,
+  useDeactivateVenteMutation,
+} from '@/composables/api/useAdminVentesApi'
 import AdminTable from '@/components/admin/AdminTable.vue'
 import type { AdminVenteResponse } from '@/api/generated/model'
 
 const toast = useToast()
-const venteStore = useVenteStore()
-const { ventes } = storeToRefs(venteStore)
+
+const { data: ventes } = useAdminVentesQuery()
+const createMutation = useCreateVenteMutation()
+const updateMutation = useUpdateVenteMutation()
+const deleteMutationHook = useDeleteVenteMutation()
+const activateMutation = useActivateVenteMutation()
+const deactivateMutation = useDeactivateVenteMutation()
 
 const showForm = ref(false)
 const editingVente = ref<AdminVenteResponse | undefined>(undefined)
@@ -46,7 +50,12 @@ function toInstantOrUndefined(datetimeLocal: string): string | undefined {
   return new Date(datetimeLocal).toISOString()
 }
 
-async function onSubmit(data: { name: string; description: string; startDate: string; endDate: string }) {
+async function onSubmit(data: {
+  name: string
+  description: string
+  startDate: string
+  endDate: string
+}) {
   submitting.value = true
   try {
     const payload = {
@@ -56,14 +65,13 @@ async function onSubmit(data: { name: string; description: string; startDate: st
       endDate: toInstantOrUndefined(data.endDate),
     }
     if (editingVente.value) {
-      await putApiAdminVentesId(editingVente.value.id, payload)
+      await updateMutation.mutateAsync({ id: editingVente.value.id, data: payload })
       toast.success('Vente mise à jour')
     } else {
-      await postApiAdminVentes(payload)
+      await createMutation.mutateAsync(payload)
       toast.success('Vente créée')
     }
     closeForm()
-    await venteStore.loadVentes()
   } catch {
     toast.error('Erreur lors de la sauvegarde de la vente')
   } finally {
@@ -81,10 +89,9 @@ function cancelDelete() {
 
 async function confirmDelete(id: number) {
   try {
-    await deleteApiAdminVentesId(id)
+    await deleteMutationHook.mutateAsync(id)
     toast.success('Vente supprimée')
     confirmingDeleteId.value = null
-    await venteStore.loadVentes()
   } catch {
     toast.error('Erreur lors de la suppression de la vente')
   }
@@ -93,13 +100,12 @@ async function confirmDelete(id: number) {
 async function toggleStatus(vente: AdminVenteResponse) {
   try {
     if (vente.status === 'ACTIVE') {
-      await putApiAdminVentesIdDeactivate(vente.id)
+      await deactivateMutation.mutateAsync(vente.id)
       toast.success('Vente désactivée')
     } else {
-      await putApiAdminVentesIdActivate(vente.id)
+      await activateMutation.mutateAsync(vente.id)
       toast.success('Vente activée')
     }
-    await venteStore.loadVentes()
   } catch {
     toast.error('Erreur lors de la mise à jour du statut')
   }
@@ -136,18 +142,16 @@ function formatDate(isoStr: string | null): string {
     />
 
     <div
-      v-if="ventes.length === 0 && !showForm"
+      v-if="(!ventes || ventes.length === 0) && !showForm"
       class="rounded-xl border border-gray-200 bg-white p-12 text-center"
       data-testid="empty-state"
     >
       <p class="mb-4 text-brown">Aucune vente. Créez votre première vente.</p>
-      <Button variant="primary" @click="openCreateForm">
-        Créer une vente
-      </Button>
+      <Button variant="primary" @click="openCreateForm"> Créer une vente </Button>
     </div>
 
     <AdminTable
-      v-else-if="ventes.length > 0"
+      v-else-if="ventes && ventes.length > 0"
       :columns="['Nom', 'Début', 'Fin', 'Statut', 'Actions']"
       caption="Liste des ventes"
       dataTestid="vente-table"
@@ -185,13 +189,7 @@ function formatDate(isoStr: string | null): string {
               >
                 Supprimer
               </Button>
-              <Button
-                variant="ghost"
-                size="md"
-                @click="cancelDelete"
-              >
-                Annuler
-              </Button>
+              <Button variant="ghost" size="md" @click="cancelDelete"> Annuler </Button>
             </template>
             <template v-else>
               <Button

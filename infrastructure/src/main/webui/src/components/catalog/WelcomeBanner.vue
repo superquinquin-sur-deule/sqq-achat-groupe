@@ -1,5 +1,4 @@
-<script setup lang="ts">
-</script>
+<script setup lang="ts"></script>
 
 <template>
   <div data-testid="welcome-banner" class="bg-primary py-8 px-4 md:py-10 md:px-6 lg:py-12 lg:px-8">

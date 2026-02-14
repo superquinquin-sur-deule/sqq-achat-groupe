@@ -33,7 +33,12 @@ function formatTime(time: string): string {
 
 function formatDate(dateStr: string): string {
   const date = new Date(dateStr + 'T00:00:00')
-  return date.toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
+  return date.toLocaleDateString('fr-FR', {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  })
 }
 </script>
 
@@ -60,7 +65,8 @@ function formatDate(dateStr: string): string {
     <Card>
       <h3 class="mb-3 text-base font-semibold text-dark">Votre créneau</h3>
       <div class="rounded-lg bg-primary px-4 py-3 text-sm font-semibold text-dark">
-        {{ formatDate(timeSlot.date) }} · {{ formatTime(timeSlot.startTime) }} — {{ formatTime(timeSlot.endTime) }}
+        {{ formatDate(timeSlot.date) }} · {{ formatTime(timeSlot.startTime) }} —
+        {{ formatTime(timeSlot.endTime) }}
       </div>
     </Card>
 
@@ -93,7 +99,12 @@ function formatDate(dateStr: string): string {
       >
         {{ isSubmitting ? 'Redirection vers le paiement...' : 'Payer ma commande' }}
       </Button>
-      <Button variant="secondary" :disabled="isSubmitting" class="w-full sm:w-auto" @click="emit('back')">
+      <Button
+        variant="secondary"
+        :disabled="isSubmitting"
+        class="w-full sm:w-auto"
+        @click="emit('back')"
+      >
         Modifier
       </Button>
     </div>

@@ -1,22 +1,19 @@
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
-import { getApiAdminPreparation } from '@/api/generated/admin-preparation/admin-preparation'
+import { ref, computed } from 'vue'
 import { useVenteStore } from '@/stores/venteStore'
 import { storeToRefs } from 'pinia'
-import { useToast } from '@/composables/useToast'
-import type { PreparationOrderResponse } from '@/api/generated/model'
+import { useAdminPreparationQuery } from '@/composables/api/useAdminPreparationApi'
 
-const toast = useToast()
 const venteStore = useVenteStore()
 const { selectedVenteId } = storeToRefs(venteStore)
 
-const orders = ref<PreparationOrderResponse[]>([])
-const loading = ref(false)
+const { data: orders, isLoading: loading } = useAdminPreparationQuery(selectedVenteId)
+
 const selectedSlot = ref('')
 
 const uniqueSlots = computed(() => {
   const slots = new Set<string>()
-  for (const order of orders.value) {
+  for (const order of orders.value ?? []) {
     slots.add(order.timeSlotLabel)
   }
   return Array.from(slots).sort()
@@ -24,13 +21,13 @@ const uniqueSlots = computed(() => {
 
 const filteredOrders = computed(() => {
   if (!selectedSlot.value) {
-    return orders.value
+    return orders.value ?? []
   }
-  return orders.value.filter((o) => o.timeSlotLabel === selectedSlot.value)
+  return (orders.value ?? []).filter((o) => o.timeSlotLabel === selectedSlot.value)
 })
 
 const groupedBySlot = computed(() => {
-  const groups = new Map<string, PreparationOrderResponse[]>()
+  const groups = new Map<string, typeof filteredOrders.value>()
   for (const order of filteredOrders.value) {
     const existing = groups.get(order.timeSlotLabel)
     if (existing) {
@@ -60,20 +57,6 @@ function handlePrint() {
   if (!selectedVenteId.value) return
   window.open(`/api/admin/preparation/pdf?venteId=${selectedVenteId.value}`, '_blank')
 }
-
-async function loadData(venteId: number) {
-  loading.value = true
-  try {
-    const response = await getApiAdminPreparation({ venteId })
-    orders.value = response.data.data ?? []
-  } catch {
-    toast.error('Erreur lors du chargement des listes de préparation')
-  } finally {
-    loading.value = false
-  }
-}
-
-watch(selectedVenteId, (id) => { if (id) loadData(id) }, { immediate: true })
 </script>
 
 <template>
@@ -107,7 +90,19 @@ watch(selectedVenteId, (id) => { if (id) loadData(id) }, { immediate: true })
           data-testid="preparation-print-btn"
           @click="handlePrint"
         >
-          <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6.72 13.829c-.24.03-.48.062-.72.096m.72-.096a42.415 42.415 0 0 1 10.56 0m-10.56 0L6.34 18m10.94-4.171c.24.03.48.062.72.096m-.72-.096L17.66 18m0 0 .229 2.523a1.125 1.125 0 0 1-1.12 1.227H7.231c-.662 0-1.18-.568-1.12-1.227L6.34 18m11.318 0h1.091A2.25 2.25 0 0 0 21 15.75V9.456c0-1.081-.768-2.015-1.837-2.175a48.055 48.055 0 0 0-1.913-.247M6.34 18H5.25A2.25 2.25 0 0 1 3 15.75V9.456c0-1.081.768-2.015 1.837-2.175a48.041 48.041 0 0 1 1.913-.247m10.5 0a48.536 48.536 0 0 0-10.5 0m10.5 0V3.375c0-.621-.504-1.125-1.125-1.125h-8.25c-.621 0-1.125.504-1.125 1.125v3.659M18.25 7.034V3.375" /></svg>
+          <svg
+            class="h-4 w-4"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke-width="1.5"
+            stroke="currentColor"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M6.72 13.829c-.24.03-.48.062-.72.096m.72-.096a42.415 42.415 0 0 1 10.56 0m-10.56 0L6.34 18m10.94-4.171c.24.03.48.062.72.096m-.72-.096L17.66 18m0 0 .229 2.523a1.125 1.125 0 0 1-1.12 1.227H7.231c-.662 0-1.18-.568-1.12-1.227L6.34 18m11.318 0h1.091A2.25 2.25 0 0 0 21 15.75V9.456c0-1.081-.768-2.015-1.837-2.175a48.055 48.055 0 0 0-1.913-.247M6.34 18H5.25A2.25 2.25 0 0 1 3 15.75V9.456c0-1.081.768-2.015 1.837-2.175a48.041 48.041 0 0 1 1.913-.247m10.5 0a48.536 48.536 0 0 0-10.5 0m10.5 0V3.375c0-.621-.504-1.125-1.125-1.125h-8.25c-.621 0-1.125.504-1.125 1.125v3.659M18.25 7.034V3.375"
+            />
+          </svg>
           Imprimer les listes
         </button>
       </div>
@@ -120,7 +115,7 @@ watch(selectedVenteId, (id) => { if (id) loadData(id) }, { immediate: true })
 
     <!-- État vide -->
     <div
-      v-else-if="orders.length === 0"
+      v-else-if="!orders || orders.length === 0"
       class="rounded-xl border border-gray-200 bg-white p-12 text-center"
       data-testid="preparation-empty"
     >
@@ -145,7 +140,7 @@ watch(selectedVenteId, (id) => { if (id) loadData(id) }, { immediate: true })
             :key="order.orderId"
             :class="[
               'mb-4 rounded-lg border border-gray-200 bg-white p-4 print:rounded-none print:border-gray-300 print:mb-0 print:break-inside-avoid',
-              order.orderId !== lastOrderId ? 'print:break-after-page' : ''
+              order.orderId !== lastOrderId ? 'print:break-after-page' : '',
             ]"
             data-testid="preparation-card"
           >

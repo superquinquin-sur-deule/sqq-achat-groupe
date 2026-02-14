@@ -35,11 +35,7 @@ defineProps<StepperProps>()
           {{ step.label }}
         </span>
       </div>
-      <div
-        v-if="index < steps.length - 1"
-        class="h-px w-6 bg-gray-300"
-        aria-hidden="true"
-      />
+      <div v-if="index < steps.length - 1" class="h-px w-6 bg-gray-300" aria-hidden="true" />
     </template>
   </nav>
 </template>

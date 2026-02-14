@@ -26,10 +26,14 @@ withDefaults(defineProps<ButtonProps>(), {
         'min-h-[44px] px-4 py-2': size === 'md',
         'min-h-[44px] w-full px-6 py-3': size === 'lg',
         'min-h-[44px] min-w-[44px] px-0 py-2': size === 'icon',
-        'bg-primary text-dark hover:bg-primary/90 active:bg-primary/80': variant === 'primary' && !disabled,
-        'border-2 border-dark bg-white text-dark hover:bg-surface active:bg-surface/80': variant === 'secondary' && !disabled,
-        'bg-red-600 text-white hover:bg-red-700 active:bg-red-800': variant === 'danger' && !disabled,
-        'bg-transparent text-dark hover:bg-surface active:bg-surface/80': variant === 'ghost' && !disabled,
+        'bg-primary text-dark hover:bg-primary/90 active:bg-primary/80':
+          variant === 'primary' && !disabled,
+        'border-2 border-dark bg-white text-dark hover:bg-surface active:bg-surface/80':
+          variant === 'secondary' && !disabled,
+        'bg-red-600 text-white hover:bg-red-700 active:bg-red-800':
+          variant === 'danger' && !disabled,
+        'bg-transparent text-dark hover:bg-surface active:bg-surface/80':
+          variant === 'ghost' && !disabled,
         'cursor-not-allowed opacity-50': disabled || loading,
       },
     ]"
@@ -43,7 +47,11 @@ withDefaults(defineProps<ButtonProps>(), {
       aria-hidden="true"
     >
       <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
-      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+      <path
+        class="opacity-75"
+        fill="currentColor"
+        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+      />
     </svg>
     <slot />
   </button>
