@@ -42,7 +42,7 @@ async function retryPayment() {
   } catch {
     isRetrying.value = false
     // If max attempts exceeded, reload status
-    const orderId = Number(route.query.orderId)
+    const orderId = route.query.orderId as string
     const statusResponse = await getApiOrdersIdPaymentStatus(orderId)
     paymentStatus.value = statusResponse.data.data ?? null
     isCancelled.value = !paymentStatus.value?.canRetry
@@ -50,7 +50,7 @@ async function retryPayment() {
 }
 
 onMounted(async () => {
-  const orderId = Number(route.query.orderId)
+  const orderId = route.query.orderId as string | undefined
   if (!orderId) {
     router.replace('/')
     return

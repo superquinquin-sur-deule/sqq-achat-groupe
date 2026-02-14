@@ -5,9 +5,10 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.UUID;
 
 public record OrderDetailResponse(
-        Long id,
+        UUID id,
         String orderNumber,
         String status,
         BigDecimal totalAmount,

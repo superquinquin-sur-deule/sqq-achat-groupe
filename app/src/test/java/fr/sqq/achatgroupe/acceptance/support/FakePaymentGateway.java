@@ -8,6 +8,7 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Alternative;
 
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -18,9 +19,9 @@ import java.util.concurrent.atomic.AtomicLong;
 public class FakePaymentGateway implements PaymentGateway {
 
     private static final AtomicLong SESSION_COUNTER = new AtomicLong(0);
-    private static final Map<String, Long> SESSION_TO_ORDER = new ConcurrentHashMap<>();
+    private static final Map<String, UUID> SESSION_TO_ORDER = new ConcurrentHashMap<>();
     private static String lastSessionId;
-    private static Long lastOrderId;
+    private static UUID lastOrderId;
     private static String lastCancelUrl;
     private static PaymentWebhookStatus nextWebhookStatus = PaymentWebhookStatus.SUCCEEDED;
 
@@ -38,7 +39,7 @@ public class FakePaymentGateway implements PaymentGateway {
 
     @Override
     public PaymentWebhookResult parseWebhookEvent(String payload, String signature) {
-        Long orderId = Long.parseLong(payload);
+        UUID orderId = UUID.fromString(payload);
         String paymentIntentId = "pi_test_fake_" + orderId;
 
         PaymentWebhookStatus status = nextWebhookStatus;
@@ -49,7 +50,7 @@ public class FakePaymentGateway implements PaymentGateway {
         return lastSessionId;
     }
 
-    public static Long getLastOrderId() {
+    public static UUID getLastOrderId() {
         return lastOrderId;
     }
 

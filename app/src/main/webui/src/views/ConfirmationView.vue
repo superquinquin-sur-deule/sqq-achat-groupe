@@ -27,7 +27,7 @@ function formatDate(dateStr: string): string {
 }
 
 onMounted(async () => {
-  const orderId = Number(route.query.orderId)
+  const orderId = route.query.orderId as string | undefined
   if (!orderId) {
     router.replace('/')
     return

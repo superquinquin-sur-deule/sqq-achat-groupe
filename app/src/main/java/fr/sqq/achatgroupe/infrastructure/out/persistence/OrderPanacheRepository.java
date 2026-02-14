@@ -14,9 +14,10 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @ApplicationScoped
-public class OrderPanacheRepository implements OrderRepository, PanacheRepositoryBase<OrderEntity, Long> {
+public class OrderPanacheRepository implements OrderRepository, PanacheRepositoryBase<OrderEntity, UUID> {
 
     @Inject
     OrderPersistenceMapper mapper;
@@ -29,7 +30,7 @@ public class OrderPanacheRepository implements OrderRepository, PanacheRepositor
     }
 
     @Override
-    public Optional<Order> findOrderById(Long id) {
+    public Optional<Order> findOrderById(UUID id) {
         return find("id", id).firstResultOptional()
                 .map(mapper::toDomain);
     }

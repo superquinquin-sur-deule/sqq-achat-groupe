@@ -5,10 +5,11 @@ import fr.sqq.achatgroupe.domain.exception.OrderAlreadyPaidException;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
+import java.util.UUID;
 
 public class Order {
 
-    private final Long id;
+    private final UUID id;
     private final Long venteId;
     private final OrderNumber orderNumber;
     private final CustomerInfo customer;
@@ -18,7 +19,7 @@ public class Order {
     private final BigDecimal totalAmount;
     private final Instant createdAt;
 
-    public Order(Long id, Long venteId, OrderNumber orderNumber, CustomerInfo customer, Long timeSlotId,
+    public Order(UUID id, Long venteId, OrderNumber orderNumber, CustomerInfo customer, Long timeSlotId,
                  List<OrderItem> items, OrderStatus status, BigDecimal totalAmount, Instant createdAt) {
         if (orderNumber == null) throw new IllegalArgumentException("Order number must not be null");
         if (customer == null) throw new IllegalArgumentException("Customer must not be null");
@@ -45,7 +46,7 @@ public class Order {
         BigDecimal total = items.stream()
                 .map(OrderItem::subtotal)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
-        return new Order(null, venteId, number, customer, timeSlotId, items, OrderStatus.PENDING, total, Instant.now());
+        return new Order(UUID.randomUUID(), venteId, number, customer, timeSlotId, items, OrderStatus.PENDING, total, Instant.now());
     }
 
     public void markAsPaid() {
@@ -69,7 +70,7 @@ public class Order {
         this.status = OrderStatus.CANCELLED;
     }
 
-    public Long id() { return id; }
+    public UUID id() { return id; }
     public Long venteId() { return venteId; }
     public OrderNumber orderNumber() { return orderNumber; }
     public CustomerInfo customer() { return customer; }

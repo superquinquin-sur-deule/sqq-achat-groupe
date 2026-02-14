@@ -2,5 +2,7 @@ package fr.sqq.achatgroupe.application.command;
 
 import fr.sqq.mediator.Command;
 
-public record MarkOrderPickedUpCommand(Long orderId) implements Command<Void> {
+import java.util.UUID;
+
+public record MarkOrderPickedUpCommand(UUID orderId) implements Command<Void> {
 }

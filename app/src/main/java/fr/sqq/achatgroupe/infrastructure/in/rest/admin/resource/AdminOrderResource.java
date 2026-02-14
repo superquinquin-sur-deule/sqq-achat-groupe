@@ -22,6 +22,7 @@ import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -55,7 +56,7 @@ public class AdminOrderResource {
     @Path("/{id}/pickup")
     @APIResponse(responseCode = "204", description = "No content")
     @APIResponse(responseCode = "409", description = "Conflict")
-    public Response markAsPickedUp(@PathParam("id") Long id) {
+    public Response markAsPickedUp(@PathParam("id") UUID id) {
         try {
             mediator.send(new MarkOrderPickedUpCommand(id));
         } catch (IllegalStateException e) {
@@ -69,7 +70,7 @@ public class AdminOrderResource {
 
     @GET
     @Path("/{id}")
-    public DataResponse<AdminOrderDetailResponse> getOrderDetail(@PathParam("id") Long id) {
+    public DataResponse<AdminOrderDetailResponse> getOrderDetail(@PathParam("id") UUID id) {
         Order order = mediator.send(new GetOrderDetailsQuery(id));
         List<TimeSlot> timeSlots = mediator.send(new ListAllTimeSlotsQuery(order.venteId()));
         Map<Long, TimeSlot> timeSlotsById = timeSlots.stream()

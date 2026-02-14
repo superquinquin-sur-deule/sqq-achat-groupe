@@ -25,7 +25,7 @@ public class PaymentSteps {
     TestContext testContext;
 
     private Response apiResponse;
-    private Long createdOrderId;
+    private String createdOrderId;
 
     @Before("@payment")
     public void setUp() {
@@ -89,7 +89,7 @@ public class PaymentSteps {
                 .setTimeout(5000));
     }
 
-    private Long createOrderViaApi() {
+    private String createOrderViaApi() {
         Long productId = testContext.productIds().get(0);
         Long timeSlotId = testContext.timeSlotIds().get(0);
         String body = """
@@ -111,13 +111,13 @@ public class PaymentSteps {
                 .statusCode(201)
                 .extract()
                 .jsonPath()
-                .getLong("data.id");
+                .getString("data.id");
     }
 
-    private void initiatePaymentViaApi(Long orderId) {
+    private void initiatePaymentViaApi(String orderId) {
         String body = """
                 {
-                    "successUrl": "http://localhost:8081/confirmation?orderId=%d&session_id={CHECKOUT_SESSION_ID}",
+                    "successUrl": "http://localhost:8081/confirmation?orderId=%s&session_id={CHECKOUT_SESSION_ID}",
                     "cancelUrl": "http://localhost:8081/checkout"
                 }
                 """.formatted(orderId);
@@ -131,11 +131,12 @@ public class PaymentSteps {
                 .statusCode(200);
     }
 
-    private void sendSuccessWebhook(Long orderId) {
+    private void sendSuccessWebhook() {
+        java.util.UUID internalOrderId = FakePaymentGateway.getLastOrderId();
         apiResponse = RestAssured.given()
                 .contentType(ContentType.JSON)
-                .header("Stripe-Signature", "fake_sig_" + orderId)
-                .body(String.valueOf(orderId))
+                .header("Stripe-Signature", "fake_sig_" + internalOrderId)
+                .body(internalOrderId.toString())
                 .when()
                 .post("/api/webhooks/stripe");
     }
@@ -184,7 +185,7 @@ public class PaymentSteps {
     public void uneCommandeDejaPayee() {
         createdOrderId = createOrderViaApi();
         initiatePaymentViaApi(createdOrderId);
-        sendSuccessWebhook(createdOrderId);
+        sendSuccessWebhook();
         apiResponse.then().statusCode(200);
     }
 
@@ -192,10 +193,10 @@ public class PaymentSteps {
     public void jAiPayeMaCommandeAvecSucces() {
         PlaywrightHooks.page().locator("button:has-text('Payer ma commande')").click();
         PlaywrightHooks.page().waitForTimeout(3000);
-        createdOrderId = FakePaymentGateway.getLastOrderId();
-        if (createdOrderId != null) {
-            sendSuccessWebhook(createdOrderId);
+        if (FakePaymentGateway.getLastOrderId() != null) {
+            sendSuccessWebhook();
         }
+        createdOrderId = FakePaymentGateway.getLastOrderId().toString();
     }
 
     // --- Actions ---
@@ -208,12 +209,12 @@ public class PaymentSteps {
 
     @Quand("le webhook Stripe notifie un paiement réussi")
     public void leWebhookStripeNotifieUnPaiementReussi() {
-        sendSuccessWebhook(createdOrderId);
+        sendSuccessWebhook();
     }
 
     @Quand("le webhook Stripe notifie le même paiement une deuxième fois")
     public void leWebhookNotifieLeMeme() {
-        sendSuccessWebhook(createdOrderId);
+        sendSuccessWebhook();
     }
 
     @Quand("je suis sur la page de confirmation")

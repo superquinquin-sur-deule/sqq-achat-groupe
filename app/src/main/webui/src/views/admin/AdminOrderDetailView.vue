@@ -13,7 +13,7 @@ const order = ref<AdminOrderDetailResponse | null>(null)
 const loading = ref(false)
 
 async function loadOrder() {
-  const orderId = Number(route.params.id)
+  const orderId = route.params.id as string
   loading.value = true
   try {
     const response = await getApiAdminOrdersId(orderId)

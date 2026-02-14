@@ -32,6 +32,7 @@ import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 
 import java.net.URI;
+import java.util.UUID;
 
 @Path("/api/orders")
 @Produces(MediaType.APPLICATION_JSON)
@@ -65,7 +66,7 @@ public class OrderResource {
 
     @GET
     @Path("/{id}")
-    public DataResponse<OrderDetailResponse> getOrder(@PathParam("id") Long id) {
+    public DataResponse<OrderDetailResponse> getOrder(@PathParam("id") UUID id) {
         Order order = orderRepository.findOrderById(id)
                 .orElseThrow(() -> new OrderNotFoundException(id));
 
@@ -103,7 +104,7 @@ public class OrderResource {
 
     @GET
     @Path("/{id}/payment-status")
-    public DataResponse<PaymentStatusResponse> getPaymentStatus(@PathParam("id") Long id) {
+    public DataResponse<PaymentStatusResponse> getPaymentStatus(@PathParam("id") UUID id) {
         Order order = orderRepository.findOrderById(id)
                 .orElseThrow(() -> new OrderNotFoundException(id));
 
@@ -121,10 +122,12 @@ public class OrderResource {
 
     @POST
     @Path("/{id}/payment")
-    public DataResponse<InitiatePaymentResponse> initiatePayment(@PathParam("id") Long id, @Valid InitiatePaymentRequest request) {
+    public DataResponse<InitiatePaymentResponse> initiatePayment(@PathParam("id") UUID id, @Valid InitiatePaymentRequest request) {
         validateUrlOrigin(request.successUrl());
         validateUrlOrigin(request.cancelUrl());
 
+        orderRepository.findOrderById(id)
+                .orElseThrow(() -> new OrderNotFoundException(id));
         var command = new InitiatePaymentCommand(id, request.successUrl(), request.cancelUrl());
         PaymentSession session = mediator.send(command);
         var response = new InitiatePaymentResponse(session.checkoutUrl());

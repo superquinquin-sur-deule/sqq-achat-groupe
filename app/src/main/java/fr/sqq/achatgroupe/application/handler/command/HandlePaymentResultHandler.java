@@ -55,7 +55,7 @@ public class HandlePaymentResultHandler implements CommandHandler<HandlePaymentR
                         "Paiement introuvable pour la commande " + order.id()));
 
         if (payment.isAlreadySucceeded()) {
-            Log.infof("Webhook ignoré : paiement déjà réussi pour la commande %d (stripe_payment_id=%s)",
+            Log.infof("Webhook ignoré : paiement déjà réussi pour la commande %s (stripe_payment_id=%s)",
                     order.id(), result.externalPaymentId());
             return null;
         }
@@ -65,17 +65,17 @@ public class HandlePaymentResultHandler implements CommandHandler<HandlePaymentR
             order.markAsPaid();
             orderRepository.save(order);
             paymentRepository.save(payment);
-            Log.infof("Paiement réussi pour la commande %d (stripe_payment_id=%s)",
+            Log.infof("Paiement réussi pour la commande %s (stripe_payment_id=%s)",
                     order.id(), result.externalPaymentId());
         } else if (result.status() == PaymentWebhookStatus.FAILED) {
             payment.markAsFailed();
             paymentRepository.save(payment);
-            Log.warnf("Paiement échoué pour la commande %d (tentatives: %d/%d)",
+            Log.warnf("Paiement échoué pour la commande %s (tentatives: %d/%d)",
                     order.id(), payment.attempts(), maxPaymentAttempts);
 
             if (payment.attempts() >= maxPaymentAttempts) {
                 mediator.send(new CancelOrderCommand(order.id()));
-                Log.infof("Commande %d annulée après %d tentatives de paiement échouées",
+                Log.infof("Commande %s annulée après %d tentatives de paiement échouées",
                         order.id(), maxPaymentAttempts);
             }
         }

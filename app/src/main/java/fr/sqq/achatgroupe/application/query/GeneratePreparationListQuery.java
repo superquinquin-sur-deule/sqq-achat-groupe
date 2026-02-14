@@ -3,10 +3,11 @@ package fr.sqq.achatgroupe.application.query;
 import fr.sqq.mediator.Query;
 
 import java.util.List;
+import java.util.UUID;
 
 public record GeneratePreparationListQuery(Long venteId) implements Query<List<GeneratePreparationListQuery.PreparationOrder>> {
 
-    public record PreparationOrder(Long orderId, String orderNumber, String customerName, String customerEmail,
+    public record PreparationOrder(UUID orderId, String orderNumber, String customerName, String customerEmail,
                                    String customerPhone, String timeSlotLabel, List<PreparationItem> items) {
     }
 

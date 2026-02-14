@@ -10,6 +10,7 @@ import jakarta.inject.Inject;
 import jakarta.persistence.LockModeType;
 
 import java.util.Optional;
+import java.util.UUID;
 
 @ApplicationScoped
 public class PaymentPanacheRepository implements PaymentRepository, PanacheRepositoryBase<PaymentEntity, Long> {
@@ -25,13 +26,13 @@ public class PaymentPanacheRepository implements PaymentRepository, PanacheRepos
     }
 
     @Override
-    public Optional<Payment> findByOrderId(Long orderId) {
+    public Optional<Payment> findByOrderId(UUID orderId) {
         return find("orderId", orderId).firstResultOptional()
                 .map(mapper::toDomain);
     }
 
     @Override
-    public Optional<Payment> findByOrderIdForUpdate(Long orderId) {
+    public Optional<Payment> findByOrderIdForUpdate(UUID orderId) {
         return find("orderId", orderId).withLock(LockModeType.PESSIMISTIC_WRITE).firstResultOptional()
                 .map(mapper::toDomain);
     }

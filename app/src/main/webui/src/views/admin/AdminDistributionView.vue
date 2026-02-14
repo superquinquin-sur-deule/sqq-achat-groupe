@@ -16,7 +16,7 @@ const loading = ref(false)
 const searchQuery = ref('')
 const selectedSlot = ref('')
 const showUnpickedOnly = ref(false)
-const pickingUp = ref(new Set<number>())
+const pickingUp = ref(new Set<string>())
 
 const uniqueSlots = computed(() => {
   const slots = new Set<string>()
@@ -66,7 +66,7 @@ function selectUnpicked() {
   showUnpickedOnly.value = true
 }
 
-async function handlePickup(orderId: number) {
+async function handlePickup(orderId: string) {
   if (pickingUp.value.has(orderId)) return
   const order = orders.value.find((o) => o.id === orderId)
   if (!order) return

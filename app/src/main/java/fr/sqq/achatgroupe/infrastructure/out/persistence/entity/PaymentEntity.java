@@ -10,6 +10,7 @@ import jakarta.persistence.Version;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.UUID;
 
 @Entity
 @Table(name = "payments")
@@ -21,7 +22,7 @@ public class PaymentEntity {
     private Long id;
 
     @Column(name = "order_id", nullable = false, unique = true)
-    private Long orderId;
+    private UUID orderId;
 
     @Column(name = "stripe_payment_id", unique = true)
     private String stripePaymentId;
@@ -48,8 +49,8 @@ public class PaymentEntity {
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
-    public Long getOrderId() { return orderId; }
-    public void setOrderId(Long orderId) { this.orderId = orderId; }
+    public UUID getOrderId() { return orderId; }
+    public void setOrderId(UUID orderId) { this.orderId = orderId; }
 
     public String getStripePaymentId() { return stripePaymentId; }
     public void setStripePaymentId(String stripePaymentId) { this.stripePaymentId = stripePaymentId; }

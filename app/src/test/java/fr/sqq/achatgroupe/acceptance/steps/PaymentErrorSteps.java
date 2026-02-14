@@ -23,7 +23,7 @@ public class PaymentErrorSteps {
     @Inject
     TestContext testContext;
 
-    private Long orderId;
+    private String orderId;
     private Response paymentStatusResponse;
     private int initialStock;
 
@@ -34,7 +34,7 @@ public class PaymentErrorSteps {
 
     // --- Helpers ---
 
-    private Long createOrderViaApi() {
+    private String createOrderViaApi() {
         Long productId = testContext.productIds().get(0);
         Long timeSlotId = testContext.timeSlotIds().get(0);
         String body = """
@@ -56,14 +56,14 @@ public class PaymentErrorSteps {
                 .statusCode(201)
                 .extract()
                 .jsonPath()
-                .getLong("data.id");
+                .getString("data.id");
     }
 
-    private void initiatePaymentViaApi(Long orderId) {
+    private void initiatePaymentViaApi(String orderId) {
         String body = """
                 {
-                    "successUrl": "http://localhost:8081/confirmation?orderId=%d&session_id={CHECKOUT_SESSION_ID}",
-                    "cancelUrl": "http://localhost:8081/payment-error?orderId=%d"
+                    "successUrl": "http://localhost:8081/confirmation?orderId=%s&session_id={CHECKOUT_SESSION_ID}",
+                    "cancelUrl": "http://localhost:8081/payment-error?orderId=%s"
                 }
                 """.formatted(orderId, orderId);
 
@@ -76,12 +76,13 @@ public class PaymentErrorSteps {
                 .statusCode(200);
     }
 
-    private void sendFailureWebhook(Long orderId) {
+    private void sendFailureWebhook() {
+        java.util.UUID internalOrderId = FakePaymentGateway.getLastOrderId();
         FakePaymentGateway.setNextWebhookStatus(PaymentWebhookStatus.FAILED);
         RestAssured.given()
                 .contentType(ContentType.JSON)
-                .header("Stripe-Signature", "fake_sig_" + orderId)
-                .body(String.valueOf(orderId))
+                .header("Stripe-Signature", "fake_sig_" + internalOrderId)
+                .body(internalOrderId.toString())
                 .when()
                 .post("/api/webhooks/stripe")
                 .then()
@@ -107,7 +108,7 @@ public class PaymentErrorSteps {
         captureStockAndSlot();
         orderId = createOrderViaApi();
         initiatePaymentViaApi(orderId);
-        sendFailureWebhook(orderId);
+        sendFailureWebhook();
     }
 
     @Étantdonnéque("une commande avec deux paiements échoués existe")
@@ -117,11 +118,11 @@ public class PaymentErrorSteps {
 
         // First attempt
         initiatePaymentViaApi(orderId);
-        sendFailureWebhook(orderId);
+        sendFailureWebhook();
 
         // Second attempt
         initiatePaymentViaApi(orderId);
-        sendFailureWebhook(orderId);
+        sendFailureWebhook();
     }
 
     @Quand("je consulte le statut de paiement de la commande")
@@ -135,8 +136,8 @@ public class PaymentErrorSteps {
     public void jeRetenteLePaiement() {
         String body = """
                 {
-                    "successUrl": "http://localhost:8081/confirmation?orderId=%d&session_id={CHECKOUT_SESSION_ID}",
-                    "cancelUrl": "http://localhost:8081/payment-error?orderId=%d"
+                    "successUrl": "http://localhost:8081/confirmation?orderId=%s&session_id={CHECKOUT_SESSION_ID}",
+                    "cancelUrl": "http://localhost:8081/payment-error?orderId=%s"
                 }
                 """.formatted(orderId, orderId);
 

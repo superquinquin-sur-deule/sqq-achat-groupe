@@ -41,7 +41,7 @@ public class CancelOrderHandler implements CommandHandler<CancelOrderCommand, Vo
                 .orElseThrow(() -> new OrderNotFoundException(command.orderId()));
 
         if (order.status() == OrderStatus.CANCELLED || order.status() == OrderStatus.PAID) {
-            LOG.infof("Annulation ignorée : commande %d déjà en statut %s", command.orderId(), order.status());
+            LOG.infof("Annulation ignorée : commande %s déjà en statut %s", command.orderId(), order.status());
             return null;
         }
 
@@ -60,7 +60,7 @@ public class CancelOrderHandler implements CommandHandler<CancelOrderCommand, Vo
         order.cancel();
         orderRepository.save(order);
 
-        LOG.infof("Commande %d annulée — stocks restaurés, créneau libéré", command.orderId());
+        LOG.infof("Commande %s annulée — stocks restaurés, créneau libéré", command.orderId());
         return null;
     }
 }

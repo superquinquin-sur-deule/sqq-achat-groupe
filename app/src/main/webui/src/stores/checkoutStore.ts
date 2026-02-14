@@ -76,7 +76,7 @@ export const useCheckoutStore = defineStore('checkout', () => {
       const successUrl = `${baseUrl}/confirmation?orderId=${order.id}&session_id={CHECKOUT_SESSION_ID}`
       const cancelUrl = `${baseUrl}/payment-error?orderId=${order.id}`
 
-      const paymentResponse = await postApiOrdersIdPayment(order.id, { successUrl, cancelUrl })
+      const paymentResponse = await postApiOrdersIdPayment(String(order.id), { successUrl, cancelUrl })
 
       window.location.href = (paymentResponse.data as { data: { checkoutUrl: string } }).data.checkoutUrl
     } catch (e: unknown) {

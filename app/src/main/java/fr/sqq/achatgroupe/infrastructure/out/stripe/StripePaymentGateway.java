@@ -16,6 +16,8 @@ import jakarta.enterprise.context.ApplicationScoped;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.logging.Logger;
 
+import java.util.UUID;
+
 @ApplicationScoped
 public class StripePaymentGateway implements PaymentGateway {
 
@@ -53,16 +55,16 @@ public class StripePaymentGateway implements PaymentGateway {
                                                 .build())
                                 .setQuantity(1L)
                                 .build())
-                .putMetadata("order_id", String.valueOf(order.id()))
+                .putMetadata("order_id", order.id().toString())
                 .setCustomerEmail(order.customer().email())
                 .build();
 
         try {
             Session session = Session.create(params);
-            LOG.infof("Stripe Checkout Session créée pour commande %d : %s", order.id(), session.getId());
+            LOG.infof("Stripe Checkout Session créée pour commande %s : %s", order.id(), session.getId());
             return new PaymentSessionResult(session.getUrl(), session.getId());
         } catch (StripeException e) {
-            LOG.errorf(e, "Erreur Stripe lors de la création de la session pour commande %d", order.id());
+            LOG.errorf(e, "Erreur Stripe lors de la création de la session pour commande %s", order.id());
             throw new PaymentSessionCreationException(order.id());
         }
     }
@@ -79,7 +81,7 @@ public class StripePaymentGateway implements PaymentGateway {
         String eventType = event.getType();
 
         if (!"checkout.session.completed".equals(eventType) && !"checkout.session.expired".equals(eventType)) {
-            return new PaymentWebhookResult(0L, null, PaymentWebhookStatus.IGNORED);
+            return new PaymentWebhookResult(null, null, PaymentWebhookStatus.IGNORED);
         }
 
         Session session = (Session) event.getDataObjectDeserializer()
@@ -104,8 +106,8 @@ public class StripePaymentGateway implements PaymentGateway {
                 eventType, orderId, stripePaymentId, session.getPaymentStatus());
 
         try {
-            return new PaymentWebhookResult(Long.parseLong(orderId), stripePaymentId, status);
-        } catch (NumberFormatException e) {
+            return new PaymentWebhookResult(UUID.fromString(orderId), stripePaymentId, status);
+        } catch (IllegalArgumentException e) {
             throw new PaymentWebhookException("Metadata order_id invalide : " + orderId);
         }
     }
