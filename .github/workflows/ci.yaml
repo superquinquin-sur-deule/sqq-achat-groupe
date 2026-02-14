@@ -48,7 +48,7 @@ jobs:
         id: meta
         shell: bash
         run: |
-          IMAGE_BASE="ghcr.io/${{ github.repository_owner }}/sqq-inscription"
+          IMAGE_BASE="ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}"
           if [[ "${GITHUB_EVENT_NAME}" == "push" && "${GITHUB_REF_TYPE}" == "branch" && "${GITHUB_REF_NAME}" == "main" ]]; then
             VERSION=$(mvn -q -DforceStdout help:evaluate -Dexpression=project.version)
             SHA=$(git rev-parse --short HEAD)

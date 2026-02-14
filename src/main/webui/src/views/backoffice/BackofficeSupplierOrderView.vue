@@ -35,9 +35,21 @@ function handlePrint() {
   window.print()
 }
 
-function handleExportXls() {
+async function handleExportXls() {
   if (!selectedVenteId.value) return
-  window.open(`/api/backoffice/supplier-orders/xlsx?venteId=${selectedVenteId.value}`, '_blank')
+  const response = await fetch(`/api/backoffice/supplier-orders/xlsx?venteId=${selectedVenteId.value}`)
+  const blob = await response.blob()
+  const disposition = response.headers.get('Content-Disposition')
+  const match = disposition?.match(/filename="?(.+?)"?$/)
+  const filename = match?.[1] ?? `bon-fournisseur-${new Date().toISOString().slice(0, 10)}.xlsx`
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  link.href = url
+  link.download = filename
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
+  URL.revokeObjectURL(url)
 }
 
 async function loadData(venteId: number) {

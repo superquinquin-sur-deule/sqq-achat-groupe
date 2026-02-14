@@ -45,3 +45,6 @@ nb-configuration.xml
 .certs/
 
 .quinoa
+.claude
+.bmad
+.bmad-output

@@ -67,7 +67,7 @@ public class BackofficeOrderResource {
                     .entity(new ProblemDetailResponse("about:blank", "Transition invalide", 409, e.getMessage()))
                     .build();
         }
-        return Response.ok().build();
+        return Response.noContent().build();
     }
 
     @GET

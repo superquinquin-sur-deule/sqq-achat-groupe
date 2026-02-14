@@ -124,26 +124,26 @@ public class BackofficeSupplierOrderSteps {
         assertTrue(btn.textContent().contains("Imprimer"), "Le bouton doit contenir 'Imprimer'");
     }
 
-    @Et("je vois le bouton exporter CSV du bon fournisseur")
-    public void jeVoisLeBoutonExporterCsvDuBonFournisseur() {
+    @Et("je vois le bouton exporter Excel du bon fournisseur")
+    public void jeVoisLeBoutonExporterExcelDuBonFournisseur() {
         Locator btn = page().locator("[data-testid='supplier-order-export-btn']");
-        assertTrue(btn.isVisible(), "Le bouton Exporter CSV doit être visible");
-        assertTrue(btn.textContent().contains("Exporter CSV"), "Le bouton doit contenir 'Exporter CSV'");
+        assertTrue(btn.isVisible(), "Le bouton Exporter Excel doit être visible");
+        assertTrue(btn.textContent().contains("Exporter Excel"), "Le bouton doit contenir 'Exporter Excel'");
     }
 
-    @Et("je clique sur exporter CSV du bon fournisseur")
-    public void jeCliqueSurExporterCsvDuBonFournisseur() {
+    @Et("je clique sur exporter Excel du bon fournisseur")
+    public void jeCliqueSurExporterExcelDuBonFournisseur() {
         lastDownload = page().waitForDownload(() -> {
             page().locator("[data-testid='supplier-order-export-btn']").click();
         });
     }
 
-    @Alors("un fichier CSV bon fournisseur est téléchargé")
-    public void unFichierCsvBonFournisseurEstTelecharge() {
+    @Alors("un fichier Excel bon fournisseur est téléchargé")
+    public void unFichierExcelBonFournisseurEstTelecharge() {
         assertNotNull(lastDownload, "Un téléchargement doit avoir été déclenché");
         String filename = lastDownload.suggestedFilename();
         assertTrue(filename.startsWith("bon-fournisseur-"), "Le fichier doit commencer par 'bon-fournisseur-'");
-        assertTrue(filename.endsWith(".csv"), "Le fichier doit se terminer par '.csv'");
+        assertTrue(filename.endsWith(".xlsx"), "Le fichier doit se terminer par '.xlsx'");
     }
 
     @Étantdonnéque("une vente sans commande pour le bon fournisseur")
