@@ -8,7 +8,9 @@
 
     <modules>
         <module>mediator</module>
-        <module>app</module>
+        <module>domain</module>
+        <module>application</module>
+        <module>infrastructure</module>
     </modules>
 
     <properties>
@@ -36,6 +38,21 @@
             <dependency>
                 <groupId>fr.sqq</groupId>
                 <artifactId>mediator</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>fr.sqq</groupId>
+                <artifactId>domain</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>fr.sqq</groupId>
+                <artifactId>application</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>fr.sqq</groupId>
+                <artifactId>infrastructure</artifactId>
                 <version>${project.version}</version>
             </dependency>
         </dependencies>
