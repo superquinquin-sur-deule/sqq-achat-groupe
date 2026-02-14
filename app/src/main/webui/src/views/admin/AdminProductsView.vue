@@ -7,6 +7,7 @@ import { getApiAdminProducts, postApiAdminProducts, putApiAdminProductsId, delet
 import { useVenteStore } from '@/stores/venteStore'
 import { storeToRefs } from 'pinia'
 import { useToast } from '@/composables/useToast'
+import AdminTable from '@/components/admin/AdminTable.vue'
 import type { AdminProductResponse, CreateProductRequest, UpdateProductRequest } from '@/api/generated/model'
 
 const toast = useToast()
@@ -195,84 +196,74 @@ function formatPrice(price: number): string {
       </Button>
     </div>
 
-    <div v-else-if="products.length > 0" class="overflow-x-auto rounded-xl border border-gray-200 bg-white">
-      <table class="w-full" data-testid="product-table">
-        <caption class="sr-only">Liste des produits</caption>
-        <thead>
-          <tr class="bg-dark text-left text-sm text-white">
-            <th class="px-4 py-3 font-medium">Nom</th>
-            <th class="px-4 py-3 font-medium">Prix</th>
-            <th class="px-4 py-3 font-medium">Fournisseur</th>
-            <th class="px-4 py-3 font-medium">Stock</th>
-            <th class="px-4 py-3 font-medium">Statut</th>
-            <th class="px-4 py-3 font-medium">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr
-            v-for="product in products"
-            :key="product.id"
-            class="border-t border-gray-100 transition-colors hover:bg-surface"
-            data-testid="product-row"
+    <AdminTable
+      v-else-if="products.length > 0"
+      :columns="['Nom', 'Prix', 'Fournisseur', 'Stock', 'Statut', 'Actions']"
+      caption="Liste des produits"
+      dataTestid="product-table"
+    >
+      <tr
+        v-for="product in products"
+        :key="product.id"
+        class="border-t border-gray-100 transition-colors hover:bg-surface"
+        data-testid="product-row"
+      >
+        <td class="px-4 py-3 font-medium text-dark">{{ product.name }}</td>
+        <td class="px-4 py-3 text-dark">{{ formatPrice(product.price) }}</td>
+        <td class="px-4 py-3 text-dark">{{ product.supplier }}</td>
+        <td class="px-4 py-3 text-dark">{{ product.stock }}</td>
+        <td class="px-4 py-3">
+          <span
+            :class="[
+              'inline-block rounded-full px-2 py-0.5 text-xs font-medium',
+              product.active
+                ? 'bg-green-100 text-green-700'
+                : 'bg-gray-100 text-gray-600',
+            ]"
           >
-            <td class="px-4 py-3 font-medium text-dark">{{ product.name }}</td>
-            <td class="px-4 py-3 text-dark">{{ formatPrice(product.price) }}</td>
-            <td class="px-4 py-3 text-dark">{{ product.supplier }}</td>
-            <td class="px-4 py-3 text-dark">{{ product.stock }}</td>
-            <td class="px-4 py-3">
-              <span
-                :class="[
-                  'inline-block rounded-full px-2 py-0.5 text-xs font-medium',
-                  product.active
-                    ? 'bg-green-100 text-green-700'
-                    : 'bg-gray-100 text-gray-600',
-                ]"
+            {{ product.active ? 'Actif' : 'Inactif' }}
+          </span>
+        </td>
+        <td class="px-4 py-3">
+          <div class="flex gap-2">
+            <template v-if="confirmingDeleteId === product.id">
+              <Button
+                variant="danger"
+                size="md"
+                :aria-label="'Confirmer la suppression de ' + product.name"
+                @click="confirmDelete(product.id)"
               >
-                {{ product.active ? 'Actif' : 'Inactif' }}
-              </span>
-            </td>
-            <td class="px-4 py-3">
-              <div class="flex gap-2">
-                <template v-if="confirmingDeleteId === product.id">
-                  <Button
-                    variant="danger"
-                    size="md"
-                    :aria-label="'Confirmer la suppression de ' + product.name"
-                    @click="confirmDelete(product.id)"
-                  >
-                    Supprimer
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="md"
-                    @click="cancelDelete"
-                  >
-                    Annuler
-                  </Button>
-                </template>
-                <template v-else>
-                  <Button
-                    variant="secondary"
-                    size="md"
-                    :aria-label="'Modifier ' + product.name"
-                    @click="openEditForm(product)"
-                  >
-                    Modifier
-                  </Button>
-                  <Button
-                    variant="danger"
-                    size="md"
-                    :aria-label="'Supprimer ' + product.name"
-                    @click="startDelete(product.id)"
-                  >
-                    Supprimer
-                  </Button>
-                </template>
-              </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+                Supprimer
+              </Button>
+              <Button
+                variant="ghost"
+                size="md"
+                @click="cancelDelete"
+              >
+                Annuler
+              </Button>
+            </template>
+            <template v-else>
+              <Button
+                variant="secondary"
+                size="md"
+                :aria-label="'Modifier ' + product.name"
+                @click="openEditForm(product)"
+              >
+                Modifier
+              </Button>
+              <Button
+                variant="danger"
+                size="md"
+                :aria-label="'Supprimer ' + product.name"
+                @click="startDelete(product.id)"
+              >
+                Supprimer
+              </Button>
+            </template>
+          </div>
+        </td>
+      </tr>
+    </AdminTable>
   </div>
 </template>

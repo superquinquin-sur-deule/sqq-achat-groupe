@@ -12,6 +12,7 @@ import {
 import { useVenteStore } from '@/stores/venteStore'
 import { storeToRefs } from 'pinia'
 import { useToast } from '@/composables/useToast'
+import AdminTable from '@/components/admin/AdminTable.vue'
 import type { AdminVenteResponse } from '@/api/generated/model'
 
 const toast = useToast()
@@ -145,92 +146,83 @@ function formatDate(isoStr: string | null): string {
       </Button>
     </div>
 
-    <div v-else-if="ventes.length > 0" class="overflow-x-auto rounded-xl border border-gray-200 bg-white">
-      <table class="w-full" data-testid="vente-table">
-        <caption class="sr-only">Liste des ventes</caption>
-        <thead>
-          <tr class="bg-dark text-left text-sm text-white">
-            <th class="px-4 py-3 font-medium">Nom</th>
-            <th class="px-4 py-3 font-medium">Début</th>
-            <th class="px-4 py-3 font-medium">Fin</th>
-            <th class="px-4 py-3 font-medium">Statut</th>
-            <th class="px-4 py-3 font-medium">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr
-            v-for="vente in ventes"
-            :key="vente.id"
-            class="border-t border-gray-100 transition-colors hover:bg-surface"
-            data-testid="vente-row"
+    <AdminTable
+      v-else-if="ventes.length > 0"
+      :columns="['Nom', 'Début', 'Fin', 'Statut', 'Actions']"
+      caption="Liste des ventes"
+      dataTestid="vente-table"
+    >
+      <tr
+        v-for="vente in ventes"
+        :key="vente.id"
+        class="border-t border-gray-100 transition-colors hover:bg-surface"
+        data-testid="vente-row"
+      >
+        <td class="px-4 py-3 font-medium text-dark">{{ vente.name }}</td>
+        <td class="px-4 py-3 text-dark">{{ formatDate(vente.startDate) }}</td>
+        <td class="px-4 py-3 text-dark">{{ formatDate(vente.endDate) }}</td>
+        <td class="px-4 py-3">
+          <span
+            :class="[
+              'inline-block rounded-full px-2 py-0.5 text-xs font-medium',
+              vente.status === 'ACTIVE'
+                ? 'bg-green-100 text-green-700'
+                : 'bg-gray-100 text-gray-600',
+            ]"
+            data-testid="vente-status-badge"
           >
-            <td class="px-4 py-3 font-medium text-dark">{{ vente.name }}</td>
-            <td class="px-4 py-3 text-dark">{{ formatDate(vente.startDate) }}</td>
-            <td class="px-4 py-3 text-dark">{{ formatDate(vente.endDate) }}</td>
-            <td class="px-4 py-3">
-              <span
-                :class="[
-                  'inline-block rounded-full px-2 py-0.5 text-xs font-medium',
-                  vente.status === 'ACTIVE'
-                    ? 'bg-green-100 text-green-700'
-                    : 'bg-gray-100 text-gray-600',
-                ]"
-                data-testid="vente-status-badge"
+            {{ vente.status === 'ACTIVE' ? 'Active' : 'Fermée' }}
+          </span>
+        </td>
+        <td class="px-4 py-3">
+          <div class="flex gap-2">
+            <template v-if="confirmingDeleteId === vente.id">
+              <Button
+                variant="danger"
+                size="md"
+                :aria-label="'Confirmer la suppression de ' + vente.name"
+                @click="confirmDelete(vente.id)"
               >
-                {{ vente.status === 'ACTIVE' ? 'Active' : 'Fermée' }}
-              </span>
-            </td>
-            <td class="px-4 py-3">
-              <div class="flex gap-2">
-                <template v-if="confirmingDeleteId === vente.id">
-                  <Button
-                    variant="danger"
-                    size="md"
-                    :aria-label="'Confirmer la suppression de ' + vente.name"
-                    @click="confirmDelete(vente.id)"
-                  >
-                    Supprimer
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="md"
-                    @click="cancelDelete"
-                  >
-                    Annuler
-                  </Button>
-                </template>
-                <template v-else>
-                  <Button
-                    variant="secondary"
-                    size="md"
-                    :aria-label="'Modifier ' + vente.name"
-                    @click="openEditForm(vente)"
-                  >
-                    Modifier
-                  </Button>
-                  <Button
-                    :variant="vente.status === 'ACTIVE' ? 'ghost' : 'primary'"
-                    size="md"
-                    :aria-label="(vente.status === 'ACTIVE' ? 'Désactiver ' : 'Activer ') + vente.name"
-                    data-testid="vente-toggle-btn"
-                    @click="toggleStatus(vente)"
-                  >
-                    {{ vente.status === 'ACTIVE' ? 'Désactiver' : 'Activer' }}
-                  </Button>
-                  <Button
-                    variant="danger"
-                    size="md"
-                    :aria-label="'Supprimer ' + vente.name"
-                    @click="startDelete(vente.id)"
-                  >
-                    Supprimer
-                  </Button>
-                </template>
-              </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+                Supprimer
+              </Button>
+              <Button
+                variant="ghost"
+                size="md"
+                @click="cancelDelete"
+              >
+                Annuler
+              </Button>
+            </template>
+            <template v-else>
+              <Button
+                variant="secondary"
+                size="md"
+                :aria-label="'Modifier ' + vente.name"
+                @click="openEditForm(vente)"
+              >
+                Modifier
+              </Button>
+              <Button
+                :variant="vente.status === 'ACTIVE' ? 'ghost' : 'primary'"
+                size="md"
+                :aria-label="(vente.status === 'ACTIVE' ? 'Désactiver ' : 'Activer ') + vente.name"
+                data-testid="vente-toggle-btn"
+                @click="toggleStatus(vente)"
+              >
+                {{ vente.status === 'ACTIVE' ? 'Désactiver' : 'Activer' }}
+              </Button>
+              <Button
+                variant="danger"
+                size="md"
+                :aria-label="'Supprimer ' + vente.name"
+                @click="startDelete(vente.id)"
+              >
+                Supprimer
+              </Button>
+            </template>
+          </div>
+        </td>
+      </tr>
+    </AdminTable>
   </div>
 </template>

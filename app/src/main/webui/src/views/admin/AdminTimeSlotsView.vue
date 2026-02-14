@@ -6,6 +6,7 @@ import { getApiAdminTimeslots, postApiAdminTimeslots, putApiAdminTimeslotsId, de
 import { useVenteStore } from '@/stores/venteStore'
 import { storeToRefs } from 'pinia'
 import { useToast } from '@/composables/useToast'
+import AdminTable from '@/components/admin/AdminTable.vue'
 import type { TimeSlotResponse, CreateTimeSlotRequest, UpdateTimeSlotRequest } from '@/api/generated/model'
 
 const toast = useToast()
@@ -154,89 +155,80 @@ function formatTime(startTime: string, endTime: string): string {
       </Button>
     </div>
 
-    <div v-else-if="timeSlots.length > 0" class="overflow-x-auto rounded-xl border border-gray-200 bg-white">
-      <table class="w-full" data-testid="timeslot-table">
-        <caption class="sr-only">Liste des créneaux de retrait</caption>
-        <thead>
-          <tr class="bg-dark text-left text-sm text-white">
-            <th class="px-4 py-3 font-medium">Date</th>
-            <th class="px-4 py-3 font-medium">Horaire</th>
-            <th class="px-4 py-3 font-medium">Capacité</th>
-            <th class="px-4 py-3 font-medium">Réservations</th>
-            <th class="px-4 py-3 font-medium">Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr
-            v-for="slot in timeSlots"
-            :key="slot.id"
-            class="border-t border-gray-100 transition-colors hover:bg-surface"
-            data-testid="timeslot-row"
+    <AdminTable
+      v-else-if="timeSlots.length > 0"
+      :columns="['Date', 'Horaire', 'Capacité', 'Réservations', 'Actions']"
+      caption="Liste des créneaux de retrait"
+      dataTestid="timeslot-table"
+    >
+      <tr
+        v-for="slot in timeSlots"
+        :key="slot.id"
+        class="border-t border-gray-100 transition-colors hover:bg-surface"
+        data-testid="timeslot-row"
+      >
+        <td class="px-4 py-3 font-medium text-dark">{{ formatDate(slot.date) }}</td>
+        <td class="px-4 py-3 text-dark">{{ formatTime(slot.startTime, slot.endTime) }}</td>
+        <td class="px-4 py-3 text-dark">{{ slot.capacity }}</td>
+        <td class="px-4 py-3">
+          <span
+            :class="[
+              'inline-block rounded-full px-2 py-0.5 text-xs font-medium',
+              slot.reserved > 0
+                ? 'bg-green-100 text-green-700'
+                : 'bg-gray-100 text-gray-600',
+            ]"
           >
-            <td class="px-4 py-3 font-medium text-dark">{{ formatDate(slot.date) }}</td>
-            <td class="px-4 py-3 text-dark">{{ formatTime(slot.startTime, slot.endTime) }}</td>
-            <td class="px-4 py-3 text-dark">{{ slot.capacity }}</td>
-            <td class="px-4 py-3">
-              <span
-                :class="[
-                  'inline-block rounded-full px-2 py-0.5 text-xs font-medium',
-                  slot.reserved > 0
-                    ? 'bg-green-100 text-green-700'
-                    : 'bg-gray-100 text-gray-600',
-                ]"
-              >
-                {{ slot.reserved }} / {{ slot.capacity }}
-              </span>
-            </td>
-            <td class="px-4 py-3">
-              <div class="flex flex-col gap-2">
-                <template v-if="confirmingDeleteId === slot.id">
-                  <p v-if="slot.reserved > 0" class="text-sm text-error">
-                    Ce créneau a {{ slot.reserved }} réservation(s). La suppression est irréversible.
-                  </p>
-                  <div class="flex gap-2">
-                    <Button
-                      variant="danger"
-                      size="md"
-                      :aria-label="'Confirmer la suppression du créneau de ' + slot.startTime + ' à ' + slot.endTime"
-                      @click="confirmDeleteAction(slot)"
-                    >
-                      Supprimer
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="md"
-                      @click="cancelDelete"
-                    >
-                      Annuler
-                    </Button>
-                  </div>
-                </template>
-                <template v-else>
-                  <div class="flex gap-2">
-                    <Button
-                      variant="secondary"
-                      size="md"
-                      :aria-label="'Modifier le créneau de ' + slot.startTime + ' à ' + slot.endTime"
-                      @click="openEditForm(slot)"
-                    >
-                      Modifier
-                    </Button>
-                    <Button
-                      variant="danger"
-                      size="md"
-                      :aria-label="'Supprimer le créneau de ' + slot.startTime + ' à ' + slot.endTime"
-                      @click="startDelete(slot.id)"
-                    >
-                      Supprimer
-                    </Button>
-                  </div>
-                </template>
+            {{ slot.reserved }} / {{ slot.capacity }}
+          </span>
+        </td>
+        <td class="px-4 py-3">
+          <div class="flex flex-col gap-2">
+            <template v-if="confirmingDeleteId === slot.id">
+              <p v-if="slot.reserved > 0" class="text-sm text-error">
+                Ce créneau a {{ slot.reserved }} réservation(s). La suppression est irréversible.
+              </p>
+              <div class="flex gap-2">
+                <Button
+                  variant="danger"
+                  size="md"
+                  :aria-label="'Confirmer la suppression du créneau de ' + slot.startTime + ' à ' + slot.endTime"
+                  @click="confirmDeleteAction(slot)"
+                >
+                  Supprimer
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="md"
+                  @click="cancelDelete"
+                >
+                  Annuler
+                </Button>
               </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+            </template>
+            <template v-else>
+              <div class="flex gap-2">
+                <Button
+                  variant="secondary"
+                  size="md"
+                  :aria-label="'Modifier le créneau de ' + slot.startTime + ' à ' + slot.endTime"
+                  @click="openEditForm(slot)"
+                >
+                  Modifier
+                </Button>
+                <Button
+                  variant="danger"
+                  size="md"
+                  :aria-label="'Supprimer le créneau de ' + slot.startTime + ' à ' + slot.endTime"
+                  @click="startDelete(slot.id)"
+                >
+                  Supprimer
+                </Button>
+              </div>
+            </template>
+          </div>
+        </td>
+      </tr>
+    </AdminTable>
   </div>
 </template>

@@ -6,6 +6,7 @@ import { getApiAdminDashboard } from '@/api/generated/admin-dashboard/admin-dash
 import { useVenteStore } from '@/stores/venteStore'
 import { storeToRefs } from 'pinia'
 import { useToast } from '@/composables/useToast'
+import AdminTable from '@/components/admin/AdminTable.vue'
 import type { DashboardStatsResponse } from '@/api/generated/model'
 
 const toast = useToast()
@@ -104,33 +105,26 @@ watch(selectedVenteId, (id) => { if (id) loadData(id) }, { immediate: true })
         </div>
       </Card>
 
-      <div class="overflow-x-auto rounded-xl border border-gray-200 bg-white">
-        <table class="w-full" data-testid="slot-distribution-table">
-          <caption class="sr-only">Répartition des commandes par créneau</caption>
-          <thead>
-            <tr class="bg-dark text-left text-sm text-white">
-              <th class="px-4 py-3 font-medium">Créneau</th>
-              <th class="px-4 py-3 font-medium">Nombre de commandes</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr
-              v-for="slot in stats.slotDistribution"
-              :key="slot.slotId"
-              class="border-t border-gray-100 transition-colors hover:bg-surface"
-              data-testid="slot-distribution-row"
-            >
-              <td class="px-4 py-3 text-dark">{{ slot.slotLabel }}</td>
-              <td class="px-4 py-3 font-medium text-dark">{{ slot.orderCount }}</td>
-            </tr>
-            <tr v-if="stats.slotDistribution.length === 0">
-              <td colspan="2" class="px-4 py-6 text-center text-brown">
-                Aucune commande par créneau
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+      <AdminTable
+        :columns="['Créneau', 'Nombre de commandes']"
+        caption="Répartition des commandes par créneau"
+        dataTestid="slot-distribution-table"
+      >
+        <tr
+          v-for="slot in stats.slotDistribution"
+          :key="slot.slotId"
+          class="border-t border-gray-100 transition-colors hover:bg-surface"
+          data-testid="slot-distribution-row"
+        >
+          <td class="px-4 py-3 text-dark">{{ slot.slotLabel }}</td>
+          <td class="px-4 py-3 font-medium text-dark">{{ slot.orderCount }}</td>
+        </tr>
+        <tr v-if="stats.slotDistribution.length === 0">
+          <td colspan="2" class="px-4 py-6 text-center text-brown">
+            Aucune commande par créneau
+          </td>
+        </tr>
+      </AdminTable>
     </template>
 
     <div v-else class="py-12 text-center text-brown">
