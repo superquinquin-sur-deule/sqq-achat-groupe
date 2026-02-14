@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import type { OrderDetailResponse } from '@/types/order'
-import { fetchOrder } from '@/api/orders'
+import type { OrderDetailResponse } from '@/api/generated/model'
+import { getApiOrdersId } from '@/api/generated/orders/orders'
 import { useCartStore } from '@/stores/cartStore'
 import Card from '@/components/ui/Card.vue'
 import Button from '@/components/ui/Button.vue'
@@ -34,7 +34,8 @@ onMounted(async () => {
   }
 
   try {
-    order.value = await fetchOrder(orderId)
+    const response = await getApiOrdersId(orderId)
+    order.value = response.data.data ?? null
     cartStore.clearCart()
   } catch {
     router.replace('/')

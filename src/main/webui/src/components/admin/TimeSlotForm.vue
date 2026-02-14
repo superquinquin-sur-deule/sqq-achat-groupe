@@ -5,10 +5,10 @@ import { z } from 'zod'
 import { nextTick, onMounted } from 'vue'
 import Input from '@/components/ui/Input.vue'
 import Button from '@/components/ui/Button.vue'
-import type { AdminTimeSlot } from '@/types/timeSlot'
+import type { TimeSlotResponse } from '@/api/generated/model'
 
 const props = defineProps<{
-  timeSlot?: AdminTimeSlot
+  timeSlot?: TimeSlotResponse
   loading?: boolean
 }>()
 

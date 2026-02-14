@@ -1,20 +1,20 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
-import { fetchSupplierOrder } from '@/api/backoffice'
+import { getApiBackofficeSupplierOrders } from '@/api/generated/backoffice-supplier-orders/backoffice-supplier-orders'
 import { useVenteStore } from '@/stores/venteStore'
 import { storeToRefs } from 'pinia'
 import { useToast } from '@/composables/useToast'
-import type { SupplierOrderLine } from '@/types/backoffice'
+import type { SupplierOrderLineResponse } from '@/api/generated/model'
 
 const toast = useToast()
 const venteStore = useVenteStore()
 const { selectedVenteId } = storeToRefs(venteStore)
 
-const lines = ref<SupplierOrderLine[]>([])
+const lines = ref<SupplierOrderLineResponse[]>([])
 const loading = ref(false)
 
 const groupedBySupplier = computed(() => {
-  const groups = new Map<string, SupplierOrderLine[]>()
+  const groups = new Map<string, SupplierOrderLineResponse[]>()
   for (const line of lines.value) {
     const existing = groups.get(line.supplier)
     if (existing) {
@@ -55,7 +55,8 @@ async function handleExportXls() {
 async function loadData(venteId: number) {
   loading.value = true
   try {
-    lines.value = await fetchSupplierOrder(venteId)
+    const response = await getApiBackofficeSupplierOrders({ venteId })
+    lines.value = response.data.data ?? []
   } catch {
     toast.error('Erreur lors du chargement du bon fournisseur')
   } finally {

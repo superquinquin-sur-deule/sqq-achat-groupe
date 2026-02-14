@@ -1,7 +1,8 @@
 import { ref } from 'vue'
-import { fetchCurrentUser, type UserInfo } from '@/api/admin'
+import { getApiAdminMe } from '@/api/generated/admin-auth/admin-auth'
+import type { UserInfoResponse } from '@/api/generated/model'
 
-const user = ref<UserInfo | null>(null)
+const user = ref<UserInfoResponse | null>(null)
 const loading = ref(false)
 const authenticated = ref(false)
 
@@ -11,7 +12,8 @@ export function useAuth() {
 
     loading.value = true
     try {
-      user.value = await fetchCurrentUser()
+      const response = await getApiAdminMe()
+      user.value = response.data.data
       authenticated.value = true
       return true
     } catch {

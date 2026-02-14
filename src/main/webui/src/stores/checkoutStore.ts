@@ -1,11 +1,15 @@
 import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
-import type { CustomerInfo, OrderResponse } from '@/types/order'
-import type { TimeSlot } from '@/types/timeSlot'
-import { createOrder } from '@/api/orders'
-import { initiatePayment as apiInitiatePayment } from '@/api/payments'
-import { fetchTimeSlots } from '@/api/timeSlots'
+import type { OrderResponse, TimeSlotResponse } from '@/api/generated/model'
+import { postApiVentesVenteIdOrders, postApiOrdersIdPayment } from '@/api/generated/orders/orders'
+import { getApiVentesVenteIdTimeslots } from '@/api/generated/timeslots/timeslots'
 import { useCartStore } from '@/stores/cartStore'
+
+interface CustomerInfo {
+  name: string
+  email: string
+  phone: string
+}
 
 export const useCheckoutStore = defineStore('checkout', () => {
   const customerInfo = ref<CustomerInfo>({ name: '', email: '', phone: '' })
@@ -14,7 +18,7 @@ export const useCheckoutStore = defineStore('checkout', () => {
   const isSubmitting = ref(false)
   const isLoadingTimeSlots = ref(false)
   const error = ref<string | null>(null)
-  const timeSlots = ref<TimeSlot[]>([])
+  const timeSlots = ref<TimeSlotResponse[]>([])
   const lastOrder = ref<OrderResponse | null>(null)
 
   const selectedTimeSlot = computed(() =>
@@ -34,7 +38,8 @@ export const useCheckoutStore = defineStore('checkout', () => {
     error.value = null
     isLoadingTimeSlots.value = true
     try {
-      timeSlots.value = await fetchTimeSlots(venteId)
+      const response = await getApiVentesVenteIdTimeslots(venteId)
+      timeSlots.value = response.data.data ?? []
     } finally {
       isLoadingTimeSlots.value = false
     }
@@ -44,7 +49,7 @@ export const useCheckoutStore = defineStore('checkout', () => {
     const cartStore = useCartStore()
     error.value = null
 
-    const response = await createOrder(venteId, {
+    const response = await postApiVentesVenteIdOrders(venteId, {
       customerName: customerInfo.value.name,
       email: customerInfo.value.email,
       phone: customerInfo.value.phone,
@@ -55,8 +60,9 @@ export const useCheckoutStore = defineStore('checkout', () => {
       })),
     })
 
-    lastOrder.value = response
-    return response
+    const order = (response.data as { data: OrderResponse }).data
+    lastOrder.value = order
+    return order
   }
 
   async function initiatePayment(venteId: number): Promise<void> {
@@ -70,9 +76,9 @@ export const useCheckoutStore = defineStore('checkout', () => {
       const successUrl = `${baseUrl}/confirmation?orderId=${order.id}&session_id={CHECKOUT_SESSION_ID}`
       const cancelUrl = `${baseUrl}/payment-error?orderId=${order.id}`
 
-      const { checkoutUrl } = await apiInitiatePayment(order.id, successUrl, cancelUrl)
+      const paymentResponse = await postApiOrdersIdPayment(order.id, { successUrl, cancelUrl })
 
-      window.location.href = checkoutUrl
+      window.location.href = (paymentResponse.data as { data: { checkoutUrl: string } }).data.checkoutUrl
     } catch (e: unknown) {
       if (e instanceof Error) {
         error.value = e.message

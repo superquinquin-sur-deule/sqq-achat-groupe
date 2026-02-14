@@ -8,6 +8,8 @@ import fr.sqq.achatgroupe.infrastructure.in.rest.dto.SupplierOrderLineResponse;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import org.eclipse.microprofile.openapi.annotations.Operation;
+import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -16,6 +18,7 @@ import java.util.List;
 @Path("/api/backoffice/supplier-orders")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
+@Tag(name = "backoffice-supplier-orders")
 public class BackofficeSupplierOrderResource {
 
     private final GenerateSupplierOrderUseCase generateSupplierOrder;
@@ -39,6 +42,7 @@ public class BackofficeSupplierOrderResource {
     @GET
     @Path("/xlsx")
     @Produces("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+    @Operation(hidden = true)
     public Response getSupplierOrderXlsx(@QueryParam("venteId") Long venteId) throws IOException {
         if (venteId == null) {
             throw new BadRequestException("venteId is required");

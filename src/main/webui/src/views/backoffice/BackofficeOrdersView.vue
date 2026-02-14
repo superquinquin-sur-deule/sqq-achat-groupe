@@ -1,18 +1,18 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
 import { RouterLink } from 'vue-router'
-import { fetchBackofficeOrders } from '@/api/backoffice'
+import { getApiBackofficeOrders } from '@/api/generated/backoffice-orders/backoffice-orders'
 import { useVenteStore } from '@/stores/venteStore'
 import { storeToRefs } from 'pinia'
 import { useToast } from '@/composables/useToast'
 import { formatPrice, statusLabel, statusClasses } from '@/utils/order-formatters'
-import type { BackofficeOrder } from '@/types/backoffice'
+import type { BackofficeOrderResponse } from '@/api/generated/model'
 
 const toast = useToast()
 const venteStore = useVenteStore()
 const { selectedVenteId } = storeToRefs(venteStore)
 
-const orders = ref<BackofficeOrder[]>([])
+const orders = ref<BackofficeOrderResponse[]>([])
 const loading = ref(false)
 const searchQuery = ref('')
 const selectedSlot = ref('')
@@ -37,7 +37,8 @@ const filteredOrders = computed(() => {
 async function loadData(venteId: number) {
   loading.value = true
   try {
-    orders.value = await fetchBackofficeOrders(venteId)
+    const response = await getApiBackofficeOrders({ venteId })
+    orders.value = response.data.data ?? []
   } catch {
     toast.error('Erreur lors du chargement des commandes')
   } finally {

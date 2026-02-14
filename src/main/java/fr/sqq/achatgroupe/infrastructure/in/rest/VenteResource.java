@@ -18,13 +18,15 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
+import org.eclipse.microprofile.openapi.annotations.tags.Tag;
+import org.jboss.resteasy.reactive.RestResponse;
 
 import java.util.List;
 
 @Path("/api/ventes")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
+@Tag(name = "ventes")
 public class VenteResource {
 
     private final ListVentesUseCase listVentesUseCase;
@@ -53,12 +55,10 @@ public class VenteResource {
     }
 
     @POST
-    public Response createVente(@Valid CreateVenteRequest request) {
+    public RestResponse<DataResponse<CreateVenteResponse>> createVente(@Valid CreateVenteRequest request) {
         var command = VenteRestMapper.toCommand(request);
         var result = createVenteUseCase.execute(command);
         var response = VenteRestMapper.toCreateResponse(result);
-        return Response.status(Response.Status.CREATED)
-                .entity(new DataResponse<>(response))
-                .build();
+        return RestResponse.status(RestResponse.Status.CREATED, new DataResponse<>(response));
     }
 }

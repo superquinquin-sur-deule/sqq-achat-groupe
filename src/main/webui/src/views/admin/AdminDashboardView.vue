@@ -2,17 +2,17 @@
 import { ref, watch } from 'vue'
 import StatCard from '@/components/admin/StatCard.vue'
 import Card from '@/components/ui/Card.vue'
-import { fetchDashboardStats } from '@/api/admin'
+import { getApiAdminDashboard } from '@/api/generated/admin-dashboard/admin-dashboard'
 import { useVenteStore } from '@/stores/venteStore'
 import { storeToRefs } from 'pinia'
 import { useToast } from '@/composables/useToast'
-import type { DashboardStats } from '@/types/dashboard'
+import type { DashboardStatsResponse } from '@/api/generated/model'
 
 const toast = useToast()
 const venteStore = useVenteStore()
 const { selectedVenteId } = storeToRefs(venteStore)
 
-const stats = ref<DashboardStats | null>(null)
+const stats = ref<DashboardStatsResponse | null>(null)
 const loading = ref(false)
 
 function formatCurrency(value: number): string {
@@ -22,7 +22,8 @@ function formatCurrency(value: number): string {
 async function loadData(venteId: number) {
   loading.value = true
   try {
-    stats.value = await fetchDashboardStats(venteId)
+    const response = await getApiAdminDashboard({ venteId })
+    stats.value = response.data.data ?? null
   } catch {
     toast.error('Erreur lors du chargement des statistiques')
   } finally {

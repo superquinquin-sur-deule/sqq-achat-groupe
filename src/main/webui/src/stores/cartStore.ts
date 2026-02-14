@@ -1,7 +1,7 @@
 import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
 import type { CartItem } from '@/types/cart'
-import type { Product } from '@/types/product'
+import type { ProductResponse } from '@/api/generated/model'
 
 export const useCartStore = defineStore('cart', () => {
   const items = ref<CartItem[]>([])
@@ -24,7 +24,7 @@ export const useCartStore = defineStore('cart', () => {
     venteId.value = id
   }
 
-  function addItem(product: Product) {
+  function addItem(product: ProductResponse) {
     const existing = items.value.find((item) => item.productId === product.id)
     if (existing) {
       existing.quantity++

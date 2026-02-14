@@ -15,6 +15,8 @@ import jakarta.validation.Valid;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
+import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.jboss.resteasy.reactive.multipart.FileUpload;
 
 import java.io.IOException;
@@ -26,6 +28,7 @@ import java.util.List;
 @Path("/api/admin/products")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
+@Tag(name = "admin-products")
 public class AdminProductResource {
 
     private final ManageProductsUseCase manageProducts;
@@ -54,6 +57,8 @@ public class AdminProductResource {
     @POST
     @Path("/import")
     @Consumes(MediaType.MULTIPART_FORM_DATA)
+    @APIResponse(responseCode = "200", description = "Import result")
+    @APIResponse(responseCode = "400", description = "Invalid CSV file")
     public Response importProducts(
             @FormParam("file") FileUpload file,
             @FormParam("venteId") Long venteId

@@ -12,11 +12,13 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
+import org.eclipse.microprofile.openapi.annotations.tags.Tag;
+import org.jboss.resteasy.reactive.RestResponse;
 
 @Path("/api/ventes/{venteId}/orders")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
+@Tag(name = "orders")
 public class VenteOrderResource {
 
     private final CreateOrderUseCase createOrderUseCase;
@@ -26,12 +28,10 @@ public class VenteOrderResource {
     }
 
     @POST
-    public Response createOrder(@PathParam("venteId") Long venteId, @Valid CreateOrderRequest request) {
+    public RestResponse<DataResponse<OrderResponse>> createOrder(@PathParam("venteId") Long venteId, @Valid CreateOrderRequest request) {
         var command = OrderRestMapper.toCommand(venteId, request);
         Order order = createOrderUseCase.execute(command);
         OrderResponse response = OrderRestMapper.toResponse(order);
-        return Response.status(Response.Status.CREATED)
-                .entity(new DataResponse<>(response))
-                .build();
+        return RestResponse.status(RestResponse.Status.CREATED, new DataResponse<>(response));
     }
 }

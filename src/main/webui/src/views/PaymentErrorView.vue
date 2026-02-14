@@ -1,9 +1,8 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import type { OrderDetailResponse, PaymentStatusResponse } from '@/types/order'
-import { fetchOrder, fetchPaymentStatus } from '@/api/orders'
-import { initiatePayment } from '@/api/payments'
+import type { OrderDetailResponse, PaymentStatusResponse } from '@/api/generated/model'
+import { getApiOrdersId, getApiOrdersIdPaymentStatus, postApiOrdersIdPayment } from '@/api/generated/orders/orders'
 import Card from '@/components/ui/Card.vue'
 import Button from '@/components/ui/Button.vue'
 
@@ -38,14 +37,15 @@ async function retryPayment() {
     const successUrl = `${baseUrl}/confirmation?orderId=${order.value.id}&session_id={CHECKOUT_SESSION_ID}`
     const cancelUrl = `${baseUrl}/payment-error?orderId=${order.value.id}`
 
-    const { checkoutUrl } = await initiatePayment(order.value.id, successUrl, cancelUrl)
-    window.location.href = checkoutUrl
+    const paymentResponse = await postApiOrdersIdPayment(order.value.id, { successUrl, cancelUrl })
+    window.location.href = (paymentResponse.data as { data: { checkoutUrl: string } }).data.checkoutUrl
   } catch {
     isRetrying.value = false
     // If max attempts exceeded, reload status
     const orderId = Number(route.query.orderId)
-    paymentStatus.value = await fetchPaymentStatus(orderId)
-    isCancelled.value = !paymentStatus.value.canRetry
+    const statusResponse = await getApiOrdersIdPaymentStatus(orderId)
+    paymentStatus.value = statusResponse.data.data ?? null
+    isCancelled.value = !paymentStatus.value?.canRetry
   }
 }
 
@@ -57,13 +57,14 @@ onMounted(async () => {
   }
 
   try {
-    const [orderData, statusData] = await Promise.all([
-      fetchOrder(orderId),
-      fetchPaymentStatus(orderId),
+    const [orderResponse, statusResponse] = await Promise.all([
+      getApiOrdersId(orderId),
+      getApiOrdersIdPaymentStatus(orderId),
     ])
-    order.value = orderData
+    order.value = orderResponse.data.data ?? null
+    const statusData = statusResponse.data.data ?? null
     paymentStatus.value = statusData
-    isCancelled.value = statusData.orderStatus === 'CANCELLED' || !statusData.canRetry
+    isCancelled.value = statusData?.orderStatus === 'CANCELLED' || !statusData?.canRetry
   } catch {
     router.replace('/')
   } finally {

@@ -8,12 +8,14 @@ import fr.sqq.achatgroupe.infrastructure.in.rest.dto.UpdateTimeSlotRequest;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
+import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 
 import java.util.List;
 
 @Path("/api/admin/timeslots")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
+@Tag(name = "admin-timeslots")
 public class AdminTimeSlotResource {
 
     private final ManageTimeSlotsUseCase manageTimeSlots;

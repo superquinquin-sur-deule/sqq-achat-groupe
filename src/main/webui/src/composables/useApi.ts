@@ -1,5 +1,5 @@
 import { ref } from 'vue'
-import { ApiError } from '@/api/client'
+import { ApiError } from '@/api/mutator/custom-fetch'
 
 export function useApi<T>(apiFn: () => Promise<T>) {
   const data = ref<T | null>(null) as { value: T | null }

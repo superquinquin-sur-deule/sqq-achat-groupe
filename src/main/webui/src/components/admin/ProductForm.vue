@@ -5,10 +5,10 @@ import { z } from 'zod'
 import { nextTick, onMounted, ref } from 'vue'
 import Input from '@/components/ui/Input.vue'
 import Button from '@/components/ui/Button.vue'
-import type { AdminProduct } from '@/types/product'
+import type { AdminProductResponse } from '@/api/generated/model'
 
 const props = defineProps<{
-  product?: AdminProduct
+  product?: AdminProductResponse
   loading?: boolean
 }>()
 

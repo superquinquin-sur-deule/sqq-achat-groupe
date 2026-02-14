@@ -9,4 +9,7 @@ dist/
 npm-debug.log
 yarn-error.log
 
+# Generated API client
+src/api/generated/
+
 # End of https://www.toptal.com/developers/gitignore/api/vuejs

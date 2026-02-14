@@ -3,23 +3,23 @@ import { ref } from 'vue'
 import Button from '@/components/ui/Button.vue'
 import VenteForm from '@/components/admin/VenteForm.vue'
 import {
-  createAdminVente,
-  updateAdminVente,
-  deleteAdminVente,
-  activateVente,
-  deactivateVente,
-} from '@/api/admin'
+  postApiAdminVentes,
+  putApiAdminVentesId,
+  deleteApiAdminVentesId,
+  putApiAdminVentesIdActivate,
+  putApiAdminVentesIdDeactivate,
+} from '@/api/generated/admin-ventes/admin-ventes'
 import { useVenteStore } from '@/stores/venteStore'
 import { storeToRefs } from 'pinia'
 import { useToast } from '@/composables/useToast'
-import type { AdminVente } from '@/types/vente'
+import type { AdminVenteResponse } from '@/api/generated/model'
 
 const toast = useToast()
 const venteStore = useVenteStore()
 const { ventes } = storeToRefs(venteStore)
 
 const showForm = ref(false)
-const editingVente = ref<AdminVente | undefined>(undefined)
+const editingVente = ref<AdminVenteResponse | undefined>(undefined)
 const submitting = ref(false)
 const confirmingDeleteId = ref<number | null>(null)
 
@@ -29,7 +29,7 @@ function openCreateForm() {
   confirmingDeleteId.value = null
 }
 
-function openEditForm(vente: AdminVente) {
+function openEditForm(vente: AdminVenteResponse) {
   editingVente.value = vente
   showForm.value = true
   confirmingDeleteId.value = null
@@ -40,8 +40,8 @@ function closeForm() {
   editingVente.value = undefined
 }
 
-function toInstantOrNull(datetimeLocal: string): string | null {
-  if (!datetimeLocal) return null
+function toInstantOrUndefined(datetimeLocal: string): string | undefined {
+  if (!datetimeLocal) return undefined
   return new Date(datetimeLocal).toISOString()
 }
 
@@ -51,14 +51,14 @@ async function onSubmit(data: { name: string; description: string; startDate: st
     const payload = {
       name: data.name,
       description: data.description,
-      startDate: toInstantOrNull(data.startDate),
-      endDate: toInstantOrNull(data.endDate),
+      startDate: toInstantOrUndefined(data.startDate),
+      endDate: toInstantOrUndefined(data.endDate),
     }
     if (editingVente.value) {
-      await updateAdminVente(editingVente.value.id, payload)
+      await putApiAdminVentesId(editingVente.value.id, payload)
       toast.success('Vente mise à jour')
     } else {
-      await createAdminVente(payload)
+      await postApiAdminVentes(payload)
       toast.success('Vente créée')
     }
     closeForm()
@@ -80,7 +80,7 @@ function cancelDelete() {
 
 async function confirmDelete(id: number) {
   try {
-    await deleteAdminVente(id)
+    await deleteApiAdminVentesId(id)
     toast.success('Vente supprimée')
     confirmingDeleteId.value = null
     await venteStore.loadVentes()
@@ -89,13 +89,13 @@ async function confirmDelete(id: number) {
   }
 }
 
-async function toggleStatus(vente: AdminVente) {
+async function toggleStatus(vente: AdminVenteResponse) {
   try {
     if (vente.status === 'ACTIVE') {
-      await deactivateVente(vente.id)
+      await putApiAdminVentesIdDeactivate(vente.id)
       toast.success('Vente désactivée')
     } else {
-      await activateVente(vente.id)
+      await putApiAdminVentesIdActivate(vente.id)
       toast.success('Vente activée')
     }
     await venteStore.loadVentes()

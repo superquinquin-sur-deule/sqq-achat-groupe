@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import type { TimeSlot } from '@/types/timeSlot'
+import type { TimeSlotResponse } from '@/api/generated/model'
 import Button from '@/components/ui/Button.vue'
 
 const props = defineProps<{
-  timeSlots: TimeSlot[]
+  timeSlots: TimeSlotResponse[]
   selectedId: number | null
   isLoading?: boolean
 }>()
@@ -16,8 +16,8 @@ const emit = defineEmits<{
 }>()
 
 const groupedByDate = computed(() => {
-  const groups: { date: string; formattedDate: string; slots: TimeSlot[] }[] = []
-  const map = new Map<string, TimeSlot[]>()
+  const groups: { date: string; formattedDate: string; slots: TimeSlotResponse[] }[] = []
+  const map = new Map<string, TimeSlotResponse[]>()
 
   for (const slot of props.timeSlots) {
     let arr = map.get(slot.date)

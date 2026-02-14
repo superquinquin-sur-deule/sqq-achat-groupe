@@ -10,13 +10,16 @@ import fr.sqq.achatgroupe.infrastructure.in.rest.dto.UpdateAdminVenteRequest;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
+import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
+import org.eclipse.microprofile.openapi.annotations.tags.Tag;
+import org.jboss.resteasy.reactive.RestResponse;
 
 import java.util.List;
 
 @Path("/api/admin/ventes")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
+@Tag(name = "admin-ventes")
 public class AdminVenteResource {
 
     private final ManageVentesUseCase manageVentes;
@@ -34,13 +37,11 @@ public class AdminVenteResource {
     }
 
     @POST
-    public Response createVente(@Valid CreateAdminVenteRequest request) {
+    public RestResponse<DataResponse<AdminVenteResponse>> createVente(@Valid CreateAdminVenteRequest request) {
         var cmd = new ManageVentesUseCase.CreateCommand(
                 request.name(), request.description(), request.startDate(), request.endDate());
         Vente vente = manageVentes.createVente(cmd);
-        return Response.status(Response.Status.CREATED)
-                .entity(new DataResponse<>(AdminVenteRestMapper.toResponse(vente)))
-                .build();
+        return RestResponse.status(RestResponse.Status.CREATED, new DataResponse<>(AdminVenteRestMapper.toResponse(vente)));
     }
 
     @PUT
@@ -54,9 +55,9 @@ public class AdminVenteResource {
 
     @DELETE
     @Path("/{id}")
-    public Response deleteVente(@PathParam("id") Long id) {
+    @APIResponse(responseCode = "204", description = "No content")
+    public void deleteVente(@PathParam("id") Long id) {
         manageVentes.deleteVente(new VenteId(id));
-        return Response.noContent().build();
     }
 
     @PUT

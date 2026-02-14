@@ -2,20 +2,20 @@
 import { ref, watch } from 'vue'
 import Button from '@/components/ui/Button.vue'
 import TimeSlotForm from '@/components/admin/TimeSlotForm.vue'
-import { fetchTimeSlots, createTimeSlot, updateTimeSlot, deleteTimeSlot } from '@/api/admin'
+import { getApiAdminTimeslots, postApiAdminTimeslots, putApiAdminTimeslotsId, deleteApiAdminTimeslotsId } from '@/api/generated/admin-timeslots/admin-timeslots'
 import { useVenteStore } from '@/stores/venteStore'
 import { storeToRefs } from 'pinia'
 import { useToast } from '@/composables/useToast'
-import type { AdminTimeSlot, CreateTimeSlotData, UpdateTimeSlotData } from '@/types/timeSlot'
+import type { TimeSlotResponse, CreateTimeSlotRequest, UpdateTimeSlotRequest } from '@/api/generated/model'
 
 const toast = useToast()
 const venteStore = useVenteStore()
 const { selectedVenteId } = storeToRefs(venteStore)
 
-const timeSlots = ref<AdminTimeSlot[]>([])
+const timeSlots = ref<TimeSlotResponse[]>([])
 const loading = ref(false)
 const showForm = ref(false)
-const editingTimeSlot = ref<AdminTimeSlot | undefined>(undefined)
+const editingTimeSlot = ref<TimeSlotResponse | undefined>(undefined)
 const submitting = ref(false)
 const confirmingDeleteId = ref<number | null>(null)
 const forceDelete = ref(false)
@@ -23,7 +23,8 @@ const forceDelete = ref(false)
 async function loadData(venteId: number) {
   loading.value = true
   try {
-    timeSlots.value = await fetchTimeSlots(venteId)
+    const response = await getApiAdminTimeslots({ venteId })
+    timeSlots.value = response.data.data ?? []
   } catch {
     toast.error('Erreur lors du chargement des créneaux')
   } finally {
@@ -40,7 +41,7 @@ function openCreateForm() {
   forceDelete.value = false
 }
 
-function openEditForm(timeSlot: AdminTimeSlot) {
+function openEditForm(timeSlot: TimeSlotResponse) {
   editingTimeSlot.value = timeSlot
   showForm.value = true
   confirmingDeleteId.value = null
@@ -57,27 +58,28 @@ async function onSubmit(data: { date: string; startTime: string; endTime: string
   submitting.value = true
   try {
     if (editingTimeSlot.value) {
-      const updateData: UpdateTimeSlotData = {
+      const updateData: UpdateTimeSlotRequest = {
         date: data.date,
         startTime: data.startTime,
         endTime: data.endTime,
         capacity: data.capacity,
       }
-      await updateTimeSlot(editingTimeSlot.value.id, updateData)
+      await putApiAdminTimeslotsId(editingTimeSlot.value.id, updateData)
       toast.success('Créneau mis à jour')
     } else {
-      const createData: CreateTimeSlotData = {
+      const createData: CreateTimeSlotRequest = {
         venteId: selectedVenteId.value,
         date: data.date,
         startTime: data.startTime,
         endTime: data.endTime,
         capacity: data.capacity,
       }
-      await createTimeSlot(createData)
+      await postApiAdminTimeslots(createData)
       toast.success('Créneau créé')
     }
     closeForm()
-    timeSlots.value = await fetchTimeSlots(selectedVenteId.value)
+    const response = await getApiAdminTimeslots({ venteId: selectedVenteId.value })
+    timeSlots.value = response.data.data ?? []
   } catch {
     toast.error('Erreur lors de la sauvegarde du créneau')
   } finally {
@@ -95,14 +97,15 @@ function cancelDelete() {
   forceDelete.value = false
 }
 
-async function confirmDeleteAction(slot: AdminTimeSlot) {
+async function confirmDeleteAction(slot: TimeSlotResponse) {
   if (!selectedVenteId.value) return
   try {
-    await deleteTimeSlot(slot.id, slot.reserved > 0 ? true : undefined)
+    await deleteApiAdminTimeslotsId(slot.id, slot.reserved > 0 ? { force: true } : undefined)
     toast.success('Créneau supprimé')
     confirmingDeleteId.value = null
     forceDelete.value = false
-    timeSlots.value = await fetchTimeSlots(selectedVenteId.value)
+    const response = await getApiAdminTimeslots({ venteId: selectedVenteId.value })
+    timeSlots.value = response.data.data ?? []
   } catch {
     toast.error('Erreur lors de la suppression du créneau')
   }

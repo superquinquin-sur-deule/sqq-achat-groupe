@@ -1,16 +1,16 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
-import { fetchPreparationList } from '@/api/backoffice'
+import { getApiBackofficePreparation } from '@/api/generated/backoffice-preparation/backoffice-preparation'
 import { useVenteStore } from '@/stores/venteStore'
 import { storeToRefs } from 'pinia'
 import { useToast } from '@/composables/useToast'
-import type { PreparationOrder } from '@/types/backoffice'
+import type { PreparationOrderResponse } from '@/api/generated/model'
 
 const toast = useToast()
 const venteStore = useVenteStore()
 const { selectedVenteId } = storeToRefs(venteStore)
 
-const orders = ref<PreparationOrder[]>([])
+const orders = ref<PreparationOrderResponse[]>([])
 const loading = ref(false)
 const selectedSlot = ref('')
 
@@ -30,7 +30,7 @@ const filteredOrders = computed(() => {
 })
 
 const groupedBySlot = computed(() => {
-  const groups = new Map<string, PreparationOrder[]>()
+  const groups = new Map<string, PreparationOrderResponse[]>()
   for (const order of filteredOrders.value) {
     const existing = groups.get(order.timeSlotLabel)
     if (existing) {
@@ -64,7 +64,8 @@ function handlePrint() {
 async function loadData(venteId: number) {
   loading.value = true
   try {
-    orders.value = await fetchPreparationList(venteId)
+    const response = await getApiBackofficePreparation({ venteId })
+    orders.value = response.data.data ?? []
   } catch {
     toast.error('Erreur lors du chargement des listes de préparation')
   } finally {

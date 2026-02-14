@@ -1,10 +1,10 @@
 import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
-import { fetchAdminVentes } from '@/api/admin'
-import type { AdminVente } from '@/types/vente'
+import { getApiAdminVentes } from '@/api/generated/admin-ventes/admin-ventes'
+import type { AdminVenteResponse } from '@/api/generated/model'
 
 export const useVenteStore = defineStore('vente', () => {
-  const ventes = ref<AdminVente[]>([])
+  const ventes = ref<AdminVenteResponse[]>([])
   const selectedVenteId = ref<number | null>(null)
   const loading = ref(false)
 
@@ -17,7 +17,8 @@ export const useVenteStore = defineStore('vente', () => {
   async function loadVentes() {
     loading.value = true
     try {
-      ventes.value = await fetchAdminVentes()
+      const response = await getApiAdminVentes()
+      ventes.value = response.data.data ?? []
       // Auto-select the first vente (most recent, sorted DESC by id from backend)
       const first = ventes.value[0]
       if (first && selectedVenteId.value === null) {

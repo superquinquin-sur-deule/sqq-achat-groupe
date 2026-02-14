@@ -15,6 +15,8 @@ import fr.sqq.achatgroupe.infrastructure.in.rest.dto.ProblemDetailResponse;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
+import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 
 import java.util.List;
 import java.util.Map;
@@ -24,6 +26,7 @@ import java.util.stream.Collectors;
 @Path("/api/backoffice/orders")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
+@Tag(name = "backoffice-orders")
 public class BackofficeOrderResource {
 
     private final ListOrdersUseCase listOrders;
@@ -58,6 +61,8 @@ public class BackofficeOrderResource {
 
     @PUT
     @Path("/{id}/pickup")
+    @APIResponse(responseCode = "204", description = "No content")
+    @APIResponse(responseCode = "409", description = "Conflict")
     public Response markAsPickedUp(@PathParam("id") Long id) {
         try {
             markOrderPickedUp.markAsPickedUp(id);

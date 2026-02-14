@@ -7,12 +7,14 @@ import fr.sqq.achatgroupe.infrastructure.in.rest.dto.DashboardStatsResponse;
 import fr.sqq.achatgroupe.infrastructure.in.rest.dto.DataResponse;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
+import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 
 import java.util.List;
 
 @Path("/api/admin/dashboard")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
+@Tag(name = "admin-dashboard")
 public class AdminDashboardResource {
 
     private final GetDashboardStatsUseCase getDashboardStats;

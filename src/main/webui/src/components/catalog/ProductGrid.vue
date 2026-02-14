@@ -1,14 +1,14 @@
 <script setup lang="ts">
-import type { Product } from '@/types/product'
+import type { ProductResponse } from '@/api/generated/model'
 import ProductCard from './ProductCard.vue'
 
 defineProps<{
-  products: Product[]
+  products: ProductResponse[]
   loading: boolean
 }>()
 
 const emit = defineEmits<{
-  add: [product: Product]
+  add: [product: ProductResponse]
 }>()
 </script>
 

@@ -8,6 +8,8 @@ import fr.sqq.achatgroupe.infrastructure.in.rest.dto.PreparationOrderResponse;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import org.eclipse.microprofile.openapi.annotations.Operation;
+import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -16,6 +18,7 @@ import java.util.List;
 @Path("/api/backoffice/preparation")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
+@Tag(name = "backoffice-preparation")
 public class BackofficePreparationResource {
 
     private final GeneratePreparationListUseCase generatePreparationList;
@@ -39,6 +42,7 @@ public class BackofficePreparationResource {
     @GET
     @Path("/pdf")
     @Produces("application/pdf")
+    @Operation(hidden = true)
     public Response getPreparationPdf(@QueryParam("venteId") Long venteId) throws IOException {
         if (venteId == null) {
             throw new BadRequestException("venteId is required");

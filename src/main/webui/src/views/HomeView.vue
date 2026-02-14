@@ -1,50 +1,54 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
-import { useApi } from '@/composables/useApi'
 import { useToast } from '@/composables/useToast'
 import { useCartStore } from '@/stores/cartStore'
-import { fetchProducts } from '@/api/products'
-import { fetchVente } from '@/api/ventes'
-import type { Product } from '@/types/product'
-import type { Vente } from '@/types/vente'
+import { getApiVentesVenteIdProducts } from '@/api/generated/products/products'
+import { getApiVentesVenteId } from '@/api/generated/ventes/ventes'
+import type { ProductResponse, VenteResponse } from '@/api/generated/model'
 import WelcomeBanner from '@/components/catalog/WelcomeBanner.vue'
 import ProductGrid from '@/components/catalog/ProductGrid.vue'
 
 const route = useRoute()
 const venteId = Number(route.params.venteId)
 
-const { data, loading, error, execute } = useApi(() => fetchProducts(venteId))
 const toast = useToast()
 const cartStore = useCartStore()
-loading.value = true
+const loading = ref(true)
+const error = ref<string | null>(null)
 
-const vente = ref<Vente | null>(null)
+const vente = ref<VenteResponse | null>(null)
 const venteClosed = computed(() => vente.value?.status === 'CLOSED')
 
 cartStore.setVenteId(venteId)
 
-const products = computed<Product[]>(() => (data as { value: Product[] | null }).value ?? [])
+const products = ref<ProductResponse[]>([])
 
-function handleAddToCart(product: Product) {
+function handleAddToCart(product: ProductResponse) {
   cartStore.addItem(product)
   toast.success('Produit ajouté')
 }
 
 onMounted(async () => {
   try {
-    vente.value = await fetchVente(venteId)
+    const venteResponse = await getApiVentesVenteId(venteId)
+    vente.value = venteResponse.data.data ?? null
   } catch {
     // Vente not found — don't try loading products
+    loading.value = false
     return
   }
 
   if (!venteClosed.value) {
-    await execute()
-    if (error.value) {
+    try {
+      const productsResponse = await getApiVentesVenteIdProducts(venteId)
+      products.value = productsResponse.data.data ?? []
+    } catch {
+      error.value = 'Impossible de charger le catalogue'
       toast.error('Impossible de charger le catalogue')
     }
   }
+  loading.value = false
 })
 </script>
 

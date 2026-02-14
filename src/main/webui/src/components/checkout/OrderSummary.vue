@@ -1,13 +1,18 @@
 <script setup lang="ts">
 import type { CartItem } from '@/types/cart'
-import type { CustomerInfo } from '@/types/order'
-import type { TimeSlot } from '@/types/timeSlot'
+import type { TimeSlotResponse } from '@/api/generated/model'
 import Card from '@/components/ui/Card.vue'
 import Button from '@/components/ui/Button.vue'
 
+interface CustomerInfo {
+  name: string
+  email: string
+  phone: string
+}
+
 defineProps<{
   customerInfo: CustomerInfo
-  timeSlot: TimeSlot
+  timeSlot: TimeSlotResponse
   items: CartItem[]
   total: number
   isSubmitting: boolean

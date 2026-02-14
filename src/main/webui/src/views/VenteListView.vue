@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { fetchVentes } from '@/api/ventes'
-import type { Vente } from '@/types/vente'
+import { getApiVentes } from '@/api/generated/ventes/ventes'
+import type { VenteResponse } from '@/api/generated/model'
 
 const router = useRouter()
-const ventes = ref<Vente[]>([])
+const ventes = ref<VenteResponse[]>([])
 const loading = ref(true)
 const error = ref<string | null>(null)
 const now = ref(Date.now())
@@ -14,7 +14,8 @@ let timer: ReturnType<typeof setInterval> | null = null
 
 onMounted(async () => {
   try {
-    ventes.value = await fetchVentes()
+    const response = await getApiVentes()
+    ventes.value = response.data.data ?? []
   } catch {
     error.value = 'Impossible de charger les ventes'
   } finally {

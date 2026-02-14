@@ -3,20 +3,20 @@ import { ref, watch } from 'vue'
 import Button from '@/components/ui/Button.vue'
 import ProductForm from '@/components/admin/ProductForm.vue'
 import ProductImportForm from '@/components/admin/ProductImportForm.vue'
-import { fetchProducts, createProduct, updateProduct, deleteProduct, importProducts } from '@/api/admin'
+import { getApiAdminProducts, postApiAdminProducts, putApiAdminProductsId, deleteApiAdminProductsId, postApiAdminProductsImport } from '@/api/generated/admin-products/admin-products'
 import { useVenteStore } from '@/stores/venteStore'
 import { storeToRefs } from 'pinia'
 import { useToast } from '@/composables/useToast'
-import type { AdminProduct, CreateProductData, UpdateProductData } from '@/types/product'
+import type { AdminProductResponse, CreateProductRequest, UpdateProductRequest } from '@/api/generated/model'
 
 const toast = useToast()
 const venteStore = useVenteStore()
 const { selectedVenteId } = storeToRefs(venteStore)
 
-const products = ref<AdminProduct[]>([])
+const products = ref<AdminProductResponse[]>([])
 const loading = ref(false)
 const showForm = ref(false)
-const editingProduct = ref<AdminProduct | undefined>(undefined)
+const editingProduct = ref<AdminProductResponse | undefined>(undefined)
 const submitting = ref(false)
 const confirmingDeleteId = ref<number | null>(null)
 const showImportForm = ref(false)
@@ -26,7 +26,8 @@ const importFormRef = ref<InstanceType<typeof ProductImportForm> | null>(null)
 async function loadData(venteId: number) {
   loading.value = true
   try {
-    products.value = await fetchProducts(venteId)
+    const response = await getApiAdminProducts({ venteId })
+    products.value = response.data.data ?? []
   } catch {
     toast.error('Erreur lors du chargement des produits')
   } finally {
@@ -57,16 +58,19 @@ async function onImportSubmit(file: File) {
   if (!selectedVenteId.value) return
   importing.value = true
   try {
-    const result = await importProducts(selectedVenteId.value, file)
-    importFormRef.value?.setResult(result)
-    if (result.errors === 0) {
-      toast.success(`${result.imported} produit${result.imported > 1 ? 's' : ''} importé${result.imported > 1 ? 's' : ''}`)
-    } else if (result.imported > 0) {
-      toast.warning(`${result.imported} produit${result.imported > 1 ? 's' : ''} importé${result.imported > 1 ? 's' : ''}, ${result.errors} erreur${result.errors > 1 ? 's' : ''}`)
+    const response = await postApiAdminProductsImport({ file, venteId: selectedVenteId.value })
+    const result = response.data as { data: { imported: number; errors: number; errorDetails: Array<{ line: number; reason: string }> } }
+    const importResult = result.data
+    importFormRef.value?.setResult(importResult)
+    if (importResult.errors === 0) {
+      toast.success(`${importResult.imported} produit${importResult.imported > 1 ? 's' : ''} importé${importResult.imported > 1 ? 's' : ''}`)
+    } else if (importResult.imported > 0) {
+      toast.warning(`${importResult.imported} produit${importResult.imported > 1 ? 's' : ''} importé${importResult.imported > 1 ? 's' : ''}, ${importResult.errors} erreur${importResult.errors > 1 ? 's' : ''}`)
     } else {
       toast.error('Aucun produit importé')
     }
-    products.value = await fetchProducts(selectedVenteId.value)
+    const productsResponse = await getApiAdminProducts({ venteId: selectedVenteId.value })
+    products.value = productsResponse.data.data ?? []
   } catch {
     toast.error('Erreur lors de l\'import des produits')
   } finally {
@@ -74,7 +78,7 @@ async function onImportSubmit(file: File) {
   }
 }
 
-function openEditForm(product: AdminProduct) {
+function openEditForm(product: AdminProductResponse) {
   editingProduct.value = product
   showForm.value = true
   confirmingDeleteId.value = null
@@ -90,7 +94,7 @@ async function onSubmit(data: { name: string; description: string; price: number
   submitting.value = true
   try {
     if (editingProduct.value) {
-      const updateData: UpdateProductData = {
+      const updateData: UpdateProductRequest = {
         name: data.name,
         description: data.description,
         price: data.price,
@@ -98,10 +102,10 @@ async function onSubmit(data: { name: string; description: string; price: number
         stock: data.stock,
         active: data.active,
       }
-      await updateProduct(editingProduct.value.id, updateData)
+      await putApiAdminProductsId(editingProduct.value.id, updateData)
       toast.success('Produit mis à jour')
     } else {
-      const createData: CreateProductData = {
+      const createData: CreateProductRequest = {
         venteId: selectedVenteId.value,
         name: data.name,
         description: data.description,
@@ -109,11 +113,12 @@ async function onSubmit(data: { name: string; description: string; price: number
         supplier: data.supplier,
         stock: data.stock,
       }
-      await createProduct(createData)
+      await postApiAdminProducts(createData)
       toast.success('Produit créé')
     }
     closeForm()
-    products.value = await fetchProducts(selectedVenteId.value)
+    const productsResponse = await getApiAdminProducts({ venteId: selectedVenteId.value })
+    products.value = productsResponse.data.data ?? []
   } catch {
     toast.error('Erreur lors de la sauvegarde du produit')
   } finally {
@@ -132,10 +137,11 @@ function cancelDelete() {
 async function confirmDelete(id: number) {
   if (!selectedVenteId.value) return
   try {
-    await deleteProduct(id)
+    await deleteApiAdminProductsId(id)
     toast.success('Produit supprimé')
     confirmingDeleteId.value = null
-    products.value = await fetchProducts(selectedVenteId.value)
+    const productsResponse = await getApiAdminProducts({ venteId: selectedVenteId.value })
+    products.value = productsResponse.data.data ?? []
   } catch {
     toast.error('Erreur lors de la suppression du produit')
   }

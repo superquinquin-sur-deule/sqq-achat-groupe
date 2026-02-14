@@ -28,14 +28,15 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
+import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 
 import java.net.URI;
 
 @Path("/api/orders")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
+@Tag(name = "orders")
 public class OrderResource {
 
     private final InitiatePaymentUseCase initiatePaymentUseCase;
@@ -64,7 +65,7 @@ public class OrderResource {
 
     @GET
     @Path("/{id}")
-    public Response getOrder(@PathParam("id") Long id) {
+    public DataResponse<OrderDetailResponse> getOrder(@PathParam("id") Long id) {
         Order order = orderRepository.findOrderById(id)
                 .orElseThrow(() -> new OrderNotFoundException(id));
 
@@ -97,12 +98,12 @@ public class OrderResource {
                 order.createdAt()
         );
 
-        return Response.ok(new DataResponse<>(response)).build();
+        return new DataResponse<>(response);
     }
 
     @GET
     @Path("/{id}/payment-status")
-    public Response getPaymentStatus(@PathParam("id") Long id) {
+    public DataResponse<PaymentStatusResponse> getPaymentStatus(@PathParam("id") Long id) {
         Order order = orderRepository.findOrderById(id)
                 .orElseThrow(() -> new OrderNotFoundException(id));
 
@@ -115,19 +116,19 @@ public class OrderResource {
 
         var response = new PaymentStatusResponse(
                 attempts, maxPaymentAttempts, paymentStatus, order.status().name(), canRetry);
-        return Response.ok(new DataResponse<>(response)).build();
+        return new DataResponse<>(response);
     }
 
     @POST
     @Path("/{id}/payment")
-    public Response initiatePayment(@PathParam("id") Long id, @Valid InitiatePaymentRequest request) {
+    public DataResponse<InitiatePaymentResponse> initiatePayment(@PathParam("id") Long id, @Valid InitiatePaymentRequest request) {
         validateUrlOrigin(request.successUrl());
         validateUrlOrigin(request.cancelUrl());
 
         var command = new InitiatePaymentCommand(id, request.successUrl(), request.cancelUrl());
         PaymentSession session = initiatePaymentUseCase.execute(command);
         var response = new InitiatePaymentResponse(session.checkoutUrl());
-        return Response.ok(new DataResponse<>(response)).build();
+        return new DataResponse<>(response);
     }
 
     private void validateUrlOrigin(String url) {

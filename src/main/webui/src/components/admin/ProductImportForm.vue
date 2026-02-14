@@ -1,7 +1,17 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import Button from '@/components/ui/Button.vue'
-import type { ImportResult } from '@/types/product'
+
+interface ImportError {
+  line: number
+  reason: string
+}
+
+interface ImportResult {
+  imported: number
+  errors: number
+  errorDetails: ImportError[]
+}
 
 defineProps<{
   loading?: boolean

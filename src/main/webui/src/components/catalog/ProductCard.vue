@@ -1,15 +1,15 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import type { Product } from '@/types/product'
+import type { ProductResponse } from '@/api/generated/model'
 import Card from '@/components/ui/Card.vue'
 import Button from '@/components/ui/Button.vue'
 
 const props = defineProps<{
-  product: Product
+  product: ProductResponse
 }>()
 
 const emit = defineEmits<{
-  add: [product: Product]
+  add: [product: ProductResponse]
 }>()
 
 const isExhausted = computed(() => props.product.stock === 0)
