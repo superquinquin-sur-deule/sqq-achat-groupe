@@ -3,13 +3,13 @@ package fr.sqq.achatgroupe.infrastructure.out.persistence.mapper;
 import fr.sqq.achatgroupe.domain.model.vente.Vente;
 import fr.sqq.achatgroupe.domain.model.vente.VenteStatus;
 import fr.sqq.achatgroupe.infrastructure.out.persistence.entity.VenteEntity;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 
-public class VentePersistenceMapper {
+@Mapper(componentModel = "cdi")
+public interface VentePersistenceMapper {
 
-    private VentePersistenceMapper() {
-    }
-
-    public static Vente toDomain(VenteEntity entity) {
+    default Vente toDomain(VenteEntity entity) {
         return new Vente(
                 entity.getId(),
                 entity.getName(),
@@ -21,15 +21,12 @@ public class VentePersistenceMapper {
         );
     }
 
-    public static VenteEntity toEntity(Vente domain) {
-        var entity = new VenteEntity();
-        entity.setId(domain.id());
-        entity.setName(domain.name());
-        entity.setDescription(domain.description());
-        entity.setStatus(domain.status().name());
-        entity.setStartDate(domain.startDate());
-        entity.setEndDate(domain.endDate());
-        entity.setCreatedAt(domain.createdAt());
-        return entity;
-    }
+    @Mapping(target = "id", expression = "java(domain.id())")
+    @Mapping(target = "name", expression = "java(domain.name())")
+    @Mapping(target = "description", expression = "java(domain.description())")
+    @Mapping(target = "status", expression = "java(domain.status().name())")
+    @Mapping(target = "startDate", expression = "java(domain.startDate())")
+    @Mapping(target = "endDate", expression = "java(domain.endDate())")
+    @Mapping(target = "createdAt", expression = "java(domain.createdAt())")
+    VenteEntity toEntity(Vente domain);
 }

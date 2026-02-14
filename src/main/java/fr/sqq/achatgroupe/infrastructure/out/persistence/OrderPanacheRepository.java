@@ -8,6 +8,7 @@ import fr.sqq.achatgroupe.infrastructure.out.persistence.entity.OrderEntity;
 import fr.sqq.achatgroupe.infrastructure.out.persistence.mapper.OrderPersistenceMapper;
 import io.quarkus.hibernate.orm.panache.PanacheRepositoryBase;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -17,23 +18,26 @@ import java.util.Optional;
 @ApplicationScoped
 public class OrderPanacheRepository implements OrderRepository, PanacheRepositoryBase<OrderEntity, Long> {
 
+    @Inject
+    OrderPersistenceMapper mapper;
+
     @Override
     public Order save(Order order) {
-        OrderEntity entity = OrderPersistenceMapper.toEntity(order);
+        OrderEntity entity = mapper.toEntity(order);
         entity = getEntityManager().merge(entity);
-        return OrderPersistenceMapper.toDomain(entity);
+        return mapper.toDomain(entity);
     }
 
     @Override
     public Optional<Order> findOrderById(Long id) {
         return find("id", id).firstResultOptional()
-                .map(OrderPersistenceMapper::toDomain);
+                .map(mapper::toDomain);
     }
 
     @Override
     public List<Order> findPendingOrdersBefore(Instant cutoff) {
         return list("status = ?1 and createdAt < ?2", "PENDING", cutoff).stream()
-                .map(OrderPersistenceMapper::toDomain)
+                .map(mapper::toDomain)
                 .toList();
     }
 
@@ -60,7 +64,7 @@ public class OrderPanacheRepository implements OrderRepository, PanacheRepositor
     public List<Order> findPaidByVenteId(Long venteId) {
         return list("venteId = ?1 AND status IN ?2 ORDER BY createdAt DESC",
                 venteId, List.of("PAID", "PICKED_UP")).stream()
-                .map(OrderPersistenceMapper::toDomain)
+                .map(mapper::toDomain)
                 .toList();
     }
 

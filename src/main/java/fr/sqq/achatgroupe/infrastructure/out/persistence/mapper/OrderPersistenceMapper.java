@@ -7,17 +7,16 @@ import fr.sqq.achatgroupe.domain.model.order.OrderNumber;
 import fr.sqq.achatgroupe.domain.model.order.OrderStatus;
 import fr.sqq.achatgroupe.infrastructure.out.persistence.entity.OrderEntity;
 import fr.sqq.achatgroupe.infrastructure.out.persistence.entity.OrderItemEntity;
+import org.mapstruct.Mapper;
 
 import java.util.List;
 
-public class OrderPersistenceMapper {
+@Mapper(componentModel = "cdi")
+public interface OrderPersistenceMapper {
 
-    private OrderPersistenceMapper() {
-    }
-
-    public static Order toDomain(OrderEntity entity) {
+    default Order toDomain(OrderEntity entity) {
         List<OrderItem> items = entity.getItems().stream()
-                .map(OrderPersistenceMapper::toDomain)
+                .map(this::toDomain)
                 .toList();
 
         return new Order(
@@ -33,16 +32,9 @@ public class OrderPersistenceMapper {
         );
     }
 
-    public static OrderItem toDomain(OrderItemEntity entity) {
-        return new OrderItem(
-                entity.getId(),
-                entity.getProductId(),
-                entity.getQuantity(),
-                entity.getUnitPrice()
-        );
-    }
+    OrderItem toDomain(OrderItemEntity entity);
 
-    public static OrderEntity toEntity(Order domain) {
+    default OrderEntity toEntity(Order domain) {
         var entity = new OrderEntity();
         entity.setId(domain.id());
         entity.setVenteId(domain.venteId());
@@ -63,7 +55,7 @@ public class OrderPersistenceMapper {
         return entity;
     }
 
-    public static OrderItemEntity toEntity(OrderItem domain, OrderEntity orderEntity) {
+    default OrderItemEntity toEntity(OrderItem domain, OrderEntity orderEntity) {
         var entity = new OrderItemEntity();
         entity.setId(domain.id());
         entity.setOrder(orderEntity);

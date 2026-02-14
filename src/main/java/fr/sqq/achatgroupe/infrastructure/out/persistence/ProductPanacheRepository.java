@@ -4,8 +4,10 @@ import fr.sqq.achatgroupe.domain.model.catalog.Product;
 import fr.sqq.achatgroupe.domain.model.catalog.ProductId;
 import fr.sqq.achatgroupe.application.port.out.ProductRepository;
 import fr.sqq.achatgroupe.infrastructure.out.persistence.entity.ProductEntity;
+import fr.sqq.achatgroupe.infrastructure.out.persistence.mapper.ProductPersistenceMapper;
 import io.quarkus.hibernate.orm.panache.PanacheRepositoryBase;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 
 import java.util.List;
 import java.util.Optional;
@@ -13,23 +15,26 @@ import java.util.Optional;
 @ApplicationScoped
 public class ProductPanacheRepository implements ProductRepository, PanacheRepositoryBase<ProductEntity, Long> {
 
+    @Inject
+    ProductPersistenceMapper mapper;
+
     @Override
     public List<Product> findAllActiveByVenteId(Long venteId) {
         return list("active = true and venteId = ?1", venteId).stream()
-                .map(ProductPersistenceMapper::toDomain)
+                .map(mapper::toDomain)
                 .toList();
     }
 
     @Override
     public Optional<Product> findById(ProductId id) {
         return find("id", id.value()).firstResultOptional()
-                .map(ProductPersistenceMapper::toDomain);
+                .map(mapper::toDomain);
     }
 
     @Override
     public List<Product> findAllByVenteId(Long venteId) {
         return list("venteId = ?1", venteId).stream()
-                .map(ProductPersistenceMapper::toDomain)
+                .map(mapper::toDomain)
                 .toList();
     }
 
@@ -46,9 +51,9 @@ public class ProductPanacheRepository implements ProductRepository, PanacheRepos
 
     @Override
     public Product saveNew(Product product) {
-        ProductEntity entity = ProductPersistenceMapper.toEntity(product);
+        ProductEntity entity = mapper.toEntity(product);
         persist(entity);
-        return ProductPersistenceMapper.toDomain(entity);
+        return mapper.toDomain(entity);
     }
 
     @Override

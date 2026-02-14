@@ -3,13 +3,13 @@ package fr.sqq.achatgroupe.infrastructure.out.persistence.mapper;
 import fr.sqq.achatgroupe.domain.model.payment.Payment;
 import fr.sqq.achatgroupe.domain.model.payment.PaymentStatus;
 import fr.sqq.achatgroupe.infrastructure.out.persistence.entity.PaymentEntity;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 
-public class PaymentPersistenceMapper {
+@Mapper(componentModel = "cdi")
+public interface PaymentPersistenceMapper {
 
-    private PaymentPersistenceMapper() {
-    }
-
-    public static Payment toDomain(PaymentEntity entity) {
+    default Payment toDomain(PaymentEntity entity) {
         return new Payment(
                 entity.getId(),
                 entity.getOrderId(),
@@ -23,17 +23,14 @@ public class PaymentPersistenceMapper {
         );
     }
 
-    public static PaymentEntity toEntity(Payment domain) {
-        var entity = new PaymentEntity();
-        entity.setId(domain.id());
-        entity.setOrderId(domain.orderId());
-        entity.setAmount(domain.amount());
-        entity.setStripePaymentId(domain.stripePaymentId());
-        entity.setStatus(domain.status().name());
-        entity.setAttempts(domain.attempts());
-        entity.setCreatedAt(domain.createdAt());
-        entity.setUpdatedAt(domain.updatedAt());
-        entity.setVersion(domain.version());
-        return entity;
-    }
+    @Mapping(target = "id", expression = "java(domain.id())")
+    @Mapping(target = "orderId", expression = "java(domain.orderId())")
+    @Mapping(target = "amount", expression = "java(domain.amount())")
+    @Mapping(target = "stripePaymentId", expression = "java(domain.stripePaymentId())")
+    @Mapping(target = "status", expression = "java(domain.status().name())")
+    @Mapping(target = "attempts", expression = "java(domain.attempts())")
+    @Mapping(target = "createdAt", expression = "java(domain.createdAt())")
+    @Mapping(target = "updatedAt", expression = "java(domain.updatedAt())")
+    @Mapping(target = "version", expression = "java(domain.version())")
+    PaymentEntity toEntity(Payment domain);
 }

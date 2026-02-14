@@ -2,33 +2,20 @@ package fr.sqq.achatgroupe.infrastructure.out.persistence.mapper;
 
 import fr.sqq.achatgroupe.domain.model.planning.TimeSlot;
 import fr.sqq.achatgroupe.infrastructure.out.persistence.entity.TimeSlotEntity;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 
-public class TimeSlotPersistenceMapper {
+@Mapper(componentModel = "cdi")
+public interface TimeSlotPersistenceMapper {
 
-    private TimeSlotPersistenceMapper() {
-    }
+    TimeSlot toDomain(TimeSlotEntity entity);
 
-    public static TimeSlot toDomain(TimeSlotEntity entity) {
-        return new TimeSlot(
-                entity.getId(),
-                entity.getVenteId(),
-                entity.getDate(),
-                entity.getStartTime(),
-                entity.getEndTime(),
-                entity.getCapacity(),
-                entity.getReserved()
-        );
-    }
-
-    public static TimeSlotEntity toEntity(TimeSlot domain) {
-        var entity = new TimeSlotEntity();
-        entity.setId(domain.id());
-        entity.setVenteId(domain.venteId());
-        entity.setDate(domain.date());
-        entity.setStartTime(domain.startTime());
-        entity.setEndTime(domain.endTime());
-        entity.setCapacity(domain.capacity());
-        entity.setReserved(domain.reserved());
-        return entity;
-    }
+    @Mapping(target = "id", expression = "java(domain.id())")
+    @Mapping(target = "venteId", expression = "java(domain.venteId())")
+    @Mapping(target = "date", expression = "java(domain.date())")
+    @Mapping(target = "startTime", expression = "java(domain.startTime())")
+    @Mapping(target = "endTime", expression = "java(domain.endTime())")
+    @Mapping(target = "capacity", expression = "java(domain.capacity())")
+    @Mapping(target = "reserved", expression = "java(domain.reserved())")
+    TimeSlotEntity toEntity(TimeSlot domain);
 }
