@@ -148,24 +148,20 @@ public class BackofficeSupplierOrderSteps {
 
     @Étantdonnéque("une vente sans commande pour le bon fournisseur")
     public void uneVenteSansCommandePourLeBonFournisseur() {
-        LocalDate futureDate = LocalDate.now().plusDays(30);
-
         var response = RestAssured.given()
                 .contentType(ContentType.JSON)
                 .body("""
                         {
                             "name": "Vente Vide %d",
                             "description": "Vente sans commande",
-                            "products": [
-                                {"name": "Produit X", "description": "Desc", "price": 5.00, "supplier": "Fournisseur X", "stock": 10}
-                            ],
-                            "timeSlots": [
-                                {"date": "%s", "startTime": "10:00", "endTime": "11:00", "capacity": 10}
-                            ]
+                            "startDate": "%s",
+                            "endDate": "%s"
                         }
-                        """.formatted(System.nanoTime(), futureDate))
+                        """.formatted(System.nanoTime(),
+                        java.time.Instant.now().minus(1, java.time.temporal.ChronoUnit.DAYS),
+                        java.time.Instant.now().plus(60, java.time.temporal.ChronoUnit.DAYS)))
                 .when()
-                .post("/api/ventes")
+                .post("/api/admin/ventes")
                 .then()
                 .statusCode(201)
                 .extract()

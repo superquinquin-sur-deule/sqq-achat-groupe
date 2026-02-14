@@ -7,7 +7,10 @@ import io.restassured.http.ContentType;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
+import java.time.Instant;
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.List;
 
 @ApplicationScoped
@@ -23,42 +26,101 @@ public class VenteSteps {
 
     private void createVente() {
         LocalDate futureDate = LocalDate.now().plusDays(30);
+        Instant startDate = Instant.now().minus(1, ChronoUnit.DAYS);
+        Instant endDate = Instant.now().plus(60, ChronoUnit.DAYS);
 
-        String body = """
+        // 1. Create vente via admin endpoint
+        String venteBody = """
                 {
                     "name": "Vente Test %d",
                     "description": "Vente de test automatisée",
-                    "products": [
-                        {"name": "Tomates bio", "description": "Tomates grappe biologiques cultivées localement", "price": 3.50, "supplier": "Ferme du Soleil", "stock": 25},
-                        {"name": "Pain de campagne", "description": "Pain artisanal au levain naturel, 500g", "price": 4.20, "supplier": "Boulangerie Martin", "stock": 15},
-                        {"name": "Miel de fleurs", "description": "Miel toutes fleurs récolté en Île-de-France, 250g", "price": 8.90, "supplier": "Rucher des Lilas", "stock": 10},
-                        {"name": "Pommes Gala", "description": "Pommes Gala croquantes du verger, 1kg", "price": 2.80, "supplier": "Verger Dupont", "stock": 0},
-                        {"name": "Fromage de chèvre", "description": "Fromage frais de chèvre fermier, 200g", "price": 5.60, "supplier": "Chèvrerie du Val", "stock": 8}
-                    ],
-                    "timeSlots": [
-                        {"date": "%s", "startTime": "10:00", "endTime": "11:00", "capacity": 30},
-                        {"date": "%s", "startTime": "11:00", "endTime": "12:00", "capacity": 30},
-                        {"date": "%s", "startTime": "14:00", "endTime": "15:00", "capacity": 30},
-                        {"date": "%s", "startTime": "15:00", "endTime": "16:00", "capacity": 30}
-                    ]
+                    "startDate": "%s",
+                    "endDate": "%s"
                 }
-                """.formatted(
-                        System.nanoTime(),
-                        futureDate, futureDate, futureDate, futureDate
-                );
+                """.formatted(System.nanoTime(), startDate, endDate);
 
-        var response = RestAssured.given()
+        Long venteId = RestAssured.given()
                 .contentType(ContentType.JSON)
-                .body(body)
+                .body(venteBody)
                 .when()
-                .post("/api/ventes")
+                .post("/api/admin/ventes")
                 .then()
                 .statusCode(201)
                 .extract()
-                .jsonPath();
+                .jsonPath()
+                .getLong("data.id");
 
-        testContext.setVenteId(response.getLong("data.id"));
-        testContext.setProductIds(response.getList("data.productIds", Long.class));
-        testContext.setTimeSlotIds(response.getList("data.timeSlotIds", Long.class));
+        testContext.setVenteId(venteId);
+
+        // 2. Create products via admin endpoint
+        List<String> products = List.of(
+                """
+                {"venteId": %d, "name": "Tomates bio", "description": "Tomates grappe biologiques cultivées localement", "price": 3.50, "supplier": "Ferme du Soleil", "stock": 25}
+                """.formatted(venteId),
+                """
+                {"venteId": %d, "name": "Pain de campagne", "description": "Pain artisanal au levain naturel, 500g", "price": 4.20, "supplier": "Boulangerie Martin", "stock": 15}
+                """.formatted(venteId),
+                """
+                {"venteId": %d, "name": "Miel de fleurs", "description": "Miel toutes fleurs récolté en Île-de-France, 250g", "price": 8.90, "supplier": "Rucher des Lilas", "stock": 10}
+                """.formatted(venteId),
+                """
+                {"venteId": %d, "name": "Pommes Gala", "description": "Pommes Gala croquantes du verger, 1kg", "price": 2.80, "supplier": "Verger Dupont", "stock": 0}
+                """.formatted(venteId),
+                """
+                {"venteId": %d, "name": "Fromage de chèvre", "description": "Fromage frais de chèvre fermier, 200g", "price": 5.60, "supplier": "Chèvrerie du Val", "stock": 8}
+                """.formatted(venteId)
+        );
+
+        List<Long> productIds = new ArrayList<>();
+        for (String productBody : products) {
+            Long productId = RestAssured.given()
+                    .contentType(ContentType.JSON)
+                    .body(productBody)
+                    .when()
+                    .post("/api/admin/products")
+                    .then()
+                    .statusCode(200)
+                    .extract()
+                    .jsonPath()
+                    .getLong("data.id");
+            productIds.add(productId);
+        }
+        testContext.setProductIds(productIds);
+
+        // 3. Create time slots via admin endpoint
+        List<Long> timeSlotIds = new ArrayList<>();
+        String[][] slots = {
+                {"10:00", "11:00"},
+                {"11:00", "12:00"},
+                {"14:00", "15:00"},
+                {"15:00", "16:00"}
+        };
+
+        for (String[] slot : slots) {
+            String timeSlotBody = """
+                    {"venteId": %d, "date": "%s", "startTime": "%s", "endTime": "%s", "capacity": 30}
+                    """.formatted(venteId, futureDate, slot[0], slot[1]);
+
+            Long timeSlotId = RestAssured.given()
+                    .contentType(ContentType.JSON)
+                    .body(timeSlotBody)
+                    .when()
+                    .post("/api/admin/timeslots")
+                    .then()
+                    .statusCode(200)
+                    .extract()
+                    .jsonPath()
+                    .getLong("data.id");
+            timeSlotIds.add(timeSlotId);
+        }
+        testContext.setTimeSlotIds(timeSlotIds);
+
+        // 4. Activate the vente
+        RestAssured.given()
+                .contentType(ContentType.JSON)
+                .when()
+                .put("/api/admin/ventes/" + venteId + "/activate")
+                .then()
+                .statusCode(200);
     }
 }
