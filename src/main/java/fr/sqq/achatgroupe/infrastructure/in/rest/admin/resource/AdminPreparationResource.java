@@ -3,7 +3,7 @@ package fr.sqq.achatgroupe.infrastructure.in.rest.admin.resource;
 import fr.sqq.achatgroupe.application.port.in.GeneratePreparationListUseCase;
 import fr.sqq.achatgroupe.application.port.in.GeneratePreparationListUseCase.PreparationOrder;
 import fr.sqq.achatgroupe.application.service.PreparationPdfGenerator;
-import fr.sqq.achatgroupe.infrastructure.in.rest.admin.mapper.BackofficePreparationRestMapper;
+import fr.sqq.achatgroupe.infrastructure.in.rest.admin.mapper.AdminPreparationRestMapper;
 import fr.sqq.achatgroupe.infrastructure.in.rest.common.dto.DataResponse;
 import fr.sqq.achatgroupe.infrastructure.in.rest.common.dto.PreparationOrderResponse;
 import jakarta.ws.rs.*;
@@ -16,19 +16,19 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
 
-@Path("/api/backoffice/preparation")
+@Path("/api/admin/preparation")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-@Tag(name = "backoffice-preparation")
-public class BackofficePreparationResource {
+@Tag(name = "admin-preparation")
+public class AdminPreparationResource {
 
     private final GeneratePreparationListUseCase generatePreparationList;
     private final PreparationPdfGenerator pdfGenerator;
-    private final BackofficePreparationRestMapper mapper;
+    private final AdminPreparationRestMapper mapper;
 
-    public BackofficePreparationResource(GeneratePreparationListUseCase generatePreparationList,
-                                         PreparationPdfGenerator pdfGenerator,
-                                         BackofficePreparationRestMapper mapper) {
+    public AdminPreparationResource(GeneratePreparationListUseCase generatePreparationList,
+                                    PreparationPdfGenerator pdfGenerator,
+                                    AdminPreparationRestMapper mapper) {
         this.generatePreparationList = generatePreparationList;
         this.pdfGenerator = pdfGenerator;
         this.mapper = mapper;

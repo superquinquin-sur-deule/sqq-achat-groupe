@@ -6,7 +6,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 
-public record BackofficeOrderDetailResponse(
+public record AdminOrderDetailResponse(
         Long id,
         String orderNumber,
         String status,

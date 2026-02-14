@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
-import { getApiBackofficeSupplierOrders } from '@/api/generated/backoffice-supplier-orders/backoffice-supplier-orders'
+import { getApiAdminSupplierOrders } from '@/api/generated/admin-supplier-orders/admin-supplier-orders'
 import { useVenteStore } from '@/stores/venteStore'
 import { storeToRefs } from 'pinia'
 import { useToast } from '@/composables/useToast'
@@ -37,7 +37,7 @@ function handlePrint() {
 
 async function handleExportXls() {
   if (!selectedVenteId.value) return
-  const response = await fetch(`/api/backoffice/supplier-orders/xlsx?venteId=${selectedVenteId.value}`)
+  const response = await fetch(`/api/admin/supplier-orders/xlsx?venteId=${selectedVenteId.value}`)
   const blob = await response.blob()
   const disposition = response.headers.get('Content-Disposition')
   const match = disposition?.match(/filename="?(.+?)"?$/)
@@ -55,7 +55,7 @@ async function handleExportXls() {
 async function loadData(venteId: number) {
   loading.value = true
   try {
-    const response = await getApiBackofficeSupplierOrders({ venteId })
+    const response = await getApiAdminSupplierOrders({ venteId })
     lines.value = response.data.data ?? []
   } catch {
     toast.error('Erreur lors du chargement du bon fournisseur')

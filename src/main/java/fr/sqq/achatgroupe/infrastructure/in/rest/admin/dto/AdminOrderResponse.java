@@ -3,7 +3,7 @@ package fr.sqq.achatgroupe.infrastructure.in.rest.admin.dto;
 import java.math.BigDecimal;
 import java.time.Instant;
 
-public record BackofficeOrderResponse(
+public record AdminOrderResponse(
         Long id,
         String orderNumber,
         String customerName,

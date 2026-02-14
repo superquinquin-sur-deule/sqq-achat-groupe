@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
-import { getApiBackofficePreparation } from '@/api/generated/backoffice-preparation/backoffice-preparation'
+import { getApiAdminPreparation } from '@/api/generated/admin-preparation/admin-preparation'
 import { useVenteStore } from '@/stores/venteStore'
 import { storeToRefs } from 'pinia'
 import { useToast } from '@/composables/useToast'
@@ -58,13 +58,13 @@ const todayFormatted = computed(() => {
 
 function handlePrint() {
   if (!selectedVenteId.value) return
-  window.open(`/api/backoffice/preparation/pdf?venteId=${selectedVenteId.value}`, '_blank')
+  window.open(`/api/admin/preparation/pdf?venteId=${selectedVenteId.value}`, '_blank')
 }
 
 async function loadData(venteId: number) {
   loading.value = true
   try {
-    const response = await getApiBackofficePreparation({ venteId })
+    const response = await getApiAdminPreparation({ venteId })
     orders.value = response.data.data ?? []
   } catch {
     toast.error('Erreur lors du chargement des listes de préparation')

@@ -1,17 +1,17 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
-import { getApiBackofficeOrders, putApiBackofficeOrdersIdPickup } from '@/api/generated/backoffice-orders/backoffice-orders'
+import { getApiAdminOrders, putApiAdminOrdersIdPickup } from '@/api/generated/admin-orders/admin-orders'
 import { useVenteStore } from '@/stores/venteStore'
 import { storeToRefs } from 'pinia'
 import { useToast } from '@/composables/useToast'
 import { statusLabel, statusClasses } from '@/utils/order-formatters'
-import type { BackofficeOrderResponse } from '@/api/generated/model'
+import type { AdminOrderResponse } from '@/api/generated/model'
 
 const toast = useToast()
 const venteStore = useVenteStore()
 const { selectedVenteId } = storeToRefs(venteStore)
 
-const orders = ref<BackofficeOrderResponse[]>([])
+const orders = ref<AdminOrderResponse[]>([])
 const loading = ref(false)
 const searchQuery = ref('')
 const selectedSlot = ref('')
@@ -76,7 +76,7 @@ async function handlePickup(orderId: number) {
   order.status = 'PICKED_UP'
 
   try {
-    await putApiBackofficeOrdersIdPickup(orderId)
+    await putApiAdminOrdersIdPickup(orderId)
     toast.success('Commande marquée comme récupérée')
   } catch {
     order.status = previousStatus
@@ -89,7 +89,7 @@ async function handlePickup(orderId: number) {
 async function loadData(venteId: number) {
   loading.value = true
   try {
-    const response = await getApiBackofficeOrders({ venteId })
+    const response = await getApiAdminOrders({ venteId })
     orders.value = response.data.data ?? []
   } catch {
     toast.error('Erreur lors du chargement des commandes')

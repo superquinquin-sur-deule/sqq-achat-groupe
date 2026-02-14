@@ -1,22 +1,22 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRoute, RouterLink } from 'vue-router'
-import { getApiBackofficeOrdersId } from '@/api/generated/backoffice-orders/backoffice-orders'
+import { getApiAdminOrdersId } from '@/api/generated/admin-orders/admin-orders'
 import { useToast } from '@/composables/useToast'
 import { formatPrice, statusLabel, statusClasses } from '@/utils/order-formatters'
-import type { BackofficeOrderDetailResponse } from '@/api/generated/model'
+import type { AdminOrderDetailResponse } from '@/api/generated/model'
 
 const route = useRoute()
 const toast = useToast()
 
-const order = ref<BackofficeOrderDetailResponse | null>(null)
+const order = ref<AdminOrderDetailResponse | null>(null)
 const loading = ref(false)
 
 async function loadOrder() {
   const orderId = Number(route.params.id)
   loading.value = true
   try {
-    const response = await getApiBackofficeOrdersId(orderId)
+    const response = await getApiAdminOrdersId(orderId)
     order.value = response.data.data ?? null
   } catch {
     toast.error('Erreur lors du chargement de la commande')

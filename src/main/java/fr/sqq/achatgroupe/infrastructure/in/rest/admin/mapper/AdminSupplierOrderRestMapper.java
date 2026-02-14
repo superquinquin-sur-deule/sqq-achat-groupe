@@ -7,7 +7,7 @@ import org.mapstruct.Mapper;
 import java.util.List;
 
 @Mapper(componentModel = "cdi")
-public interface BackofficeSupplierOrderRestMapper {
+public interface AdminSupplierOrderRestMapper {
 
     List<SupplierOrderLineResponse> toResponse(List<SupplierOrderLine> lines);
 

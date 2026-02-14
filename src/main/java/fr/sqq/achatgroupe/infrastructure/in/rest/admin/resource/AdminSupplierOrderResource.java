@@ -3,7 +3,7 @@ package fr.sqq.achatgroupe.infrastructure.in.rest.admin.resource;
 import fr.sqq.achatgroupe.application.port.in.GenerateSupplierOrderUseCase;
 import fr.sqq.achatgroupe.application.port.in.GenerateSupplierOrderUseCase.SupplierOrderLine;
 import fr.sqq.achatgroupe.application.service.SupplierOrderExcelGenerator;
-import fr.sqq.achatgroupe.infrastructure.in.rest.admin.mapper.BackofficeSupplierOrderRestMapper;
+import fr.sqq.achatgroupe.infrastructure.in.rest.admin.mapper.AdminSupplierOrderRestMapper;
 import fr.sqq.achatgroupe.infrastructure.in.rest.common.dto.DataResponse;
 import fr.sqq.achatgroupe.infrastructure.in.rest.common.dto.SupplierOrderLineResponse;
 import jakarta.ws.rs.*;
@@ -16,19 +16,19 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
 
-@Path("/api/backoffice/supplier-orders")
+@Path("/api/admin/supplier-orders")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-@Tag(name = "backoffice-supplier-orders")
-public class BackofficeSupplierOrderResource {
+@Tag(name = "admin-supplier-orders")
+public class AdminSupplierOrderResource {
 
     private final GenerateSupplierOrderUseCase generateSupplierOrder;
     private final SupplierOrderExcelGenerator excelGenerator;
-    private final BackofficeSupplierOrderRestMapper mapper;
+    private final AdminSupplierOrderRestMapper mapper;
 
-    public BackofficeSupplierOrderResource(GenerateSupplierOrderUseCase generateSupplierOrder,
-                                           SupplierOrderExcelGenerator excelGenerator,
-                                           BackofficeSupplierOrderRestMapper mapper) {
+    public AdminSupplierOrderResource(GenerateSupplierOrderUseCase generateSupplierOrder,
+                                      SupplierOrderExcelGenerator excelGenerator,
+                                      AdminSupplierOrderRestMapper mapper) {
         this.generateSupplierOrder = generateSupplierOrder;
         this.excelGenerator = excelGenerator;
         this.mapper = mapper;

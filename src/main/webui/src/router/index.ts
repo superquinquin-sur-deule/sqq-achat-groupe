@@ -66,37 +66,30 @@ const router = createRouter({
         {
           path: 'orders',
           name: 'admin-orders',
-          component: () => import('@/views/backoffice/BackofficeOrdersView.vue'),
+          component: () => import('@/views/admin/AdminOrdersView.vue'),
         },
         {
           path: 'orders/:id',
           name: 'admin-order-detail',
-          component: () => import('@/views/backoffice/BackofficeOrderDetailView.vue'),
+          component: () => import('@/views/admin/AdminOrderDetailView.vue'),
         },
         {
           path: 'supplier-order',
           name: 'admin-supplier-order',
-          component: () => import('@/views/backoffice/BackofficeSupplierOrderView.vue'),
+          component: () => import('@/views/admin/AdminSupplierOrderView.vue'),
         },
         {
           path: 'preparation',
           name: 'admin-preparation',
-          component: () => import('@/views/backoffice/BackofficePreparationView.vue'),
+          component: () => import('@/views/admin/AdminPreparationView.vue'),
         },
         {
           path: 'distribution',
           name: 'admin-distribution',
-          component: () => import('@/views/backoffice/BackofficeDistributionView.vue'),
+          component: () => import('@/views/admin/AdminDistributionView.vue'),
         },
       ],
     },
-    // Backward-compatibility redirects
-    { path: '/backoffice', redirect: '/admin/orders' },
-    { path: '/backoffice/orders', redirect: '/admin/orders' },
-    { path: '/backoffice/orders/:id', redirect: (to) => `/admin/orders/${to.params.id}` },
-    { path: '/backoffice/supplier-order', redirect: '/admin/supplier-order' },
-    { path: '/backoffice/preparation', redirect: '/admin/preparation' },
-    { path: '/backoffice/distribution', redirect: '/admin/distribution' },
   ],
 })
 

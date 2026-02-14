@@ -8,7 +8,7 @@ import org.mapstruct.Mapper;
 import java.util.List;
 
 @Mapper(componentModel = "cdi")
-public interface BackofficePreparationRestMapper {
+public interface AdminPreparationRestMapper {
 
     default List<PreparationOrderResponse> toResponse(List<PreparationOrder> orders) {
         return orders.stream()

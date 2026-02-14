@@ -8,9 +8,9 @@ import fr.sqq.achatgroupe.application.port.in.MarkOrderPickedUpUseCase;
 import fr.sqq.achatgroupe.domain.model.catalog.Product;
 import fr.sqq.achatgroupe.domain.model.order.Order;
 import fr.sqq.achatgroupe.domain.model.planning.TimeSlot;
-import fr.sqq.achatgroupe.infrastructure.in.rest.admin.mapper.BackofficeOrderRestMapper;
-import fr.sqq.achatgroupe.infrastructure.in.rest.admin.dto.BackofficeOrderDetailResponse;
-import fr.sqq.achatgroupe.infrastructure.in.rest.admin.dto.BackofficeOrderResponse;
+import fr.sqq.achatgroupe.infrastructure.in.rest.admin.mapper.AdminOrderRestMapper;
+import fr.sqq.achatgroupe.infrastructure.in.rest.admin.dto.AdminOrderDetailResponse;
+import fr.sqq.achatgroupe.infrastructure.in.rest.admin.dto.AdminOrderResponse;
 import fr.sqq.achatgroupe.infrastructure.in.rest.common.dto.DataResponse;
 import fr.sqq.achatgroupe.infrastructure.in.rest.common.dto.ProblemDetailResponse;
 import jakarta.ws.rs.*;
@@ -24,26 +24,26 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-@Path("/api/backoffice/orders")
+@Path("/api/admin/orders")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
-@Tag(name = "backoffice-orders")
-public class BackofficeOrderResource {
+@Tag(name = "admin-orders")
+public class AdminOrderResource {
 
     private final ListOrdersUseCase listOrders;
     private final GetOrderDetailsUseCase getOrderDetails;
     private final ManageTimeSlotsUseCase manageTimeSlots;
     private final ManageProductsUseCase manageProducts;
     private final MarkOrderPickedUpUseCase markOrderPickedUp;
-    private final BackofficeOrderRestMapper mapper;
+    private final AdminOrderRestMapper mapper;
 
-    public BackofficeOrderResource(
+    public AdminOrderResource(
             ListOrdersUseCase listOrders,
             GetOrderDetailsUseCase getOrderDetails,
             ManageTimeSlotsUseCase manageTimeSlots,
             ManageProductsUseCase manageProducts,
             MarkOrderPickedUpUseCase markOrderPickedUp,
-            BackofficeOrderRestMapper mapper) {
+            AdminOrderRestMapper mapper) {
         this.listOrders = listOrders;
         this.getOrderDetails = getOrderDetails;
         this.manageTimeSlots = manageTimeSlots;
@@ -53,7 +53,7 @@ public class BackofficeOrderResource {
     }
 
     @GET
-    public DataResponse<List<BackofficeOrderResponse>> listOrders(@QueryParam("venteId") Long venteId) {
+    public DataResponse<List<AdminOrderResponse>> listOrders(@QueryParam("venteId") Long venteId) {
         if (venteId == null) {
             throw new BadRequestException("venteId is required");
         }
@@ -81,7 +81,7 @@ public class BackofficeOrderResource {
 
     @GET
     @Path("/{id}")
-    public DataResponse<BackofficeOrderDetailResponse> getOrderDetail(@PathParam("id") Long id) {
+    public DataResponse<AdminOrderDetailResponse> getOrderDetail(@PathParam("id") Long id) {
         Order order = getOrderDetails.getOrderDetails(id);
         Map<Long, TimeSlot> timeSlotsById = manageTimeSlots.listAllTimeSlots(order.venteId()).stream()
                 .collect(Collectors.toMap(TimeSlot::id, Function.identity()));
