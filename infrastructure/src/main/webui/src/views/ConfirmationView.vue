@@ -12,7 +12,7 @@ const cartStore = useCartStore()
 
 const orderId = route.query.orderId as string | undefined
 if (!orderId) {
-  router.replace('/')
+  router.replace({ name: 'ventes' })
 }
 
 const { data: order, isLoading, isError } = useOrderDetailQuery(orderId ?? '', !!orderId)
@@ -25,7 +25,7 @@ watch(order, (value) => {
 
 watch(isError, (error) => {
   if (error) {
-    router.replace('/')
+    router.replace({ name: 'ventes' })
   }
 })
 
@@ -123,7 +123,7 @@ function formatDate(dateStr: string): string {
       <p class="text-sm text-brown">Un email de confirmation vous a été envoyé.</p>
 
       <!-- Back to catalog -->
-      <Button variant="secondary" class="w-full sm:w-auto" @click="router.push('/')">
+      <Button variant="secondary" class="w-full sm:w-auto" @click="router.push({ name: 'ventes' })">
         Retour au catalogue
       </Button>
     </div>

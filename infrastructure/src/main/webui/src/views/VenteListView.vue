@@ -34,7 +34,7 @@ function countdown(endDate: string | null): string | null {
 }
 
 function goToVente(venteId: number) {
-  router.push(`/ventes/${venteId}`)
+  router.push({ name: 'home', params: { venteId } })
 }
 </script>
 

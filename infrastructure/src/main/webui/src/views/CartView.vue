@@ -18,7 +18,7 @@ const steps = [
 ]
 
 function goToCatalogue() {
-  router.push(`/ventes/${venteId}`)
+  router.push({ name: 'home', params: { venteId } })
 }
 </script>
 

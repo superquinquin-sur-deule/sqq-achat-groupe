@@ -16,7 +16,7 @@ const formattedTotal = computed(() =>
 )
 
 function goToCheckout() {
-  router.push(`/ventes/${venteId.value}/checkout`)
+  router.push({ name: 'checkout', params: { venteId: venteId.value } })
 }
 </script>
 

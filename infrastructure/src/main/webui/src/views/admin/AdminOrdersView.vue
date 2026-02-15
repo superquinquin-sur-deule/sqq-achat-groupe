@@ -79,7 +79,7 @@ const filteredOrders = computed(() => {
       >
         <td class="border-t border-gray-100 px-4 py-3">
           <RouterLink
-            :to="`/admin/orders/${order.id}`"
+            :to="{ name: 'admin-order-detail', params: { id: order.id } }"
             class="font-medium text-dark underline decoration-primary/30 hover:decoration-primary"
           >
             {{ order.orderNumber }}

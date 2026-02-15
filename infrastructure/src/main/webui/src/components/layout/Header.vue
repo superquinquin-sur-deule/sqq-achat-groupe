@@ -7,8 +7,12 @@ const cartStore = useCartStore()
 const route = useRoute()
 
 const venteId = computed(() => route.params.venteId as string | undefined)
-const homeLink = computed(() => (venteId.value ? `/ventes/${venteId.value}` : '/'))
-const cartLink = computed(() => (venteId.value ? `/ventes/${venteId.value}/cart` : '/'))
+const homeLink = computed(() =>
+  venteId.value ? { name: 'home', params: { venteId: venteId.value } } : { name: 'ventes' },
+)
+const cartLink = computed(() =>
+  venteId.value ? { name: 'cart', params: { venteId: venteId.value } } : { name: 'ventes' },
+)
 </script>
 
 <template>

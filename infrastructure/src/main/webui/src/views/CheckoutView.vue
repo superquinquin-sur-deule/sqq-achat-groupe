@@ -33,7 +33,7 @@ const steps = [
 
 onMounted(() => {
   if (cartStore.isEmpty) {
-    router.replace(`/ventes/${venteId}`)
+    router.replace({ name: 'home', params: { venteId } })
     return
   }
   checkoutStore.reset()
@@ -71,7 +71,7 @@ async function handleConfirm() {
     <CheckoutForm
       v-if="checkoutStore.currentStep === 2"
       @submit="handleCustomerSubmit"
-      @back="router.push(`/ventes/${venteId}/cart`)"
+      @back="router.push({ name: 'cart', params: { venteId } })"
     />
 
     <TimeSlotPicker

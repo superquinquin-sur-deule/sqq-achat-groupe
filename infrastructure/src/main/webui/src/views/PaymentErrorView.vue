@@ -12,7 +12,7 @@ const isRetrying = ref(false)
 
 const orderId = route.query.orderId as string | undefined
 if (!orderId) {
-  router.replace('/')
+  router.replace({ name: 'ventes' })
 }
 
 const { data: order, isLoading: isLoadingOrder } = useOrderDetailQuery(orderId ?? '', !!orderId)
@@ -30,7 +30,7 @@ const isCancelled = computed(() => {
 
 watch([order, paymentStatus], () => {
   if (!order.value && !isLoading.value && orderId) {
-    router.replace('/')
+    router.replace({ name: 'ventes' })
   }
 })
 
@@ -128,7 +128,7 @@ async function retryPayment() {
         </p>
       </div>
 
-      <Button class="w-full sm:w-auto sm:min-w-[200px]" @click="router.push('/')">
+      <Button class="w-full sm:w-auto sm:min-w-[200px]" @click="router.push({ name: 'ventes' })">
         Retour au catalogue
       </Button>
     </div>
@@ -207,7 +207,7 @@ async function retryPayment() {
         {{ isRetrying ? 'Redirection vers le paiement...' : 'Réessayer le paiement' }}
       </Button>
 
-      <Button variant="secondary" class="w-full sm:w-auto" @click="router.push('/')">
+      <Button variant="secondary" class="w-full sm:w-auto" @click="router.push({ name: 'ventes' })">
         Retour au catalogue
       </Button>
     </div>

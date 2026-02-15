@@ -33,7 +33,7 @@ const router = useRouter()
         </p>
       </div>
 
-      <Button class="w-full sm:w-auto sm:min-w-[200px]" @click="router.push('/')">
+      <Button class="w-full sm:w-auto sm:min-w-[200px]" @click="router.push({ name: 'ventes' })">
         Retour à l'accueil
       </Button>
     </div>
