@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { RouterLink, useRoute } from 'vue-router'
+import { cva } from 'class-variance-authority'
 import { useAuth } from '@/composables/useAuth'
 import { useVenteStore } from '@/stores/venteStore'
 import { storeToRefs } from 'pinia'
@@ -43,6 +44,30 @@ const ventesLinks = [
   { to: '/admin/ventes', label: 'Ventes', testid: 'sidenav-ventes', icon: 'ventes' },
 ]
 
+const navLinkVariants = cva(
+  'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
+  {
+    variants: {
+      active: {
+        true: 'bg-primary text-dark',
+        false: 'text-white/70 hover:bg-white/10 hover:text-white',
+      },
+    },
+  },
+)
+
+const sidebarVariants = cva(
+  'fixed inset-y-0 left-0 z-50 flex w-64 flex-col bg-dark print:hidden transition-transform duration-200 ease-in-out md:translate-x-0',
+  {
+    variants: {
+      open: {
+        true: 'translate-x-0',
+        false: '-translate-x-full',
+      },
+    },
+  },
+)
+
 function isActive(to: string) {
   return route.path === to || route.path.startsWith(to + '/')
 }
@@ -69,15 +94,7 @@ function onVenteChange(event: Event) {
   </Teleport>
 
   <!-- Sidebar -->
-  <aside
-    data-testid="admin-sidenav"
-    :class="[
-      'fixed inset-y-0 left-0 z-50 flex w-64 flex-col bg-dark print:hidden',
-      'transition-transform duration-200 ease-in-out',
-      modelValue ? 'translate-x-0' : '-translate-x-full',
-      'md:translate-x-0',
-    ]"
-  >
+  <aside data-testid="admin-sidenav" :class="sidebarVariants({ open: modelValue })">
     <!-- Logo / titre -->
     <div class="flex h-16 items-center gap-3 px-6">
       <img src="/logo.svg" alt="SuperQuinquin" class="h-8 w-8" />
@@ -109,12 +126,7 @@ function onVenteChange(event: Event) {
           <RouterLink
             :to="link.to"
             :data-testid="link.testid"
-            :class="[
-              'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
-              isActive(link.to)
-                ? 'bg-primary text-dark'
-                : 'text-white/70 hover:bg-white/10 hover:text-white',
-            ]"
+            :class="navLinkVariants({ active: isActive(link.to) })"
             :aria-current="isActive(link.to) ? 'page' : undefined"
             @click="close"
           >
@@ -262,12 +274,7 @@ function onVenteChange(event: Event) {
           <RouterLink
             :to="link.to"
             :data-testid="link.testid"
-            :class="[
-              'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
-              isActive(link.to)
-                ? 'bg-primary text-dark'
-                : 'text-white/70 hover:bg-white/10 hover:text-white',
-            ]"
+            :class="navLinkVariants({ active: isActive(link.to) })"
             :aria-current="isActive(link.to) ? 'page' : undefined"
             @click="close"
           >

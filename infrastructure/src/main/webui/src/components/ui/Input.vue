@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { cva } from 'class-variance-authority'
+
 export interface InputProps {
   modelValue?: string
   label: string
@@ -13,7 +15,7 @@ export interface InputProps {
 
 defineOptions({ inheritAttrs: false })
 
-withDefaults(defineProps<InputProps>(), {
+const props = withDefaults(defineProps<InputProps>(), {
   modelValue: '',
   type: 'text',
   placeholder: '',
@@ -27,6 +29,22 @@ defineEmits<{
   'update:modelValue': [value: string]
   blur: [event: FocusEvent]
 }>()
+
+const inputVariants = cva(
+  'min-h-[44px] rounded-lg border px-3 py-2 text-dark transition-colors focus:outline-2 focus:outline-offset-2 focus:outline-dark',
+  {
+    variants: {
+      error: {
+        true: 'border-red-600 focus:border-red-600',
+        false: 'border-gray-300 focus:border-primary',
+      },
+      disabled: {
+        true: 'cursor-not-allowed border-gray-200 bg-gray-100 opacity-50',
+      },
+    },
+    defaultVariants: { error: false },
+  },
+)
 </script>
 
 <template>
@@ -46,14 +64,7 @@ defineEmits<{
       :aria-describedby="error ? `${id}-error` : undefined"
       :aria-invalid="!!error"
       v-bind="$attrs"
-      :class="[
-        'min-h-[44px] rounded-lg border px-3 py-2 text-dark transition-colors focus:outline-2 focus:outline-offset-2 focus:outline-dark',
-        {
-          'border-gray-300 focus:border-primary': !error && !disabled,
-          'border-red-600 focus:border-red-600': error,
-          'cursor-not-allowed border-gray-200 bg-gray-100 opacity-50': disabled,
-        },
-      ]"
+      :class="inputVariants({ error: !!props.error, disabled: disabled || undefined })"
       @input="$emit('update:modelValue', ($event.target as HTMLInputElement).value)"
       @blur="$emit('blur', $event)"
     />

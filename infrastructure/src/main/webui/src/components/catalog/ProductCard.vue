@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { cva } from 'class-variance-authority'
 import type { ProductResponse } from '@/api/generated/model'
 import Card from '@/components/ui/Card.vue'
 import Button from '@/components/ui/Button.vue'
@@ -26,6 +27,14 @@ const formattedPrice = computed(() =>
     props.product.price,
   ),
 )
+
+const productCardVariants = cva('transition-shadow hover:shadow-md', {
+  variants: {
+    exhausted: {
+      true: 'opacity-50',
+    },
+  },
+})
 
 function handleAdd() {
   if (!isExhausted.value) {
@@ -59,7 +68,7 @@ function onQuantityInput(event: Event) {
   <div
     data-testid="product-card"
     :data-exhausted="isExhausted || undefined"
-    :class="['transition-shadow hover:shadow-md', { 'opacity-50': isExhausted }]"
+    :class="productCardVariants({ exhausted: isExhausted || undefined })"
   >
     <Card>
       <h3 class="text-xl font-semibold text-dark">{{ product.name }}</h3>

@@ -3,6 +3,7 @@ import { useForm, useField } from 'vee-validate'
 import { toTypedSchema } from '@vee-validate/zod'
 import { z } from 'zod'
 import { nextTick, onMounted, ref } from 'vue'
+import { cva } from 'class-variance-authority'
 import Input from '@/components/ui/Input.vue'
 import Button from '@/components/ui/Button.vue'
 import type { AdminProductResponse } from '@/api/generated/model'
@@ -82,6 +83,19 @@ const { value: stock, errorMessage: stockError, handleBlur: stockBlur } = useFie
 
 const firstInput = ref<InstanceType<typeof Input> | null>(null)
 
+const textareaVariants = cva(
+  'min-h-[44px] rounded-lg border px-3 py-2 text-dark transition-colors focus:outline-2 focus:outline-offset-2 focus:outline-dark',
+  {
+    variants: {
+      error: {
+        true: 'border-red-600 focus:border-red-600',
+        false: 'border-gray-300 focus:border-primary',
+      },
+    },
+    defaultVariants: { error: false },
+  },
+)
+
 onMounted(async () => {
   await nextTick()
   const el = document.getElementById('product-name')
@@ -124,13 +138,7 @@ const onSubmit = handleSubmit((values) => {
           rows="3"
           :aria-describedby="descriptionError ? 'product-description-error' : undefined"
           :aria-invalid="!!descriptionError"
-          :class="[
-            'min-h-[44px] rounded-lg border px-3 py-2 text-dark transition-colors focus:outline-2 focus:outline-offset-2 focus:outline-dark',
-            {
-              'border-gray-300 focus:border-primary': !descriptionError,
-              'border-red-600 focus:border-red-600': descriptionError,
-            },
-          ]"
+          :class="textareaVariants({ error: !!descriptionError })"
           @blur="descriptionBlur"
         />
         <p

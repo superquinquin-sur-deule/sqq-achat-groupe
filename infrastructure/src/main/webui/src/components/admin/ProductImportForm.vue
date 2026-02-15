@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import { cva } from 'class-variance-authority'
 import Button from '@/components/ui/Button.vue'
 
 interface ImportError {
@@ -25,6 +26,19 @@ const emit = defineEmits<{
 const selectedFile = ref<File | null>(null)
 const isDragging = ref(false)
 const importResult = ref<ImportResult | null>(null)
+
+const dropZoneVariants = cva(
+  'flex flex-col items-center rounded-lg border-2 border-dashed p-8 transition-colors',
+  {
+    variants: {
+      dragging: {
+        true: 'border-primary bg-primary/5',
+        false: 'border-gray-300',
+      },
+    },
+    defaultVariants: { dragging: false },
+  },
+)
 
 function onFileChange(event: Event) {
   const input = event.target as HTMLInputElement
@@ -86,10 +100,7 @@ defineExpose({ setResult })
     <div
       role="button"
       tabindex="0"
-      :class="[
-        'flex flex-col items-center rounded-lg border-2 border-dashed p-8 transition-colors',
-        isDragging ? 'border-primary bg-primary/5' : 'border-gray-300',
-      ]"
+      :class="dropZoneVariants({ dragging: isDragging })"
       @dragover="onDragOver"
       @dragleave="onDragLeave"
       @drop="onDrop"

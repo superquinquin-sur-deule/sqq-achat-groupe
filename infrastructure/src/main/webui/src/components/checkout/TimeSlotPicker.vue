@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { cva } from 'class-variance-authority'
 import type { TimeSlotResponse } from '@/api/generated/model'
 import Button from '@/components/ui/Button.vue'
 
@@ -14,6 +15,26 @@ const emit = defineEmits<{
   continue: []
   back: []
 }>()
+
+const slotVariants = cva(
+  'min-h-[44px] w-full rounded-lg border px-4 py-3 text-left text-sm font-medium transition-colors focus:outline-2 focus:outline-offset-2 focus:outline-dark',
+  {
+    variants: {
+      state: {
+        selected: 'border-primary bg-primary text-dark',
+        available: 'border-gray-300 bg-white text-dark hover:border-primary',
+        disabled: 'cursor-not-allowed border-gray-200 bg-gray-100 text-gray-400',
+      },
+    },
+    defaultVariants: { state: 'available' },
+  },
+)
+
+function getSlotState(slot: TimeSlotResponse): 'selected' | 'available' | 'disabled' {
+  if (props.selectedId === slot.id) return 'selected'
+  if (slot.remainingPlaces <= 0) return 'disabled'
+  return 'available'
+}
 
 const groupedByDate = computed(() => {
   const groups: { date: string; formattedDate: string; slots: TimeSlotResponse[] }[] = []
@@ -71,16 +92,7 @@ function formatDate(dateStr: string): string {
             :aria-checked="selectedId === slot.id"
             :aria-disabled="slot.remainingPlaces <= 0"
             :disabled="slot.remainingPlaces <= 0"
-            :class="[
-              'min-h-[44px] w-full rounded-lg border px-4 py-3 text-left text-sm font-medium transition-colors focus:outline-2 focus:outline-offset-2 focus:outline-dark',
-              {
-                'border-primary bg-primary text-dark': selectedId === slot.id,
-                'border-gray-300 bg-white text-dark hover:border-primary':
-                  selectedId !== slot.id && slot.remainingPlaces > 0,
-                'cursor-not-allowed border-gray-200 bg-gray-100 text-gray-400':
-                  slot.remainingPlaces <= 0,
-              },
-            ]"
+            :class="slotVariants({ state: getSlotState(slot) })"
             @click="slot.remainingPlaces > 0 && emit('select', slot.id)"
           >
             <span v-if="slot.remainingPlaces > 0">

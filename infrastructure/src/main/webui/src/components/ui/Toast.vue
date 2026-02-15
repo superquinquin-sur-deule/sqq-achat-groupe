@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { onMounted } from 'vue'
+import { cva } from 'class-variance-authority'
 
 export interface ToastProps {
   variant?: 'success' | 'error' | 'info' | 'warning'
@@ -16,6 +17,21 @@ const emit = defineEmits<{
   close: []
 }>()
 
+const toastVariants = cva(
+  'fixed left-1/2 top-4 z-50 flex min-h-[44px] -translate-x-1/2 items-center gap-2 rounded-lg px-4 py-3 shadow-lg',
+  {
+    variants: {
+      variant: {
+        success: 'bg-green-100 text-green-800',
+        error: 'bg-red-100 text-red-800',
+        info: 'bg-blue-100 text-blue-800',
+        warning: 'bg-yellow-100 text-yellow-800',
+      },
+    },
+    defaultVariants: { variant: 'info' },
+  },
+)
+
 onMounted(() => {
   if (props.duration > 0) {
     setTimeout(() => emit('close'), props.duration)
@@ -24,19 +40,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div
-    role="alert"
-    aria-live="polite"
-    :class="[
-      'fixed left-1/2 top-4 z-50 flex min-h-[44px] -translate-x-1/2 items-center gap-2 rounded-lg px-4 py-3 shadow-lg',
-      {
-        'bg-green-100 text-green-800': variant === 'success',
-        'bg-red-100 text-red-800': variant === 'error',
-        'bg-blue-100 text-blue-800': variant === 'info',
-        'bg-yellow-100 text-yellow-800': variant === 'warning',
-      },
-    ]"
-  >
+  <div role="alert" aria-live="polite" :class="toastVariants({ variant: props.variant })">
     <span class="text-sm font-medium">{{ message }}</span>
     <button
       type="button"

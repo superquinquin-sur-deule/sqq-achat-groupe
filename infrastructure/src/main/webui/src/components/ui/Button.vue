@@ -1,3 +1,32 @@
+<script lang="ts">
+import { cva, type VariantProps } from 'class-variance-authority'
+
+export const buttonVariants = cva(
+  'inline-flex items-center justify-center rounded-lg font-semibold transition-colors focus:outline-2 focus:outline-offset-2 focus:outline-dark',
+  {
+    variants: {
+      variant: {
+        primary: 'bg-primary text-dark hover:bg-primary/90 active:bg-primary/80',
+        secondary: 'border-2 border-dark bg-white text-dark hover:bg-surface active:bg-surface/80',
+        danger: 'bg-red-600 text-white hover:bg-red-700 active:bg-red-800',
+        ghost: 'bg-transparent text-dark hover:bg-surface active:bg-surface/80',
+      },
+      size: {
+        md: 'min-h-[44px] px-4 py-2',
+        lg: 'min-h-[44px] w-full px-6 py-3',
+        icon: 'min-h-[44px] min-w-[44px] px-0 py-2',
+      },
+      disabled: {
+        true: 'cursor-not-allowed opacity-50',
+      },
+    },
+    defaultVariants: { variant: 'primary', size: 'md' },
+  },
+)
+
+export type ButtonVariants = VariantProps<typeof buttonVariants>
+</script>
+
 <script setup lang="ts">
 export interface ButtonProps {
   variant?: 'primary' | 'secondary' | 'danger' | 'ghost'
@@ -7,7 +36,7 @@ export interface ButtonProps {
   type?: 'button' | 'submit' | 'reset'
 }
 
-withDefaults(defineProps<ButtonProps>(), {
+const props = withDefaults(defineProps<ButtonProps>(), {
   variant: 'primary',
   size: 'md',
   disabled: false,
@@ -20,23 +49,13 @@ withDefaults(defineProps<ButtonProps>(), {
   <button
     :type="type"
     :disabled="disabled || loading"
-    :class="[
-      'inline-flex items-center justify-center rounded-lg font-semibold transition-colors focus:outline-2 focus:outline-offset-2 focus:outline-dark',
-      {
-        'min-h-[44px] px-4 py-2': size === 'md',
-        'min-h-[44px] w-full px-6 py-3': size === 'lg',
-        'min-h-[44px] min-w-[44px] px-0 py-2': size === 'icon',
-        'bg-primary text-dark hover:bg-primary/90 active:bg-primary/80':
-          variant === 'primary' && !disabled,
-        'border-2 border-dark bg-white text-dark hover:bg-surface active:bg-surface/80':
-          variant === 'secondary' && !disabled,
-        'bg-red-600 text-white hover:bg-red-700 active:bg-red-800':
-          variant === 'danger' && !disabled,
-        'bg-transparent text-dark hover:bg-surface active:bg-surface/80':
-          variant === 'ghost' && !disabled,
-        'cursor-not-allowed opacity-50': disabled || loading,
-      },
-    ]"
+    :class="
+      buttonVariants({
+        variant: props.variant,
+        size: props.size,
+        disabled: disabled || loading || undefined,
+      })
+    "
   >
     <svg
       v-if="loading"
