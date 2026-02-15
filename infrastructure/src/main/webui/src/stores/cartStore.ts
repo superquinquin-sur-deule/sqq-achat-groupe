@@ -54,6 +54,10 @@ export const useCartStore = defineStore(
       items.value = []
     }
 
+    function getItemQuantity(productId: number): number {
+      return items.value.find((i) => i.productId === productId)?.quantity ?? 0
+    }
+
     return {
       items,
       venteId,
@@ -65,6 +69,7 @@ export const useCartStore = defineStore(
       updateQuantity,
       removeItem,
       clearCart,
+      getItemQuantity,
     }
   },
   {

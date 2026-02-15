@@ -48,6 +48,27 @@ Fonctionnalité: Panier d'achat
     Quand je consulte mon panier
     Alors je vois chaque produit avec son nom, prix unitaire, quantité et sous-total
 
+  Scénario: Le bouton Ajouter est remplacé par un sélecteur de quantité après ajout
+    Étant donné qu'une vente existe avec des produits et des créneaux
+    Quand je navigue vers la page d'accueil
+    Et je clique sur "Ajouter" pour le premier produit disponible
+    Alors le bouton "Ajouter" du premier produit est remplacé par un sélecteur de quantité
+    Et le sélecteur affiche la quantité 1
+
+  Scénario: Augmenter la quantité d'un produit depuis le catalogue
+    Étant donné qu'une vente existe avec des produits et des créneaux
+    Et j'ai ajouté un produit au panier depuis le catalogue
+    Quand j'augmente la quantité du produit depuis le catalogue
+    Alors le sélecteur affiche la quantité 2
+    Et le compteur du panier dans le header affiche 2
+
+  Scénario: Retirer un produit du panier en diminuant la quantité à zéro depuis le catalogue
+    Étant donné qu'une vente existe avec des produits et des créneaux
+    Et j'ai ajouté un produit au panier depuis le catalogue
+    Quand je diminue la quantité du produit depuis le catalogue
+    Alors le bouton "Ajouter" réapparaît sur le premier produit
+    Et le compteur du panier dans le header n'est plus visible
+
   Scénario: Panier vide avec message et lien vers le catalogue
     Étant donné qu'une vente existe avec des produits et des créneaux
     Quand je navigue vers la page panier

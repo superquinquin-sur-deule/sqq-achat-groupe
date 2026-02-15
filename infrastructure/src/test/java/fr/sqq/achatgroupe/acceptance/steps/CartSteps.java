@@ -133,6 +133,20 @@ public class CartSteps {
         }
     }
 
+    @Quand("j'augmente la quantité du produit depuis le catalogue")
+    public void jAugmenteLaQuantiteDuProduitDepuisLeCatalogue() {
+        Locator firstCard = PlaywrightHooks.page().locator("[data-testid='product-card']:not([data-exhausted='true'])").first();
+        firstCard.locator("[data-testid='increase-quantity']").click();
+        PlaywrightHooks.page().waitForTimeout(300);
+    }
+
+    @Quand("je diminue la quantité du produit depuis le catalogue")
+    public void jeDiminueLaQuantiteDuProduitDepuisLeCatalogue() {
+        Locator firstCard = PlaywrightHooks.page().locator("[data-testid='product-card']:not([data-exhausted='true'])").first();
+        firstCard.locator("[data-testid='decrease-quantity']").click();
+        PlaywrightHooks.page().waitForTimeout(300);
+    }
+
     @Quand("je clique sur \"Découvrir nos produits\"")
     public void jeCliqueSurDecouvrirNosProduits() {
         PlaywrightHooks.page().locator("[data-testid='discover-products']").click();
@@ -241,6 +255,59 @@ public class CartSteps {
         String count = cartBadge.textContent().trim();
         int itemCount = Integer.parseInt(count);
         assertTrue(itemCount >= 2, "Le compteur doit afficher au moins 2 articles, got: " + itemCount);
+    }
+
+    @Alors("le bouton \"Ajouter\" du premier produit est remplacé par un sélecteur de quantité")
+    public void leBoutonAjouterEstRemplaceParUnSelecteurDeQuantite() {
+        Locator firstCard = PlaywrightHooks.page().locator("[data-testid='product-card']:not([data-exhausted='true'])").first();
+        assertFalse(firstCard.locator("[data-testid='add-button']").isVisible(),
+                "Le bouton 'Ajouter' ne doit plus être visible");
+        assertTrue(firstCard.locator("[data-testid='decrease-quantity']").isVisible(),
+                "Le bouton '-' doit être visible");
+        assertTrue(firstCard.locator("[data-testid='item-quantity']").isVisible(),
+                "L'input de quantité doit être visible");
+        assertTrue(firstCard.locator("[data-testid='increase-quantity']").isVisible(),
+                "Le bouton '+' doit être visible");
+    }
+
+    @Alors("le sélecteur affiche la quantité {int}")
+    public void leSelecteurAfficheLaQuantite(int expectedQuantity) {
+        Locator firstCard = PlaywrightHooks.page().locator("[data-testid='product-card']:not([data-exhausted='true'])").first();
+        String value = firstCard.locator("[data-testid='item-quantity']").inputValue();
+        assertEquals(String.valueOf(expectedQuantity), value,
+                "La quantité affichée doit être " + expectedQuantity);
+    }
+
+    @Alors("le compteur du panier dans le header affiche {int}")
+    public void leCompteurDuPanierDansLeHeaderAffiche(int expectedCount) {
+        Locator cartBadge = PlaywrightHooks.page().locator("[data-testid='cart-count']");
+        cartBadge.waitFor(new Locator.WaitForOptions()
+                .setState(WaitForSelectorState.VISIBLE)
+                .setTimeout(5000));
+        String count = cartBadge.textContent().trim();
+        assertEquals(String.valueOf(expectedCount), count,
+                "Le compteur du panier doit afficher " + expectedCount);
+    }
+
+    @Alors("le bouton \"Ajouter\" réapparaît sur le premier produit")
+    public void leBoutonAjouterReapparaitSurLePremierProduit() {
+        Locator firstCard = PlaywrightHooks.page().locator("[data-testid='product-card']:not([data-exhausted='true'])").first();
+        firstCard.locator("[data-testid='add-button']").waitFor(new Locator.WaitForOptions()
+                .setState(WaitForSelectorState.VISIBLE)
+                .setTimeout(5000));
+        assertTrue(firstCard.locator("[data-testid='add-button']").isVisible(),
+                "Le bouton 'Ajouter' doit réapparaître");
+        assertFalse(firstCard.locator("[data-testid='decrease-quantity']").isVisible(),
+                "Le sélecteur de quantité ne doit plus être visible");
+    }
+
+    @Alors("le compteur du panier dans le header n'est plus visible")
+    public void leCompteurDuPanierNEstPlusVisible() {
+        Locator cartBadge = PlaywrightHooks.page().locator("[data-testid='cart-count']");
+        cartBadge.waitFor(new Locator.WaitForOptions()
+                .setState(WaitForSelectorState.HIDDEN)
+                .setTimeout(5000));
+        assertFalse(cartBadge.isVisible(), "Le compteur du panier ne doit plus être visible");
     }
 
     @Alors("le panier affiche le message \"Votre panier est vide\"")
