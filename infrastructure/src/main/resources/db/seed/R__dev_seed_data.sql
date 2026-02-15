@@ -1,102 +1,241 @@
--- Repeatable Flyway migration: dev seed data
--- Only loaded in dev profile via %dev.quarkus.flyway.locations
+-- Dev Seed Data for Group Purchasing Platform
+-- This file is reloaded on every dev restart (Flyway repeatable migration)
 
--- Clean existing seed data (idempotent)
-DELETE FROM order_items WHERE order_id IN (SELECT id FROM orders WHERE vente_id IN (SELECT id FROM ventes WHERE name LIKE '[DEV]%'));
-DELETE FROM payments WHERE order_id IN (SELECT id FROM orders WHERE vente_id IN (SELECT id FROM ventes WHERE name LIKE '[DEV]%'));
-DELETE FROM orders WHERE vente_id IN (SELECT id FROM ventes WHERE name LIKE '[DEV]%');
-DELETE FROM products WHERE vente_id IN (SELECT id FROM ventes WHERE name LIKE '[DEV]%');
-DELETE FROM time_slots WHERE vente_id IN (SELECT id FROM ventes WHERE name LIKE '[DEV]%');
-DELETE FROM ventes WHERE name LIKE '[DEV]%';
+-- Clear existing data (order matters due to FK constraints)
+TRUNCATE payments, order_items, orders, time_slots, products, ventes RESTART IDENTITY CASCADE;
 
--- Vente
-INSERT INTO ventes (id, name, description, status, start_date, end_date)
-VALUES (9000, '[DEV] Vente de printemps', 'Vente groupée de produits locaux - printemps 2026', 'ACTIVE',
-        NOW() - INTERVAL '1 day', NOW() + INTERVAL '60 days')
-ON CONFLICT (id) DO UPDATE SET name = EXCLUDED.name, description = EXCLUDED.description, status = EXCLUDED.status,
-    start_date = EXCLUDED.start_date, end_date = EXCLUDED.end_date;
+-- ============================================================================
+-- VENTES (Sales Events)
+-- Uses dynamic dates relative to CURRENT_DATE to ensure there's always an active vente
+-- ============================================================================
+INSERT INTO ventes (id, name, description, status, start_date, end_date, created_at) VALUES
+(1, 'Vente de Saison', 'Grande vente de produits bio de saison - fruits, legumes et produits laitiers locaux', 'ACTIVE',
+    (CURRENT_DATE - INTERVAL '7 days')::timestamptz,
+    (CURRENT_DATE + INTERVAL '30 days')::timestamptz,
+    (CURRENT_TIMESTAMP - INTERVAL '14 days')::timestamptz),
+(2, 'Vente Precedente', 'Vente speciale terminee avec produits festifs et gourmands', 'CLOSED',
+    (CURRENT_DATE - INTERVAL '60 days')::timestamptz,
+    (CURRENT_DATE - INTERVAL '30 days')::timestamptz,
+    (CURRENT_TIMESTAMP - INTERVAL '75 days')::timestamptz),
+(3, 'Vente a Venir', 'Produits frais pour la prochaine saison', 'ACTIVE',
+    (CURRENT_DATE + INTERVAL '14 days')::timestamptz,
+    (CURRENT_DATE + INTERVAL '60 days')::timestamptz,
+    CURRENT_TIMESTAMP::timestamptz);
 
--- Products
-INSERT INTO products (id, name, description, price, supplier, stock, active, vente_id) VALUES
-(9001, 'Pommes Gala',        'Pommes Gala Bio, 1kg',             3.50,  'Verger du Soleil',    50, true,  9000),
-(9002, 'Carottes',           'Carottes de pleine terre, 1kg',    2.80,  'Ferme de la Vallée',  40, true,  9000),
-(9003, 'Miel de fleurs',    'Pot de miel toutes fleurs, 500g',  8.90,  'Rucher des Collines', 25, true,  9000),
-(9004, 'Oeufs fermiers',    'Boîte de 6 oeufs plein air',       3.20,  'Ferme de la Vallée',  60, true,  9000),
-(9005, 'Pain de campagne',  'Pain au levain, 500g',              4.50,  'Boulangerie Martin',  30, true,  9000),
-(9006, 'Fromage de chèvre', 'Bûche de chèvre affinée, 200g',   5.60,  'Chèvrerie du Lac',    20, true,  9000),
-(9007, 'Jus de pomme',      'Jus de pomme artisanal, 1L',       4.20,  'Verger du Soleil',    35, true,  9000),
-(9008, 'Confiture fraises', 'Confiture de fraises, 350g',        5.90,  'Conserverie Locale',  15, true,  9000),
-(9009, 'Salade verte',      'Salade batavia, pièce',            1.80,  'Maraîcher Bio',       45, true,  9000),
-(9010, 'Yaourt nature',     'Lot de 4 yaourts nature, 500g',    3.40,  'Laiterie du Pré',     40, true,  9000)
-ON CONFLICT (id) DO UPDATE SET
-  name = EXCLUDED.name, description = EXCLUDED.description, price = EXCLUDED.price,
-  supplier = EXCLUDED.supplier, stock = EXCLUDED.stock, active = EXCLUDED.active, vente_id = EXCLUDED.vente_id;
+SELECT setval('ventes_id_seq', 3);
 
--- Time slots (dates in the future)
-INSERT INTO time_slots (id, date, start_time, end_time, capacity, reserved, vente_id) VALUES
-(9001, CURRENT_DATE + INTERVAL '7 days',  '09:00', '10:00', 15, 2, 9000),
-(9002, CURRENT_DATE + INTERVAL '7 days',  '10:00', '11:00', 15, 2, 9000),
-(9003, CURRENT_DATE + INTERVAL '7 days',  '11:00', '12:00', 15, 1, 9000),
-(9004, CURRENT_DATE + INTERVAL '14 days', '09:00', '10:00', 20, 1, 9000),
-(9005, CURRENT_DATE + INTERVAL '14 days', '10:00', '11:00', 20, 0, 9000)
-ON CONFLICT (id) DO UPDATE SET
-  date = EXCLUDED.date, start_time = EXCLUDED.start_time, end_time = EXCLUDED.end_time,
-  capacity = EXCLUDED.capacity, reserved = EXCLUDED.reserved, vente_id = EXCLUDED.vente_id;
+-- ============================================================================
+-- PRODUCTS
+-- ============================================================================
+-- Products for Vente 1 (Printemps Bio 2024)
+INSERT INTO products (id, vente_id, name, description, price, supplier, stock, active, version) VALUES
+(1, 1, 'Panier de legumes bio', 'Assortiment de legumes de saison: carottes, poireaux, choux, navets (environ 5kg)', 25.00, 'Ferme du Soleil', 50, true, 0),
+(2, 1, 'Pommes Golden bio', 'Pommes Golden issues de vergers locaux - caisse de 3kg', 12.50, 'Vergers de la Vallee', 30, true, 0),
+(3, 1, 'Oeufs fermiers bio', 'Boite de 12 oeufs de poules elevees en plein air', 6.50, 'Ferme du Soleil', 100, true, 0),
+(4, 1, 'Fromage de chevre frais', 'Fromage de chevre artisanal - 200g', 8.90, 'Chevrerie des Monts', 40, true, 0),
+(5, 1, 'Miel de fleurs bio', 'Pot de miel toutes fleurs - 500g', 14.00, 'Rucher du Vallon', 25, true, 0),
+(6, 1, 'Pain de campagne bio', 'Pain au levain naturel - 800g', 5.50, 'Boulangerie Artisanale', 60, true, 0),
+(7, 1, 'Jus de pomme artisanal', 'Bouteille de jus de pomme pur - 1L', 4.50, 'Vergers de la Vallee', 80, true, 0),
+(8, 1, 'Yaourts nature bio', 'Lot de 4 yaourts nature au lait entier', 4.20, 'Laiterie du Terroir', 45, true, 0);
 
--- Orders (PAID)
-INSERT INTO orders (id, order_number, customer_name, customer_email, customer_phone, time_slot_id, status, total_amount, vente_id, created_at) VALUES
-(9001, 'ORD-9001', 'Marie Dupont',    'marie.dupont@email.fr',    '06 12 34 56 78', 9001, 'PAID', 20.90, 9000, NOW() - INTERVAL '2 days'),
-(9002, 'ORD-9002', 'Jean Martin',     'jean.martin@email.fr',     '06 23 45 67 89', 9001, 'PAID', 16.60, 9000, NOW() - INTERVAL '2 days'),
-(9003, 'ORD-9003', 'Sophie Bernard',  'sophie.bernard@email.fr',  '06 34 56 78 90', 9002, 'PAID', 25.10, 9000, NOW() - INTERVAL '1 day'),
-(9004, 'ORD-9004', 'Pierre Leroy',    'pierre.leroy@email.fr',    '06 45 67 89 01', 9002, 'PAID', 12.30, 9000, NOW() - INTERVAL '1 day'),
-(9005, 'ORD-9005', 'Claire Moreau',   'claire.moreau@email.fr',   '06 56 78 90 12', 9003, 'PAID', 18.40, 9000, NOW() - INTERVAL '12 hours'),
-(9006, 'ORD-9006', 'Lucas Petit',     'lucas.petit@email.fr',     '06 67 89 01 23', 9004, 'PAID', 31.70, 9000, NOW() - INTERVAL '6 hours')
-ON CONFLICT (id) DO UPDATE SET
-  order_number = EXCLUDED.order_number, customer_name = EXCLUDED.customer_name,
-  customer_email = EXCLUDED.customer_email, customer_phone = EXCLUDED.customer_phone,
-  time_slot_id = EXCLUDED.time_slot_id, status = EXCLUDED.status,
-  total_amount = EXCLUDED.total_amount, vente_id = EXCLUDED.vente_id;
+-- Products for Vente 2 (Panier de Noel 2023) - Closed sale
+INSERT INTO products (id, vente_id, name, description, price, supplier, stock, active, version) VALUES
+(9, 2, 'Foie gras de canard', 'Bloc de foie gras mi-cuit - 200g', 32.00, 'Ferme des Palmipedes', 0, true, 0),
+(10, 2, 'Champagne brut', 'Bouteille de champagne brut - 75cl', 28.50, 'Cave du Terroir', 0, true, 0),
+(11, 2, 'Buche glacee', 'Buche glacee artisanale 6 parts - chocolat/vanille', 24.00, 'Patisserie Gourmande', 0, true, 0),
+(12, 2, 'Coffret chocolats', 'Assortiment de chocolats fins - 250g', 18.00, 'Chocolaterie Artisanale', 0, true, 0),
+(13, 2, 'Saumon fume', 'Saumon fume artisanal - 200g', 15.00, 'Fumoir du Littoral', 0, true, 0);
 
--- Order items
+-- Products for Vente 3 (Ete Gourmand 2024)
+INSERT INTO products (id, vente_id, name, description, price, supplier, stock, active, version) VALUES
+(14, 3, 'Tomates anciennes bio', 'Assortiment de tomates anciennes - caisse 2kg', 9.80, 'Ferme du Soleil', 40, true, 0),
+(15, 3, 'Courgettes bio', 'Courgettes de plein champ - lot de 1kg', 4.50, 'Ferme du Soleil', 60, true, 0),
+(16, 3, 'Melon charentais', 'Melon charentais sucre - piece', 5.50, 'Maraicher Local', 35, true, 0),
+(17, 3, 'Saucisses artisanales', 'Lot de 6 saucisses pur porc - 600g', 12.00, 'Boucherie du Village', 30, true, 0),
+(18, 3, 'Cotes de porc', 'Lot de 4 cotes de porc fermier', 16.50, 'Boucherie du Village', 25, true, 0),
+(19, 3, 'Peches bio', 'Barquette de peches jaunes - 1kg', 7.90, 'Vergers de la Vallee', 45, true, 0),
+(20, 3, 'Glaces artisanales', 'Pot de glace artisanale 500ml - parfum au choix', 8.50, 'Glacier du Terroir', 50, true, 0),
+(21, 3, 'Vin rose local', 'Bouteille de rose AOC - 75cl', 9.00, 'Cave du Terroir', 40, true, 0),
+(22, 3, 'Salade mesclun', 'Sachet de mesclun frais - 200g', 3.50, 'Ferme du Soleil', 70, false, 0);
+
+SELECT setval('products_id_seq', 22);
+
+-- ============================================================================
+-- TIME SLOTS
+-- Uses dynamic dates relative to CURRENT_DATE
+-- ============================================================================
+-- Time slots for Vente 1 (Active sale) - Some in the past (with orders), some available
+INSERT INTO time_slots (id, vente_id, date, start_time, end_time, capacity, reserved, version) VALUES
+(1, 1, CURRENT_DATE - INTERVAL '3 days', '09:00', '10:00', 20, 15, 0),
+(2, 1, CURRENT_DATE - INTERVAL '3 days', '10:00', '11:00', 20, 20, 0),
+(3, 1, CURRENT_DATE - INTERVAL '3 days', '11:00', '12:00', 20, 8, 0),
+(4, 1, CURRENT_DATE - INTERVAL '2 days', '09:00', '10:00', 25, 10, 0),
+(5, 1, CURRENT_DATE - INTERVAL '2 days', '10:00', '11:00', 25, 5, 0),
+(6, 1, CURRENT_DATE - INTERVAL '2 days', '14:00', '15:00', 15, 0, 0),
+-- Future slots available for new orders
+(7, 1, CURRENT_DATE + INTERVAL '3 days', '09:00', '10:00', 20, 0, 0),
+(8, 1, CURRENT_DATE + INTERVAL '3 days', '10:00', '11:00', 20, 2, 0),
+(9, 1, CURRENT_DATE + INTERVAL '3 days', '14:00', '15:00', 15, 0, 0),
+(10, 1, CURRENT_DATE + INTERVAL '4 days', '09:00', '10:00', 25, 0, 0),
+(11, 1, CURRENT_DATE + INTERVAL '4 days', '10:00', '11:00', 25, 0, 0),
+(12, 1, CURRENT_DATE + INTERVAL '5 days', '09:00', '10:00', 20, 0, 0);
+
+-- Time slots for Vente 2 (Closed sale) - All in the past, fully reserved
+INSERT INTO time_slots (id, vente_id, date, start_time, end_time, capacity, reserved, version) VALUES
+(13, 2, CURRENT_DATE - INTERVAL '35 days', '09:00', '10:00', 30, 30, 0),
+(14, 2, CURRENT_DATE - INTERVAL '35 days', '10:00', '11:00', 30, 30, 0),
+(15, 2, CURRENT_DATE - INTERVAL '35 days', '14:00', '15:00', 30, 28, 0),
+(16, 2, CURRENT_DATE - INTERVAL '34 days', '09:00', '10:00', 30, 30, 0);
+
+-- Time slots for Vente 3 (Future sale)
+INSERT INTO time_slots (id, vente_id, date, start_time, end_time, capacity, reserved, version) VALUES
+(17, 3, CURRENT_DATE + INTERVAL '20 days', '08:00', '09:00', 20, 0, 0),
+(18, 3, CURRENT_DATE + INTERVAL '20 days', '09:00', '10:00', 20, 0, 0),
+(19, 3, CURRENT_DATE + INTERVAL '20 days', '10:00', '11:00', 20, 0, 0),
+(20, 3, CURRENT_DATE + INTERVAL '21 days', '08:00', '09:00', 25, 0, 0),
+(21, 3, CURRENT_DATE + INTERVAL '21 days', '09:00', '10:00', 25, 0, 0),
+(22, 3, CURRENT_DATE + INTERVAL '21 days', '10:00', '11:00', 25, 0, 0);
+
+SELECT setval('time_slots_id_seq', 22);
+
+-- ============================================================================
+-- ORDERS
+-- Uses dynamic dates and updated time slot references
+-- ============================================================================
+-- Orders for Vente 1 (Active sale) - Various statuses
+INSERT INTO orders (id, vente_id, order_number, customer_name, customer_email, customer_phone, time_slot_id, status, total_amount, created_at) VALUES
+-- PENDING orders (awaiting payment) - for past time slots
+('a1b2c3d4-e5f6-7890-abcd-ef1234567890', 1, 'AG-2024-00001', 'Marie Dupont', 'marie.dupont@email.fr', '0612345678', 1, 'PENDING', 44.00, CURRENT_TIMESTAMP - INTERVAL '5 days'),
+('b2c3d4e5-f6a7-8901-bcde-f12345678901', 1, 'AG-2024-00002', 'Jean Martin', 'jean.martin@email.fr', '0623456789', 1, 'PENDING', 31.40, CURRENT_TIMESTAMP - INTERVAL '4 days'),
+
+-- PAID orders (payment received, awaiting pickup)
+('c3d4e5f6-a7b8-9012-cdef-123456789012', 1, 'AG-2024-00003', 'Sophie Bernard', 'sophie.bernard@email.fr', '0634567890', 2, 'PAID', 56.50, CURRENT_TIMESTAMP - INTERVAL '4 days'),
+('d4e5f6a7-b8c9-0123-def0-234567890123', 1, 'AG-2024-00004', 'Pierre Dubois', 'pierre.dubois@email.fr', '0645678901', 2, 'PAID', 25.00, CURRENT_TIMESTAMP - INTERVAL '4 days'),
+('e5f6a7b8-c9d0-1234-ef01-345678901234', 1, 'AG-2024-00005', 'Isabelle Moreau', 'isabelle.moreau@email.fr', '0656789012', 3, 'PAID', 68.90, CURRENT_TIMESTAMP - INTERVAL '3 days'),
+
+-- PICKED_UP orders (completed)
+('f6a7b8c9-d0e1-2345-f012-456789012345', 1, 'AG-2024-00006', 'Francois Petit', 'francois.petit@email.fr', '0667890123', 4, 'PICKED_UP', 37.50, CURRENT_TIMESTAMP - INTERVAL '3 days'),
+('a7b8c9d0-e1f2-3456-0123-567890123456', 1, 'AG-2024-00007', 'Catherine Leroy', 'catherine.leroy@email.fr', '0678901234', 4, 'PICKED_UP', 49.40, CURRENT_TIMESTAMP - INTERVAL '3 days'),
+
+-- CANCELLED order
+('b8c9d0e1-f2a3-4567-1234-678901234567', 1, 'AG-2024-00008', 'Michel Roux', 'michel.roux@email.fr', '0689012345', 5, 'CANCELLED', 25.00, CURRENT_TIMESTAMP - INTERVAL '2 days'),
+
+-- New orders for future time slots (for demo purposes)
+('11111111-1111-1111-1111-111111111111', 1, 'AG-2024-00009', 'Claire Fontaine', 'claire.fontaine@email.fr', '0611111111', 8, 'PAID', 37.00, CURRENT_TIMESTAMP - INTERVAL '1 day'),
+('22222222-2222-2222-2222-222222222222', 1, 'AG-2024-00010', 'Marc Riviere', 'marc.riviere@email.fr', '0622222222', 8, 'PENDING', 29.50, CURRENT_TIMESTAMP - INTERVAL '12 hours');
+
+-- Orders for Vente 2 (Closed sale) - All picked up
+INSERT INTO orders (id, vente_id, order_number, customer_name, customer_email, customer_phone, time_slot_id, status, total_amount, created_at) VALUES
+('c9d0e1f2-a3b4-5678-2345-789012345678', 2, 'AG-2023-00101', 'Anne Richard', 'anne.richard@email.fr', '0690123456', 13, 'PICKED_UP', 84.50, CURRENT_TIMESTAMP - INTERVAL '40 days'),
+('d0e1f2a3-b4c5-6789-3456-890123456789', 2, 'AG-2023-00102', 'Luc Simon', 'luc.simon@email.fr', '0601234567', 13, 'PICKED_UP', 118.50, CURRENT_TIMESTAMP - INTERVAL '39 days'),
+('e1f2a3b4-c5d6-7890-4567-901234567890', 2, 'AG-2023-00103', 'Nathalie Blanc', 'nathalie.blanc@email.fr', '0612345670', 14, 'PICKED_UP', 56.00, CURRENT_TIMESTAMP - INTERVAL '38 days');
+
+-- ============================================================================
+-- ORDER ITEMS
+-- ============================================================================
+-- Items for Order AG-2024-00001 (Marie Dupont - PENDING)
 INSERT INTO order_items (id, order_id, product_id, quantity, unit_price) VALUES
--- Marie Dupont: Pommes Gala x2, Miel x1, Carottes x1
-(9001, 9001, 9001, 2, 3.50),
-(9002, 9001, 9003, 1, 8.90),
-(9003, 9001, 9002, 1, 2.80),
--- Jean Martin: Oeufs x2, Pain x1, Salade x2
-(9004, 9002, 9004, 2, 3.20),
-(9005, 9002, 9005, 1, 4.50),
-(9006, 9002, 9009, 2, 1.80),
--- Sophie Bernard: Fromage x2, Jus de pomme x1, Confiture x1, Carottes x1
-(9007, 9003, 9006, 2, 5.60),
-(9008, 9003, 9007, 1, 4.20),
-(9009, 9003, 9008, 1, 5.90),
-(9010, 9003, 9002, 1, 2.80),
--- Pierre Leroy: Pommes Gala x1, Yaourt x1, Salade x2
-(9011, 9004, 9001, 1, 3.50),
-(9012, 9004, 9010, 1, 3.40),
-(9013, 9004, 9009, 2, 1.80),
--- Claire Moreau: Miel x1, Pain x1, Oeufs x1
-(9014, 9005, 9003, 1, 8.90),
-(9015, 9005, 9005, 1, 4.50),
-(9016, 9005, 9004, 1, 3.20),
--- Lucas Petit: Fromage x1, Confiture x2, Jus de pomme x2, Pommes Gala x1
-(9017, 9006, 9006, 1, 5.60),
-(9018, 9006, 9008, 2, 5.90),
-(9019, 9006, 9007, 2, 4.20),
-(9020, 9006, 9001, 1, 3.50)
-ON CONFLICT (id) DO UPDATE SET
-  order_id = EXCLUDED.order_id, product_id = EXCLUDED.product_id,
-  quantity = EXCLUDED.quantity, unit_price = EXCLUDED.unit_price;
+(1, 'a1b2c3d4-e5f6-7890-abcd-ef1234567890', 1, 1, 25.00),
+(2, 'a1b2c3d4-e5f6-7890-abcd-ef1234567890', 3, 2, 6.50),
+(3, 'a1b2c3d4-e5f6-7890-abcd-ef1234567890', 6, 1, 5.50);
 
--- Payments (matching paid orders)
-INSERT INTO payments (id, order_id, stripe_payment_id, status, amount, attempts, created_at, updated_at) VALUES
-(9001, 9001, 'pi_dev_9001', 'SUCCEEDED', 20.90, 1, NOW() - INTERVAL '2 days', NOW() - INTERVAL '2 days'),
-(9002, 9002, 'pi_dev_9002', 'SUCCEEDED', 16.60, 1, NOW() - INTERVAL '2 days', NOW() - INTERVAL '2 days'),
-(9003, 9003, 'pi_dev_9003', 'SUCCEEDED', 25.10, 1, NOW() - INTERVAL '1 day',  NOW() - INTERVAL '1 day'),
-(9004, 9004, 'pi_dev_9004', 'SUCCEEDED', 12.30, 1, NOW() - INTERVAL '1 day',  NOW() - INTERVAL '1 day'),
-(9005, 9005, 'pi_dev_9005', 'SUCCEEDED', 18.40, 1, NOW() - INTERVAL '12 hours', NOW() - INTERVAL '12 hours'),
-(9006, 9006, 'pi_dev_9006', 'SUCCEEDED', 31.70, 1, NOW() - INTERVAL '6 hours',  NOW() - INTERVAL '6 hours')
-ON CONFLICT (id) DO UPDATE SET
-  stripe_payment_id = EXCLUDED.stripe_payment_id, status = EXCLUDED.status,
-  amount = EXCLUDED.amount, attempts = EXCLUDED.attempts;
+-- Items for Order AG-2024-00002 (Jean Martin - PENDING)
+INSERT INTO order_items (id, order_id, product_id, quantity, unit_price) VALUES
+(4, 'b2c3d4e5-f6a7-8901-bcde-f12345678901', 2, 1, 12.50),
+(5, 'b2c3d4e5-f6a7-8901-bcde-f12345678901', 4, 1, 8.90),
+(6, 'b2c3d4e5-f6a7-8901-bcde-f12345678901', 7, 2, 4.50);
+
+-- Items for Order AG-2024-00003 (Sophie Bernard - PAID)
+INSERT INTO order_items (id, order_id, product_id, quantity, unit_price) VALUES
+(7, 'c3d4e5f6-a7b8-9012-cdef-123456789012', 1, 1, 25.00),
+(8, 'c3d4e5f6-a7b8-9012-cdef-123456789012', 5, 1, 14.00),
+(9, 'c3d4e5f6-a7b8-9012-cdef-123456789012', 8, 2, 4.20),
+(10, 'c3d4e5f6-a7b8-9012-cdef-123456789012', 7, 2, 4.50);
+
+-- Items for Order AG-2024-00004 (Pierre Dubois - PAID)
+INSERT INTO order_items (id, order_id, product_id, quantity, unit_price) VALUES
+(11, 'd4e5f6a7-b8c9-0123-def0-234567890123', 1, 1, 25.00);
+
+-- Items for Order AG-2024-00005 (Isabelle Moreau - PAID)
+INSERT INTO order_items (id, order_id, product_id, quantity, unit_price) VALUES
+(12, 'e5f6a7b8-c9d0-1234-ef01-345678901234', 1, 1, 25.00),
+(13, 'e5f6a7b8-c9d0-1234-ef01-345678901234', 4, 2, 8.90),
+(14, 'e5f6a7b8-c9d0-1234-ef01-345678901234', 5, 1, 14.00),
+(15, 'e5f6a7b8-c9d0-1234-ef01-345678901234', 3, 1, 6.50),
+(16, 'e5f6a7b8-c9d0-1234-ef01-345678901234', 6, 1, 5.50);
+
+-- Items for Order AG-2024-00006 (Francois Petit - PICKED_UP)
+INSERT INTO order_items (id, order_id, product_id, quantity, unit_price) VALUES
+(17, 'f6a7b8c9-d0e1-2345-f012-456789012345', 2, 1, 12.50),
+(18, 'f6a7b8c9-d0e1-2345-f012-456789012345', 1, 1, 25.00);
+
+-- Items for Order AG-2024-00007 (Catherine Leroy - PICKED_UP)
+INSERT INTO order_items (id, order_id, product_id, quantity, unit_price) VALUES
+(19, 'a7b8c9d0-e1f2-3456-0123-567890123456', 1, 1, 25.00),
+(20, 'a7b8c9d0-e1f2-3456-0123-567890123456', 8, 2, 4.20),
+(21, 'a7b8c9d0-e1f2-3456-0123-567890123456', 6, 1, 5.50),
+(22, 'a7b8c9d0-e1f2-3456-0123-567890123456', 7, 2, 4.50);
+
+-- Items for Order AG-2024-00008 (Michel Roux - CANCELLED)
+INSERT INTO order_items (id, order_id, product_id, quantity, unit_price) VALUES
+(23, 'b8c9d0e1-f2a3-4567-1234-678901234567', 1, 1, 25.00);
+
+-- Items for Noel orders (Vente 2)
+INSERT INTO order_items (id, order_id, product_id, quantity, unit_price) VALUES
+(24, 'c9d0e1f2-a3b4-5678-2345-789012345678', 9, 1, 32.00),
+(25, 'c9d0e1f2-a3b4-5678-2345-789012345678', 10, 1, 28.50),
+(26, 'c9d0e1f2-a3b4-5678-2345-789012345678', 12, 1, 18.00),
+(27, 'c9d0e1f2-a3b4-5678-2345-789012345678', 6, 1, 6.00);
+
+INSERT INTO order_items (id, order_id, product_id, quantity, unit_price) VALUES
+(28, 'd0e1f2a3-b4c5-6789-3456-890123456789', 9, 2, 32.00),
+(29, 'd0e1f2a3-b4c5-6789-3456-890123456789', 10, 1, 28.50),
+(30, 'd0e1f2a3-b4c5-6789-3456-890123456789', 11, 1, 24.00);
+
+INSERT INTO order_items (id, order_id, product_id, quantity, unit_price) VALUES
+(31, 'e1f2a3b4-c5d6-7890-4567-901234567890', 9, 1, 32.00),
+(32, 'e1f2a3b4-c5d6-7890-4567-901234567890', 11, 1, 24.00);
+
+-- Items for new orders on future time slots (Vente 1)
+INSERT INTO order_items (id, order_id, product_id, quantity, unit_price) VALUES
+(33, '11111111-1111-1111-1111-111111111111', 1, 1, 25.00),
+(34, '11111111-1111-1111-1111-111111111111', 2, 1, 12.00);
+
+INSERT INTO order_items (id, order_id, product_id, quantity, unit_price) VALUES
+(35, '22222222-2222-2222-2222-222222222222', 3, 2, 6.50),
+(36, '22222222-2222-2222-2222-222222222222', 6, 1, 5.50),
+(37, '22222222-2222-2222-2222-222222222222', 7, 2, 4.50);
+
+SELECT setval('order_items_id_seq', 37);
+
+-- ============================================================================
+-- PAYMENTS
+-- Uses dynamic dates
+-- ============================================================================
+INSERT INTO payments (id, order_id, amount, stripe_payment_id, status, attempts, created_at, updated_at, version) VALUES
+-- PAID orders - successful payments
+(1, 'c3d4e5f6-a7b8-9012-cdef-123456789012', 56.50, 'pi_3Oabc123def456', 'SUCCEEDED', 1, CURRENT_TIMESTAMP - INTERVAL '4 days', CURRENT_TIMESTAMP - INTERVAL '4 days', 0),
+(2, 'd4e5f6a7-b8c9-0123-def0-234567890123', 25.00, 'pi_3Oabc123def457', 'SUCCEEDED', 1, CURRENT_TIMESTAMP - INTERVAL '4 days', CURRENT_TIMESTAMP - INTERVAL '4 days', 0),
+(3, 'e5f6a7b8-c9d0-1234-ef01-345678901234', 68.90, 'pi_3Oabc123def458', 'SUCCEEDED', 1, CURRENT_TIMESTAMP - INTERVAL '3 days', CURRENT_TIMESTAMP - INTERVAL '3 days', 0),
+
+-- PICKED_UP orders - successful payments
+(4, 'f6a7b8c9-d0e1-2345-f012-456789012345', 37.50, 'pi_3Oabc123def459', 'SUCCEEDED', 1, CURRENT_TIMESTAMP - INTERVAL '3 days', CURRENT_TIMESTAMP - INTERVAL '3 days', 0),
+(5, 'a7b8c9d0-e1f2-3456-0123-567890123456', 49.40, 'pi_3Oabc123def460', 'SUCCEEDED', 1, CURRENT_TIMESTAMP - INTERVAL '3 days', CURRENT_TIMESTAMP - INTERVAL '3 days', 0),
+
+-- PENDING orders - pending payments
+(6, 'a1b2c3d4-e5f6-7890-abcd-ef1234567890', 44.00, NULL, 'PENDING', 0, CURRENT_TIMESTAMP - INTERVAL '5 days', CURRENT_TIMESTAMP - INTERVAL '5 days', 0),
+(7, 'b2c3d4e5-f6a7-8901-bcde-f12345678901', 31.40, NULL, 'PENDING', 0, CURRENT_TIMESTAMP - INTERVAL '4 days', CURRENT_TIMESTAMP - INTERVAL '4 days', 0),
+
+-- CANCELLED order - failed payment
+(8, 'b8c9d0e1-f2a3-4567-1234-678901234567', 25.00, NULL, 'FAILED', 3, CURRENT_TIMESTAMP - INTERVAL '2 days', CURRENT_TIMESTAMP - INTERVAL '2 days', 0),
+
+-- Closed sale orders (Vente 2) - all successful
+(9, 'c9d0e1f2-a3b4-5678-2345-789012345678', 84.50, 'pi_3Noel123def461', 'SUCCEEDED', 1, CURRENT_TIMESTAMP - INTERVAL '40 days', CURRENT_TIMESTAMP - INTERVAL '40 days', 0),
+(10, 'd0e1f2a3-b4c5-6789-3456-890123456789', 118.50, 'pi_3Noel123def462', 'SUCCEEDED', 1, CURRENT_TIMESTAMP - INTERVAL '39 days', CURRENT_TIMESTAMP - INTERVAL '39 days', 0),
+(11, 'e1f2a3b4-c5d6-7890-4567-901234567890', 56.00, 'pi_3Noel123def463', 'SUCCEEDED', 1, CURRENT_TIMESTAMP - INTERVAL '38 days', CURRENT_TIMESTAMP - INTERVAL '38 days', 0),
+
+-- New orders for future time slots (Vente 1)
+(12, '11111111-1111-1111-1111-111111111111', 37.00, 'pi_3New123def464', 'SUCCEEDED', 1, CURRENT_TIMESTAMP - INTERVAL '1 day', CURRENT_TIMESTAMP - INTERVAL '1 day', 0),
+(13, '22222222-2222-2222-2222-222222222222', 29.50, NULL, 'PENDING', 0, CURRENT_TIMESTAMP - INTERVAL '12 hours', CURRENT_TIMESTAMP - INTERVAL '12 hours', 0);
+
+SELECT setval('payments_id_seq', 13);
