@@ -8,6 +8,7 @@ import { useAdminTimeslotsQuery } from '@/composables/api/useAdminTimeslotsApi'
 import { useCursorPagination } from '@/composables/useCursorPagination'
 import { formatPrice, statusLabel, statusClasses } from '@/utils/order-formatters'
 import AdminTable from '@/components/admin/AdminTable.vue'
+import EmptyState from '@/components/ui/EmptyState.vue'
 import Pagination from '@/components/ui/Pagination.vue'
 
 const venteStore = useVenteStore()
@@ -79,13 +80,10 @@ const timeSlots = computed(() => timeslotsPageData.value?.data ?? [])
 
     <div v-if="loading" class="py-12 text-center text-brown">Chargement des commandes...</div>
 
-    <div
+    <EmptyState
       v-else-if="!orders || orders.length === 0"
-      class="rounded-xl border border-gray-200 bg-white p-12 text-center"
-      data-testid="empty-state"
-    >
-      <p class="text-brown">Aucune commande payée pour cette vente.</p>
-    </div>
+      message="Aucune commande payée pour cette vente."
+    />
 
     <AdminTable
       v-else

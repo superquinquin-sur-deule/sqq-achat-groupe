@@ -5,6 +5,7 @@ import { storeToRefs } from 'pinia'
 import { useToast } from '@/composables/useToast'
 import { useAdminOrdersQuery, usePickupMutation } from '@/composables/api/useAdminOrdersApi'
 import { statusLabel, statusClasses } from '@/utils/order-formatters'
+import EmptyState from '@/components/ui/EmptyState.vue'
 import type { AdminOrderResponse } from '@/api/generated/model'
 
 const toast = useToast()
@@ -157,13 +158,11 @@ async function handlePickup(orderId: string) {
     <div v-if="loading" class="py-12 text-center text-brown">Chargement des commandes...</div>
 
     <!-- Empty state -->
-    <div
+    <EmptyState
       v-else-if="!orders || orders.length === 0"
-      class="rounded-xl border border-gray-200 bg-white p-12 text-center"
+      message="Aucune commande pour le moment"
       data-testid="distribution-empty"
-    >
-      <p class="text-brown">Aucune commande pour le moment</p>
-    </div>
+    />
 
     <!-- Orders list -->
     <div v-else>

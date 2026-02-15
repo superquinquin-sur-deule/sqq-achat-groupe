@@ -1,18 +1,19 @@
 package fr.sqq.achatgroupe.acceptance.steps;
 
-import fr.sqq.achatgroupe.acceptance.support.TestContext;
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-import com.microsoft.playwright.*;
+import com.microsoft.playwright.Locator;
+import com.microsoft.playwright.Page;
 import com.microsoft.playwright.options.WaitForSelectorState;
+import fr.sqq.achatgroupe.acceptance.support.TestContext;
 import io.cucumber.java.fr.Alors;
 import io.cucumber.java.fr.Et;
 import io.cucumber.java.fr.Quand;
 import io.cucumber.java.fr.Étantdonnéque;
+import io.quarkus.test.junit.QuarkusTest;
+import jakarta.inject.Inject;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@ApplicationScoped
+@QuarkusTest
 public class CartSteps {
 
     @Inject

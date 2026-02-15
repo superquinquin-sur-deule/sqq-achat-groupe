@@ -3,6 +3,7 @@ import { ref, computed } from 'vue'
 import { useVenteStore } from '@/stores/venteStore'
 import { storeToRefs } from 'pinia'
 import { useAdminPreparationQuery } from '@/composables/api/useAdminPreparationApi'
+import EmptyState from '@/components/ui/EmptyState.vue'
 
 const venteStore = useVenteStore()
 const { selectedVenteId } = storeToRefs(venteStore)
@@ -114,13 +115,11 @@ function handlePrint() {
     </div>
 
     <!-- État vide -->
-    <div
+    <EmptyState
       v-else-if="!orders || orders.length === 0"
-      class="rounded-xl border border-gray-200 bg-white p-12 text-center"
+      message="Aucune commande pour le moment"
       data-testid="preparation-empty"
-    >
-      <p class="text-brown">Aucune commande pour le moment</p>
-    </div>
+    />
 
     <!-- Fiches de préparation groupées par créneau -->
     <div v-else>

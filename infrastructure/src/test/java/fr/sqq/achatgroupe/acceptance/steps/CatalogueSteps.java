@@ -1,17 +1,17 @@
 package fr.sqq.achatgroupe.acceptance.steps;
 
 import fr.sqq.achatgroupe.acceptance.support.TestContext;
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
 import io.cucumber.java.fr.Alors;
 import io.cucumber.java.fr.Et;
 import io.cucumber.java.fr.Quand;
+import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
+import jakarta.inject.Inject;
 
 import static org.hamcrest.Matchers.*;
 
-@ApplicationScoped
+@QuarkusTest
 public class CatalogueSteps {
 
     @Inject

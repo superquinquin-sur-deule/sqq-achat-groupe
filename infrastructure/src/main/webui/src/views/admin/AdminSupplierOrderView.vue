@@ -3,6 +3,7 @@ import { computed } from 'vue'
 import { useVenteStore } from '@/stores/venteStore'
 import { storeToRefs } from 'pinia'
 import { useAdminSupplierOrdersQuery } from '@/composables/api/useAdminSupplierOrdersApi'
+import EmptyState from '@/components/ui/EmptyState.vue'
 
 const venteStore = useVenteStore()
 const { selectedVenteId } = storeToRefs(venteStore)
@@ -114,13 +115,11 @@ async function handleExportXls() {
     </div>
 
     <!-- État vide -->
-    <div
+    <EmptyState
       v-else-if="!lines || lines.length === 0"
-      class="rounded-xl border border-gray-200 bg-white p-12 text-center"
+      message="Aucune commande pour le moment"
       data-testid="supplier-order-empty"
-    >
-      <p class="text-brown">Aucune commande pour le moment</p>
-    </div>
+    />
 
     <!-- Tableau groupé par fournisseur -->
     <div

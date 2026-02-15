@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import Button from '@/components/ui/Button.vue'
+import EmptyState from '@/components/ui/EmptyState.vue'
 import Pagination from '@/components/ui/Pagination.vue'
 import VenteForm from '@/components/admin/VenteForm.vue'
 import { useToast } from '@/composables/useToast'
@@ -147,14 +148,12 @@ function formatDate(isoStr: string | null): string {
       @cancel="closeForm"
     />
 
-    <div
+    <EmptyState
       v-if="(!ventes || ventes.length === 0) && !showForm && !loading"
-      class="rounded-xl border border-gray-200 bg-white p-12 text-center"
-      data-testid="empty-state"
-    >
-      <p class="mb-4 text-brown">Aucune vente. Créez votre première vente.</p>
-      <Button variant="primary" @click="openCreateForm"> Créer une vente </Button>
-    </div>
+      message="Aucune vente. Créez votre première vente."
+      action-label="Créer une vente"
+      @action="openCreateForm"
+    />
 
     <AdminTable
       v-else-if="ventes && ventes.length > 0"

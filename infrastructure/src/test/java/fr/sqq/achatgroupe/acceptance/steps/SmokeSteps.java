@@ -1,6 +1,5 @@
 package fr.sqq.achatgroupe.acceptance.steps;
 
-import jakarta.enterprise.context.ApplicationScoped;
 import io.cucumber.java.fr.Alors;
 import io.cucumber.java.fr.Quand;
 import io.cucumber.java.fr.Étantdonnéque;
@@ -10,7 +9,6 @@ import io.restassured.response.Response;
 
 import static org.hamcrest.Matchers.equalTo;
 
-@ApplicationScoped
 @QuarkusTest
 public class SmokeSteps {
 

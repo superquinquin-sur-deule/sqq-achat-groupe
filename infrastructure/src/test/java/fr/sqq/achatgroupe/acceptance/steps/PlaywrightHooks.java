@@ -1,13 +1,16 @@
 package fr.sqq.achatgroupe.acceptance.steps;
 
-import com.microsoft.playwright.*;
+import com.microsoft.playwright.Browser;
+import com.microsoft.playwright.BrowserType;
+import com.microsoft.playwright.Page;
+import com.microsoft.playwright.Playwright;
 import io.cucumber.java.After;
 import io.cucumber.java.AfterAll;
 import io.cucumber.java.Before;
 import io.cucumber.java.BeforeAll;
-import jakarta.enterprise.context.ApplicationScoped;
+import io.quarkus.test.junit.QuarkusTest;
 
-@ApplicationScoped
+@QuarkusTest
 public class PlaywrightHooks {
 
     private static Playwright playwright;

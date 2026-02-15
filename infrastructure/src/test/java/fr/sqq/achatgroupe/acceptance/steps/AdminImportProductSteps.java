@@ -8,16 +8,18 @@ import fr.sqq.achatgroupe.acceptance.support.TestContext;
 import io.cucumber.java.fr.Alors;
 import io.cucumber.java.fr.Et;
 import io.cucumber.java.fr.Quand;
-import jakarta.enterprise.context.ApplicationScoped;
+import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;
 
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import static org.junit.jupiter.api.Assertions.*;
 
-@ApplicationScoped
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+@QuarkusTest
 public class AdminImportProductSteps {
 
     @Inject

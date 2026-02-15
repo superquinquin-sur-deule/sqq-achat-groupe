@@ -5,11 +5,11 @@ import com.microsoft.playwright.options.WaitForSelectorState;
 import io.cucumber.java.fr.Alors;
 import io.cucumber.java.fr.Et;
 import io.cucumber.java.fr.Quand;
-import jakarta.enterprise.context.ApplicationScoped;
+import io.quarkus.test.junit.QuarkusTest;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@ApplicationScoped
+@QuarkusTest
 public class NotFoundSteps {
 
     @Quand("j'accède à une URL inexistante")

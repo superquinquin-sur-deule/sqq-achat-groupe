@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
 import Button from '@/components/ui/Button.vue'
+import EmptyState from '@/components/ui/EmptyState.vue'
 import Pagination from '@/components/ui/Pagination.vue'
 import TimeSlotForm from '@/components/admin/TimeSlotForm.vue'
 import { useVenteStore } from '@/stores/venteStore'
@@ -145,14 +146,12 @@ function formatTime(startTime: string, endTime: string): string {
 
     <div v-if="loading" class="py-12 text-center text-brown">Chargement des créneaux...</div>
 
-    <div
+    <EmptyState
       v-else-if="(!timeSlots || timeSlots.length === 0) && !showForm"
-      class="rounded-xl border border-gray-200 bg-white p-12 text-center"
-      data-testid="empty-state"
-    >
-      <p class="mb-4 text-brown">Aucun créneau. Ajoutez votre premier créneau de retrait.</p>
-      <Button variant="primary" @click="openCreateForm"> Ajouter un créneau </Button>
-    </div>
+      message="Aucun créneau. Ajoutez votre premier créneau de retrait."
+      action-label="Ajouter un créneau"
+      @action="openCreateForm"
+    />
 
     <AdminTable
       v-else-if="timeSlots && timeSlots.length > 0"

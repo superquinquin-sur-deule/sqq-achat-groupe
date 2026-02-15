@@ -2,9 +2,9 @@ package fr.sqq.achatgroupe.acceptance.steps;
 
 import fr.sqq.achatgroupe.acceptance.support.TestContext;
 import io.cucumber.java.fr.Étantdonnéque;
+import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
-import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
 import java.time.Instant;
@@ -13,7 +13,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 
-@ApplicationScoped
+@QuarkusTest
 public class VenteSteps {
 
     @Inject

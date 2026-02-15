@@ -1,23 +1,24 @@
 package fr.sqq.achatgroupe.acceptance.steps;
 
-import fr.sqq.achatgroupe.acceptance.support.TestContext;
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
 import fr.sqq.achatgroupe.acceptance.support.FakePaymentGateway;
+import fr.sqq.achatgroupe.acceptance.support.TestContext;
 import fr.sqq.achatgroupe.application.port.out.PaymentGateway.PaymentWebhookStatus;
 import io.cucumber.java.Before;
 import io.cucumber.java.fr.Alors;
 import io.cucumber.java.fr.Et;
 import io.cucumber.java.fr.Quand;
 import io.cucumber.java.fr.Étantdonnéque;
+import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
+import jakarta.inject.Inject;
 
-import static org.hamcrest.Matchers.*;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.notNullValue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@ApplicationScoped
+@QuarkusTest
 public class PaymentErrorSteps {
 
     @Inject

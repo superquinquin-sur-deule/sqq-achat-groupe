@@ -9,14 +9,15 @@ import io.cucumber.java.fr.Alors;
 import io.cucumber.java.fr.Et;
 import io.cucumber.java.fr.Quand;
 import io.cucumber.java.fr.Étantdonnéque;
+import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
-import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-@ApplicationScoped
+@QuarkusTest
 public class AdminVentesSteps {
 
     @Inject

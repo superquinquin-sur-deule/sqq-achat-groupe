@@ -1,15 +1,15 @@
 package fr.sqq.achatgroupe.acceptance.steps;
 
-import jakarta.enterprise.context.ApplicationScoped;
 import io.cucumber.java.fr.Alors;
 import io.cucumber.java.fr.Quand;
+import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
 
 import static org.hamcrest.Matchers.anyOf;
 import static org.hamcrest.Matchers.is;
 
-@ApplicationScoped
+@QuarkusTest
 public class AdminAuthSteps {
 
     private Response response;

@@ -8,25 +8,24 @@ import com.microsoft.playwright.options.WaitForSelectorState;
 import fr.sqq.achatgroupe.acceptance.support.TestContext;
 import fr.sqq.achatgroupe.application.command.CreateOrderCommand;
 import fr.sqq.achatgroupe.application.command.CreateOrderCommand.OrderItemCommand;
-import fr.sqq.mediator.Mediator;
 import fr.sqq.achatgroupe.application.port.out.OrderRepository;
 import fr.sqq.achatgroupe.domain.model.order.Order;
+import fr.sqq.mediator.Mediator;
 import io.cucumber.java.fr.Alors;
 import io.cucumber.java.fr.Et;
 import io.cucumber.java.fr.Quand;
 import io.cucumber.java.fr.Étantdonnéque;
+import io.quarkus.test.junit.QuarkusTest;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
-import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 
-import java.time.LocalDate;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@ApplicationScoped
+@QuarkusTest
 public class BackofficeSupplierOrderSteps {
 
     @Inject

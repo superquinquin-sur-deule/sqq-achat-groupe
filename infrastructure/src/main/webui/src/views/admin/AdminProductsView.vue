@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
 import Button from '@/components/ui/Button.vue'
+import EmptyState from '@/components/ui/EmptyState.vue'
 import Pagination from '@/components/ui/Pagination.vue'
 import ProductForm from '@/components/admin/ProductForm.vue'
 import ProductImportForm from '@/components/admin/ProductImportForm.vue'
@@ -211,14 +212,12 @@ function formatPrice(price: number): string {
 
     <div v-if="loading" class="py-12 text-center text-brown">Chargement des produits...</div>
 
-    <div
+    <EmptyState
       v-else-if="(!products || products.length === 0) && !showForm"
-      class="rounded-xl border border-gray-200 bg-white p-12 text-center"
-      data-testid="empty-state"
-    >
-      <p class="mb-4 text-brown">Aucun produit. Ajoutez votre premier produit.</p>
-      <Button variant="primary" @click="openCreateForm"> Ajouter un produit </Button>
-    </div>
+      message="Aucun produit. Ajoutez votre premier produit."
+      action-label="Ajouter un produit"
+      @action="openCreateForm"
+    />
 
     <AdminTable
       v-else-if="products && products.length > 0"
