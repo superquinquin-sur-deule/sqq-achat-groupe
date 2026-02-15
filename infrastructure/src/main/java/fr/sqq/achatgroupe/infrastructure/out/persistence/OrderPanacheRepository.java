@@ -4,6 +4,9 @@ import fr.sqq.achatgroupe.domain.model.order.Order;
 import fr.sqq.achatgroupe.application.port.out.OrderRepository;
 import fr.sqq.achatgroupe.application.port.out.OrderRepository.SlotOrderCount;
 import fr.sqq.achatgroupe.application.port.out.OrderRepository.TopProduct;
+import fr.sqq.achatgroupe.application.query.CursorPage;
+import fr.sqq.achatgroupe.application.query.CursorPageRequest;
+import fr.sqq.achatgroupe.infrastructure.out.persistence.cursor.CursorCodec;
 import fr.sqq.achatgroupe.infrastructure.out.persistence.entity.OrderEntity;
 import fr.sqq.achatgroupe.infrastructure.out.persistence.mapper.OrderPersistenceMapper;
 import io.quarkus.hibernate.orm.panache.PanacheRepositoryBase;
@@ -12,6 +15,8 @@ import jakarta.inject.Inject;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -67,6 +72,53 @@ public class OrderPanacheRepository implements OrderRepository, PanacheRepositor
                 venteId, List.of("PAID", "PICKED_UP")).stream()
                 .map(mapper::toDomain)
                 .toList();
+    }
+
+    @Override
+    public CursorPage<Order> findPaidByVenteId(Long venteId, CursorPageRequest pageRequest, String searchName, Long timeSlotId) {
+        var conditions = new ArrayList<String>();
+        var params = new HashMap<String, Object>();
+
+        conditions.add("venteId = :venteId");
+        params.put("venteId", venteId);
+
+        conditions.add("status IN :statuses");
+        params.put("statuses", List.of("PAID", "PICKED_UP"));
+
+        if (searchName != null && !searchName.isBlank()) {
+            conditions.add("LOWER(customerName) LIKE :searchName");
+            params.put("searchName", "%" + searchName.toLowerCase() + "%");
+        }
+
+        if (timeSlotId != null) {
+            conditions.add("timeSlotId = :timeSlotId");
+            params.put("timeSlotId", timeSlotId);
+        }
+
+        if (pageRequest.cursor() != null) {
+            Instant cursorCreatedAt = CursorCodec.decodeOrderCursorCreatedAt(pageRequest.cursor());
+            UUID cursorId = CursorCodec.decodeOrderCursorId(pageRequest.cursor());
+            conditions.add("(createdAt < :cursorCreatedAt OR (createdAt = :cursorCreatedAt AND id < :cursorId))");
+            params.put("cursorCreatedAt", cursorCreatedAt);
+            params.put("cursorId", cursorId);
+        }
+
+        String query = String.join(" AND ", conditions) + " ORDER BY createdAt DESC, id DESC";
+        int fetchSize = pageRequest.size() + 1;
+
+        List<OrderEntity> entities = find(query, params).range(0, fetchSize - 1).list();
+
+        boolean hasNext = entities.size() > pageRequest.size();
+        List<OrderEntity> page = hasNext ? entities.subList(0, pageRequest.size()) : entities;
+        List<Order> items = page.stream().map(mapper::toDomain).toList();
+
+        String endCursor = null;
+        if (!page.isEmpty()) {
+            OrderEntity last = page.get(page.size() - 1);
+            endCursor = CursorCodec.encodeOrderCursor(last.getCreatedAt(), last.getId());
+        }
+
+        return new CursorPage<>(items, endCursor, hasNext);
     }
 
     @Override

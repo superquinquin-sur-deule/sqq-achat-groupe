@@ -1,8 +1,10 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import Button from '@/components/ui/Button.vue'
+import Pagination from '@/components/ui/Pagination.vue'
 import VenteForm from '@/components/admin/VenteForm.vue'
 import { useToast } from '@/composables/useToast'
+import { useCursorPagination } from '@/composables/useCursorPagination'
 import {
   useAdminVentesQuery,
   useCreateVenteMutation,
@@ -15,8 +17,12 @@ import AdminTable from '@/components/admin/AdminTable.vue'
 import type { AdminVenteResponse } from '@/api/generated/model'
 
 const toast = useToast()
+const pagination = useCursorPagination()
 
-const { data: ventes } = useAdminVentesQuery()
+const { data: pageData, isLoading: loading } = useAdminVentesQuery(pagination.currentCursor)
+const ventes = computed(() => pageData.value?.data ?? [])
+const pageInfo = computed(() => pageData.value?.pageInfo ?? { endCursor: null, hasNext: false })
+
 const createMutation = useCreateVenteMutation()
 const updateMutation = useUpdateVenteMutation()
 const deleteMutationHook = useDeleteVenteMutation()
@@ -142,7 +148,7 @@ function formatDate(isoStr: string | null): string {
     />
 
     <div
-      v-if="(!ventes || ventes.length === 0) && !showForm"
+      v-if="(!ventes || ventes.length === 0) && !showForm && !loading"
       class="rounded-xl border border-gray-200 bg-white p-12 text-center"
       data-testid="empty-state"
     >
@@ -222,5 +228,15 @@ function formatDate(isoStr: string | null): string {
         </td>
       </tr>
     </AdminTable>
+
+    <Pagination
+      v-if="ventes && ventes.length > 0"
+      :has-next="pageInfo.hasNext"
+      :has-previous="pagination.hasPrevious.value"
+      :page-number="pagination.pageNumber.value"
+      :loading="loading"
+      @next="pagination.goToNext(pageInfo.endCursor!)"
+      @previous="pagination.goToPrevious()"
+    />
   </div>
 </template>

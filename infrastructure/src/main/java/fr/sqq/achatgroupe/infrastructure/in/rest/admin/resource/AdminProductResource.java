@@ -3,6 +3,8 @@ package fr.sqq.achatgroupe.infrastructure.in.rest.admin.resource;
 import fr.sqq.achatgroupe.application.command.DeleteProductCommand;
 import fr.sqq.achatgroupe.application.command.ImportProductsCommand;
 import fr.sqq.achatgroupe.application.command.ImportResult;
+import fr.sqq.achatgroupe.application.query.CursorPage;
+import fr.sqq.achatgroupe.application.query.CursorPageRequest;
 import fr.sqq.achatgroupe.application.query.ListAllProductsQuery;
 import fr.sqq.achatgroupe.domain.model.catalog.Product;
 import fr.sqq.achatgroupe.domain.model.catalog.ProductId;
@@ -11,6 +13,7 @@ import fr.sqq.achatgroupe.infrastructure.in.rest.admin.util.CsvProductParser;
 import fr.sqq.achatgroupe.infrastructure.in.rest.admin.util.CsvProductParser.CsvParseResult;
 import fr.sqq.achatgroupe.infrastructure.in.rest.admin.dto.AdminProductResponse;
 import fr.sqq.achatgroupe.infrastructure.in.rest.common.dto.CreateProductRequest;
+import fr.sqq.achatgroupe.infrastructure.in.rest.common.dto.CursorPageResponse;
 import fr.sqq.achatgroupe.infrastructure.in.rest.common.dto.DataResponse;
 import fr.sqq.achatgroupe.infrastructure.in.rest.common.dto.ImportProductsResponse;
 import fr.sqq.achatgroupe.infrastructure.in.rest.common.dto.ImportProductsResponse.ImportErrorDetail;
@@ -48,12 +51,16 @@ public class AdminProductResource {
     }
 
     @GET
-    public DataResponse<List<AdminProductResponse>> listProducts(@QueryParam("venteId") Long venteId) {
-        List<Product> products = mediator.send(new ListAllProductsQuery(venteId));
-        var responses = products.stream()
+    public CursorPageResponse<AdminProductResponse> listProducts(
+            @QueryParam("venteId") Long venteId,
+            @QueryParam("cursor") String cursor,
+            @QueryParam("size") @DefaultValue("20") int size) {
+        var pageRequest = cursor != null ? CursorPageRequest.after(cursor, size) : CursorPageRequest.first(size);
+        CursorPage<Product> page = mediator.send(new ListAllProductsQuery(venteId, pageRequest));
+        var responses = page.items().stream()
                 .map(mapper::toResponse)
                 .toList();
-        return new DataResponse<>(responses);
+        return new CursorPageResponse<>(responses, new CursorPageResponse.PageInfo(page.endCursor(), page.hasNext()));
     }
 
     @POST

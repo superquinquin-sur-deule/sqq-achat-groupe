@@ -76,7 +76,7 @@ public class BackofficeOrderSteps {
         page().route("**/api/admin/ventes", route -> route.fulfill(new Route.FulfillOptions()
                 .setStatus(200)
                 .setContentType("application/json")
-                .setBody("{\"data\":[{\"id\":" + venteId + ",\"name\":\"Vente Test\",\"description\":\"Test\",\"status\":\"ACTIVE\",\"startDate\":null,\"endDate\":null,\"createdAt\":\"2026-01-01T00:00:00Z\"}]}")));
+                .setBody("{\"data\":[{\"id\":" + venteId + ",\"name\":\"Vente Test\",\"description\":\"Test\",\"status\":\"ACTIVE\",\"startDate\":null,\"endDate\":null,\"createdAt\":\"2026-01-01T00:00:00Z\"}],\"pageInfo\":{\"endCursor\":null,\"hasNext\":false}}")));
 
         page().navigate(PlaywrightHooks.testUrl() + "/admin/orders");
         page().waitForSelector("[data-testid='backoffice-orders-table'], [data-testid='empty-state']", new Page.WaitForSelectorOptions()
@@ -149,8 +149,8 @@ public class BackofficeOrderSteps {
     @Et("je saisis {string} dans le champ de recherche backoffice")
     public void jeSaisisDansLeChampDeRecherche(String query) {
         page().locator("[data-testid='backoffice-search-input']").fill(query);
-        // Attendre le filtrage
-        page().waitForTimeout(300);
+        // Attendre le debounce (300ms) + la requête API + le re-rendu
+        page().waitForTimeout(1500);
     }
 
     @Alors("seules les commandes contenant {string} sont affichées")
@@ -171,9 +171,9 @@ public class BackofficeOrderSteps {
         Locator options = filter.locator("option");
         assertTrue(options.count() > 1, "Il doit y avoir au moins un créneau dans le filtre");
         String firstSlotValue = options.nth(1).getAttribute("value");
-        selectedSlotLabel = firstSlotValue;
+        selectedSlotLabel = options.nth(1).textContent().trim();
         filter.selectOption(firstSlotValue);
-        page().waitForTimeout(300);
+        page().waitForTimeout(500);
     }
 
     @Alors("seules les commandes de ce créneau sont affichées")

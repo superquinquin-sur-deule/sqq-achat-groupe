@@ -1,5 +1,7 @@
 package fr.sqq.achatgroupe.application.port.out;
 
+import fr.sqq.achatgroupe.application.query.CursorPage;
+import fr.sqq.achatgroupe.application.query.CursorPageRequest;
 import fr.sqq.achatgroupe.domain.model.order.Order;
 
 import java.math.BigDecimal;
@@ -25,6 +27,8 @@ public interface OrderRepository {
     List<SlotOrderCount> countByTimeSlotForVente(Long venteId);
 
     List<Order> findPaidByVenteId(Long venteId);
+
+    CursorPage<Order> findPaidByVenteId(Long venteId, CursorPageRequest pageRequest, String searchName, Long timeSlotId);
 
     List<TopProduct> findTopSellingProducts(Long venteId, int limit);
 

@@ -1,15 +1,14 @@
 package fr.sqq.achatgroupe.application.handler.query;
 
 import fr.sqq.achatgroupe.application.port.out.ProductRepository;
+import fr.sqq.achatgroupe.application.query.CursorPage;
 import fr.sqq.achatgroupe.application.query.ListAllProductsQuery;
 import fr.sqq.achatgroupe.domain.model.catalog.Product;
 import fr.sqq.mediator.QueryHandler;
 import jakarta.enterprise.context.ApplicationScoped;
 
-import java.util.List;
-
 @ApplicationScoped
-public class ListAllProductsHandler implements QueryHandler<ListAllProductsQuery, List<Product>> {
+public class ListAllProductsHandler implements QueryHandler<ListAllProductsQuery, CursorPage<Product>> {
 
     private final ProductRepository productRepository;
 
@@ -18,7 +17,7 @@ public class ListAllProductsHandler implements QueryHandler<ListAllProductsQuery
     }
 
     @Override
-    public List<Product> handle(ListAllProductsQuery query) {
-        return productRepository.findAllByVenteId(query.venteId());
+    public CursorPage<Product> handle(ListAllProductsQuery query) {
+        return productRepository.findAllByVenteId(query.venteId(), query.pageRequest());
     }
 }

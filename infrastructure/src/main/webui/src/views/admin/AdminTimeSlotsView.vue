@@ -1,10 +1,12 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed, watch } from 'vue'
 import Button from '@/components/ui/Button.vue'
+import Pagination from '@/components/ui/Pagination.vue'
 import TimeSlotForm from '@/components/admin/TimeSlotForm.vue'
 import { useVenteStore } from '@/stores/venteStore'
 import { storeToRefs } from 'pinia'
 import { useToast } from '@/composables/useToast'
+import { useCursorPagination } from '@/composables/useCursorPagination'
 import {
   useAdminTimeslotsQuery,
   useCreateTimeslotMutation,
@@ -21,8 +23,16 @@ import type {
 const toast = useToast()
 const venteStore = useVenteStore()
 const { selectedVenteId } = storeToRefs(venteStore)
+const pagination = useCursorPagination()
 
-const { data: timeSlots, isLoading: loading } = useAdminTimeslotsQuery(selectedVenteId)
+watch(selectedVenteId, () => pagination.reset())
+
+const { data: pageData, isLoading: loading } = useAdminTimeslotsQuery(
+  selectedVenteId,
+  pagination.currentCursor,
+)
+const timeSlots = computed(() => pageData.value?.data ?? [])
+const pageInfo = computed(() => pageData.value?.pageInfo ?? { endCursor: null, hasNext: false })
 const createMutation = useCreateTimeslotMutation(selectedVenteId)
 const updateMutation = useUpdateTimeslotMutation(selectedVenteId)
 const deleteMutationHook = useDeleteTimeslotMutation(selectedVenteId)
@@ -216,5 +226,15 @@ function formatTime(startTime: string, endTime: string): string {
         </td>
       </tr>
     </AdminTable>
+
+    <Pagination
+      v-if="timeSlots && timeSlots.length > 0"
+      :has-next="pageInfo.hasNext"
+      :has-previous="pagination.hasPrevious.value"
+      :page-number="pagination.pageNumber.value"
+      :loading="loading"
+      @next="pagination.goToNext(pageInfo.endCursor!)"
+      @previous="pagination.goToPrevious()"
+    />
   </div>
 </template>

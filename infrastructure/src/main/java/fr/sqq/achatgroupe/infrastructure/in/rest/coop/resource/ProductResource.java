@@ -1,18 +1,17 @@
 package fr.sqq.achatgroupe.infrastructure.in.rest.coop.resource;
 
+import fr.sqq.achatgroupe.application.query.CursorPage;
+import fr.sqq.achatgroupe.application.query.CursorPageRequest;
 import fr.sqq.achatgroupe.application.query.GetProductQuery;
 import fr.sqq.achatgroupe.application.query.ListActiveProductsQuery;
 import fr.sqq.achatgroupe.domain.model.catalog.Product;
 import fr.sqq.achatgroupe.domain.model.catalog.ProductId;
 import fr.sqq.achatgroupe.infrastructure.in.rest.coop.mapper.ProductRestMapper;
+import fr.sqq.achatgroupe.infrastructure.in.rest.common.dto.CursorPageResponse;
 import fr.sqq.achatgroupe.infrastructure.in.rest.common.dto.DataResponse;
-import fr.sqq.achatgroupe.infrastructure.in.rest.common.dto.ProductListResponse;
 import fr.sqq.achatgroupe.infrastructure.in.rest.common.dto.ProductResponse;
 import fr.sqq.mediator.Mediator;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.PathParam;
-import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 
@@ -32,14 +31,16 @@ public class ProductResource {
     }
 
     @GET
-    public ProductListResponse listProducts(@PathParam("venteId") Long venteId) {
-        List<Product> products = mediator.send(new ListActiveProductsQuery(venteId));
-        List<ProductResponse> responses = products.stream()
+    public CursorPageResponse<ProductResponse> listProducts(
+            @PathParam("venteId") Long venteId,
+            @QueryParam("cursor") String cursor,
+            @QueryParam("size") @DefaultValue("50") int size) {
+        var pageRequest = cursor != null ? CursorPageRequest.after(cursor, size) : CursorPageRequest.first(size);
+        CursorPage<Product> page = mediator.send(new ListActiveProductsQuery(venteId, pageRequest));
+        List<ProductResponse> responses = page.items().stream()
                 .map(mapper::toResponse)
                 .toList();
-
-        var meta = new ProductListResponse.Meta(responses.size(), 1, responses.size());
-        return new ProductListResponse(responses, meta);
+        return new CursorPageResponse<>(responses, new CursorPageResponse.PageInfo(page.endCursor(), page.hasNext()));
     }
 
     @GET

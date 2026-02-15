@@ -1,19 +1,17 @@
 package fr.sqq.achatgroupe.infrastructure.in.rest.coop.resource;
 
+import fr.sqq.achatgroupe.application.query.CursorPage;
+import fr.sqq.achatgroupe.application.query.CursorPageRequest;
 import fr.sqq.achatgroupe.application.query.GetVenteQuery;
 import fr.sqq.achatgroupe.application.query.ListActiveVentesQuery;
 import fr.sqq.achatgroupe.domain.model.vente.Vente;
 import fr.sqq.achatgroupe.domain.model.vente.VenteId;
 import fr.sqq.achatgroupe.infrastructure.in.rest.coop.mapper.VenteRestMapper;
+import fr.sqq.achatgroupe.infrastructure.in.rest.common.dto.CursorPageResponse;
 import fr.sqq.achatgroupe.infrastructure.in.rest.common.dto.DataResponse;
-import fr.sqq.achatgroupe.infrastructure.in.rest.common.dto.VenteListResponse;
 import fr.sqq.achatgroupe.infrastructure.in.rest.coop.dto.VenteResponse;
 import fr.sqq.mediator.Mediator;
-import jakarta.ws.rs.Consumes;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.PathParam;
-import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 
@@ -34,12 +32,15 @@ public class VenteResource {
     }
 
     @GET
-    public VenteListResponse listVentes() {
-        List<Vente> ventes = mediator.send(new ListActiveVentesQuery());
-        List<VenteResponse> responses = ventes.stream()
+    public CursorPageResponse<VenteResponse> listVentes(
+            @QueryParam("cursor") String cursor,
+            @QueryParam("size") @DefaultValue("50") int size) {
+        var pageRequest = cursor != null ? CursorPageRequest.after(cursor, size) : CursorPageRequest.first(size);
+        CursorPage<Vente> page = mediator.send(new ListActiveVentesQuery(pageRequest));
+        List<VenteResponse> responses = page.items().stream()
                 .map(mapper::toResponse)
                 .toList();
-        return new VenteListResponse(responses);
+        return new CursorPageResponse<>(responses, new CursorPageResponse.PageInfo(page.endCursor(), page.hasNext()));
     }
 
     @GET

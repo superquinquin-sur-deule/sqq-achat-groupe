@@ -1,36 +1,55 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { RouterLink } from 'vue-router'
 import { useVenteStore } from '@/stores/venteStore'
 import { storeToRefs } from 'pinia'
 import { useAdminOrdersQuery } from '@/composables/api/useAdminOrdersApi'
+import { useAdminTimeslotsQuery } from '@/composables/api/useAdminTimeslotsApi'
+import { useCursorPagination } from '@/composables/useCursorPagination'
 import { formatPrice, statusLabel, statusClasses } from '@/utils/order-formatters'
 import AdminTable from '@/components/admin/AdminTable.vue'
+import Pagination from '@/components/ui/Pagination.vue'
 
 const venteStore = useVenteStore()
 const { selectedVenteId } = storeToRefs(venteStore)
+const pagination = useCursorPagination()
 
-const { data: orders, isLoading: loading } = useAdminOrdersQuery(selectedVenteId)
+const searchInput = ref('')
+const debouncedSearch = ref<string | null>(null)
+const selectedTimeSlotId = ref<number | null>(null)
+let searchTimeout: ReturnType<typeof setTimeout> | null = null
 
-const searchQuery = ref('')
-const selectedSlot = ref('')
+function onSearchInput() {
+  if (searchTimeout) clearTimeout(searchTimeout)
+  searchTimeout = setTimeout(() => {
+    debouncedSearch.value = searchInput.value.trim() || null
+    pagination.reset()
+  }, 300)
+}
 
-const uniqueSlots = computed(() => {
-  const slots = new Set((orders.value ?? []).map((o) => o.timeSlotLabel))
-  return Array.from(slots).sort()
+watch(selectedVenteId, () => {
+  pagination.reset()
+  searchInput.value = ''
+  debouncedSearch.value = null
+  selectedTimeSlotId.value = null
 })
 
-const filteredOrders = computed(() => {
-  let result = orders.value ?? []
-  if (searchQuery.value.trim()) {
-    const query = searchQuery.value.trim().toLowerCase()
-    result = result.filter((o) => o.customerName.toLowerCase().includes(query))
-  }
-  if (selectedSlot.value) {
-    result = result.filter((o) => o.timeSlotLabel === selectedSlot.value)
-  }
-  return result
+watch(selectedTimeSlotId, () => {
+  pagination.reset()
 })
+
+const { data: pageData, isLoading: loading } = useAdminOrdersQuery(
+  selectedVenteId,
+  pagination.currentCursor,
+  debouncedSearch,
+  selectedTimeSlotId,
+)
+const orders = computed(() => pageData.value?.data ?? [])
+const pageInfo = computed(() => pageData.value?.pageInfo ?? { endCursor: null, hasNext: false })
+
+// Fetch timeslots separately for the filter dropdown
+const { data: timeslotsPageData } = useAdminTimeslotsQuery(selectedVenteId)
+const timeSlots = computed(() => timeslotsPageData.value?.data ?? [])
 </script>
 
 <template>
@@ -39,19 +58,22 @@ const filteredOrders = computed(() => {
 
     <div class="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center">
       <input
-        v-model="searchQuery"
+        v-model="searchInput"
         type="text"
         placeholder="Rechercher par nom..."
         class="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
         data-testid="backoffice-search-input"
+        @input="onSearchInput"
       />
       <select
-        v-model="selectedSlot"
+        v-model="selectedTimeSlotId"
         class="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
         data-testid="backoffice-slot-filter"
       >
-        <option value="">Tous les créneaux</option>
-        <option v-for="slot in uniqueSlots" :key="slot" :value="slot">{{ slot }}</option>
+        <option :value="null">Tous les créneaux</option>
+        <option v-for="slot in timeSlots" :key="slot.id" :value="slot.id">
+          {{ slot.date }} {{ slot.startTime?.substring(0, 5) }}-{{ slot.endTime?.substring(0, 5) }}
+        </option>
       </select>
     </div>
 
@@ -72,7 +94,7 @@ const filteredOrders = computed(() => {
       dataTestid="backoffice-orders-table"
     >
       <tr
-        v-for="order in filteredOrders"
+        v-for="order in orders"
         :key="order.id"
         class="hover:bg-yellow-50 transition-colors"
         data-testid="backoffice-order-row"
@@ -102,11 +124,16 @@ const filteredOrders = computed(() => {
           </span>
         </td>
       </tr>
-      <tr v-if="filteredOrders.length === 0">
-        <td colspan="6" class="border-t border-gray-100 px-4 py-8 text-center text-brown">
-          Aucune commande ne correspond à votre recherche.
-        </td>
-      </tr>
     </AdminTable>
+
+    <Pagination
+      v-if="orders && orders.length > 0"
+      :has-next="pageInfo.hasNext"
+      :has-previous="pagination.hasPrevious.value"
+      :page-number="pagination.pageNumber.value"
+      :loading="loading"
+      @next="pagination.goToNext(pageInfo.endCursor!)"
+      @previous="pagination.goToPrevious()"
+    />
   </div>
 </template>

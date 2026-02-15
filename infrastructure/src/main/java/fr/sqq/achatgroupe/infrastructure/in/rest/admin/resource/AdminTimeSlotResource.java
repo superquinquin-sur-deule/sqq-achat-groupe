@@ -1,10 +1,13 @@
 package fr.sqq.achatgroupe.infrastructure.in.rest.admin.resource;
 
 import fr.sqq.achatgroupe.application.command.DeleteTimeSlotCommand;
+import fr.sqq.achatgroupe.application.query.CursorPage;
+import fr.sqq.achatgroupe.application.query.CursorPageRequest;
 import fr.sqq.achatgroupe.application.query.ListAllTimeSlotsQuery;
 import fr.sqq.achatgroupe.domain.model.planning.TimeSlot;
 import fr.sqq.achatgroupe.infrastructure.in.rest.admin.mapper.AdminTimeSlotRestMapper;
 import fr.sqq.achatgroupe.infrastructure.in.rest.common.dto.CreateTimeSlotRequest;
+import fr.sqq.achatgroupe.infrastructure.in.rest.common.dto.CursorPageResponse;
 import fr.sqq.achatgroupe.infrastructure.in.rest.common.dto.DataResponse;
 import fr.sqq.achatgroupe.infrastructure.in.rest.common.dto.TimeSlotResponse;
 import fr.sqq.achatgroupe.infrastructure.in.rest.common.dto.UpdateTimeSlotRequest;
@@ -31,12 +34,16 @@ public class AdminTimeSlotResource {
     }
 
     @GET
-    public DataResponse<List<TimeSlotResponse>> listTimeSlots(@QueryParam("venteId") Long venteId) {
-        List<TimeSlot> timeSlots = mediator.send(new ListAllTimeSlotsQuery(venteId));
-        var responses = timeSlots.stream()
+    public CursorPageResponse<TimeSlotResponse> listTimeSlots(
+            @QueryParam("venteId") Long venteId,
+            @QueryParam("cursor") String cursor,
+            @QueryParam("size") @DefaultValue("20") int size) {
+        var pageRequest = cursor != null ? CursorPageRequest.after(cursor, size) : CursorPageRequest.first(size);
+        CursorPage<TimeSlot> page = mediator.send(new ListAllTimeSlotsQuery(venteId, pageRequest));
+        var responses = page.items().stream()
                 .map(mapper::toResponse)
                 .toList();
-        return new DataResponse<>(responses);
+        return new CursorPageResponse<>(responses, new CursorPageResponse.PageInfo(page.endCursor(), page.hasNext()));
     }
 
     @POST

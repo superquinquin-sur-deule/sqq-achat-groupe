@@ -34,7 +34,7 @@ public class AdminDashboardSteps {
         page().route("**/api/admin/ventes", route -> route.fulfill(new Route.FulfillOptions()
                 .setStatus(200)
                 .setContentType("application/json")
-                .setBody("{\"data\":[{\"id\":" + venteId + ",\"name\":\"Vente Test\",\"description\":\"Test\",\"status\":\"ACTIVE\",\"startDate\":null,\"endDate\":null,\"createdAt\":\"2026-01-01T00:00:00Z\"}]}")));
+                .setBody("{\"data\":[{\"id\":" + venteId + ",\"name\":\"Vente Test\",\"description\":\"Test\",\"status\":\"ACTIVE\",\"startDate\":null,\"endDate\":null,\"createdAt\":\"2026-01-01T00:00:00Z\"}],\"pageInfo\":{\"endCursor\":null,\"hasNext\":false}}")));
 
         page().navigate(PlaywrightHooks.testUrl() + "/admin/dashboard");
         page().waitForSelector("[data-testid='dashboard-stats']", new Page.WaitForSelectorOptions()

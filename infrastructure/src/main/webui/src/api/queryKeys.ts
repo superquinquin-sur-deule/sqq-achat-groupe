@@ -10,11 +10,25 @@ export const queryKeys = {
     paymentStatus: (orderId: string) => ['orders', orderId, 'payment-status'] as const,
   },
   admin: {
-    ventes: { all: ['admin', 'ventes'] as const },
-    products: { list: (venteId: number) => ['admin', 'products', { venteId }] as const },
-    timeslots: { list: (venteId: number) => ['admin', 'timeslots', { venteId }] as const },
+    ventes: {
+      all: ['admin', 'ventes'] as const,
+      list: (cursor?: string | null) => ['admin', 'ventes', { cursor }] as const,
+    },
+    products: {
+      list: (venteId: number, cursor?: string | null) =>
+        ['admin', 'products', { venteId, cursor }] as const,
+    },
+    timeslots: {
+      list: (venteId: number, cursor?: string | null) =>
+        ['admin', 'timeslots', { venteId, cursor }] as const,
+    },
     orders: {
-      list: (venteId: number) => ['admin', 'orders', { venteId }] as const,
+      list: (
+        venteId: number,
+        cursor?: string | null,
+        search?: string | null,
+        timeSlotId?: number | null,
+      ) => ['admin', 'orders', { venteId, cursor, search, timeSlotId }] as const,
       detail: (orderId: string) => ['admin', 'orders', orderId] as const,
     },
     dashboard: { stats: (venteId: number) => ['admin', 'dashboard', { venteId }] as const },

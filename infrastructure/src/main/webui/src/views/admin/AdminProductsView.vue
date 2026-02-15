@@ -1,11 +1,13 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed, watch } from 'vue'
 import Button from '@/components/ui/Button.vue'
+import Pagination from '@/components/ui/Pagination.vue'
 import ProductForm from '@/components/admin/ProductForm.vue'
 import ProductImportForm from '@/components/admin/ProductImportForm.vue'
 import { useVenteStore } from '@/stores/venteStore'
 import { storeToRefs } from 'pinia'
 import { useToast } from '@/composables/useToast'
+import { useCursorPagination } from '@/composables/useCursorPagination'
 import {
   useAdminProductsQuery,
   useCreateProductMutation,
@@ -23,8 +25,17 @@ import type {
 const toast = useToast()
 const venteStore = useVenteStore()
 const { selectedVenteId } = storeToRefs(venteStore)
+const pagination = useCursorPagination()
 
-const { data: products, isLoading: loading } = useAdminProductsQuery(selectedVenteId)
+watch(selectedVenteId, () => pagination.reset())
+
+const { data: pageData, isLoading: loading } = useAdminProductsQuery(
+  selectedVenteId,
+  pagination.currentCursor,
+)
+const products = computed(() => pageData.value?.data ?? [])
+const pageInfo = computed(() => pageData.value?.pageInfo ?? { endCursor: null, hasNext: false })
+
 const createMutation = useCreateProductMutation(selectedVenteId)
 const updateMutation = useUpdateProductMutation(selectedVenteId)
 const deleteMutation = useDeleteProductMutation(selectedVenteId)
@@ -270,5 +281,15 @@ function formatPrice(price: number): string {
         </td>
       </tr>
     </AdminTable>
+
+    <Pagination
+      v-if="products && products.length > 0"
+      :has-next="pageInfo.hasNext"
+      :has-previous="pagination.hasPrevious.value"
+      :page-number="pagination.pageNumber.value"
+      :loading="loading"
+      @next="pagination.goToNext(pageInfo.endCursor!)"
+      @previous="pagination.goToPrevious()"
+    />
   </div>
 </template>

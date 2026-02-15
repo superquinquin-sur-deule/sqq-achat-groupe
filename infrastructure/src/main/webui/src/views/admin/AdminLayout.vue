@@ -1,12 +1,13 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { ref, computed, watch } from 'vue'
 import AdminSidenav from '@/components/admin/AdminSidenav.vue'
 import { useVenteStore } from '@/stores/venteStore'
 import { useAdminVentesQuery } from '@/composables/api/useAdminVentesApi'
 
 const sidenavOpen = ref(false)
 const venteStore = useVenteStore()
-const { data: ventes, isLoading: loading } = useAdminVentesQuery()
+const { data: pageData, isLoading: loading } = useAdminVentesQuery()
+const ventes = computed(() => pageData.value?.data ?? [])
 
 watch(ventes, (data) => {
   if (!data) return

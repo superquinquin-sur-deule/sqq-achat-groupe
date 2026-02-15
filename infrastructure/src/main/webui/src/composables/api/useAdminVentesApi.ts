@@ -1,4 +1,5 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/vue-query'
+import { computed, toValue, type MaybeRefOrGetter } from 'vue'
+import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tanstack/vue-query'
 import { queryKeys } from '@/api/queryKeys'
 import {
   getApiAdminVentes,
@@ -10,13 +11,20 @@ import {
 } from '@/api/generated/admin-ventes/admin-ventes'
 import type { CreateAdminVenteRequest, UpdateAdminVenteRequest } from '@/api/generated/model'
 
-export function useAdminVentesQuery() {
+export function useAdminVentesQuery(cursor: MaybeRefOrGetter<string | null> = null) {
   return useQuery({
-    queryKey: queryKeys.admin.ventes.all,
+    queryKey: computed(() => queryKeys.admin.ventes.list(toValue(cursor))),
     queryFn: async () => {
-      const response = await getApiAdminVentes()
-      return response.data.data ?? []
+      const params: Record<string, unknown> = {}
+      const c = toValue(cursor)
+      if (c) params.cursor = c
+      const response = await getApiAdminVentes(params)
+      return {
+        data: response.data.data ?? [],
+        pageInfo: response.data.pageInfo ?? { endCursor: null, hasNext: false },
+      }
     },
+    placeholderData: keepPreviousData,
   })
 }
 

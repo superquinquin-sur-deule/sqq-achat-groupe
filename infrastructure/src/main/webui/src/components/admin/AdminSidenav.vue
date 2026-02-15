@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import { RouterLink, useRoute } from 'vue-router'
 import { cva } from 'class-variance-authority'
 import { useAuth } from '@/composables/useAuth'
@@ -13,7 +14,8 @@ const route = useRoute()
 const { user } = useAuth()
 const venteStore = useVenteStore()
 const { selectedVenteId } = storeToRefs(venteStore)
-const { data: ventes } = useAdminVentesQuery()
+const { data: pageData } = useAdminVentesQuery()
+const ventes = computed(() => pageData.value?.data ?? [])
 
 const adminLinks = [
   { to: '/admin/dashboard', label: 'Dashboard', testid: 'sidenav-dashboard', icon: 'dashboard' },

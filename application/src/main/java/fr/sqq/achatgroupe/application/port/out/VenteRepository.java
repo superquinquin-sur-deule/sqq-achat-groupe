@@ -1,5 +1,7 @@
 package fr.sqq.achatgroupe.application.port.out;
 
+import fr.sqq.achatgroupe.application.query.CursorPage;
+import fr.sqq.achatgroupe.application.query.CursorPageRequest;
 import fr.sqq.achatgroupe.domain.model.vente.Vente;
 import fr.sqq.achatgroupe.domain.model.vente.VenteId;
 
@@ -14,7 +16,11 @@ public interface VenteRepository {
 
     List<Vente> findAllActive();
 
+    CursorPage<Vente> findAllActive(CursorPageRequest pageRequest);
+
     List<Vente> findAllVentes();
+
+    CursorPage<Vente> findAllVentes(CursorPageRequest pageRequest);
 
     void deleteById(VenteId id);
 }

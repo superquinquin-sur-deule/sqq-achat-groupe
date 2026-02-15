@@ -1,15 +1,14 @@
 package fr.sqq.achatgroupe.application.handler.query;
 
 import fr.sqq.achatgroupe.application.port.out.TimeSlotRepository;
+import fr.sqq.achatgroupe.application.query.CursorPage;
 import fr.sqq.achatgroupe.application.query.ListAllTimeSlotsQuery;
 import fr.sqq.achatgroupe.domain.model.planning.TimeSlot;
 import fr.sqq.mediator.QueryHandler;
 import jakarta.enterprise.context.ApplicationScoped;
 
-import java.util.List;
-
 @ApplicationScoped
-public class ListAllTimeSlotsHandler implements QueryHandler<ListAllTimeSlotsQuery, List<TimeSlot>> {
+public class ListAllTimeSlotsHandler implements QueryHandler<ListAllTimeSlotsQuery, CursorPage<TimeSlot>> {
 
     private final TimeSlotRepository timeSlotRepository;
 
@@ -18,7 +17,7 @@ public class ListAllTimeSlotsHandler implements QueryHandler<ListAllTimeSlotsQue
     }
 
     @Override
-    public List<TimeSlot> handle(ListAllTimeSlotsQuery query) {
-        return timeSlotRepository.findAllByVenteId(query.venteId());
+    public CursorPage<TimeSlot> handle(ListAllTimeSlotsQuery query) {
+        return timeSlotRepository.findAllByVenteId(query.venteId(), query.pageRequest());
     }
 }

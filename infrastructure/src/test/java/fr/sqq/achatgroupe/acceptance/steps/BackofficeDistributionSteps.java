@@ -100,7 +100,7 @@ public class BackofficeDistributionSteps {
         page().route("**/api/admin/ventes", route -> route.fulfill(new Route.FulfillOptions()
                 .setStatus(200)
                 .setContentType("application/json")
-                .setBody("{\"data\":[{\"id\":" + venteId + ",\"name\":\"Vente Test\",\"description\":\"Test\",\"status\":\"ACTIVE\",\"startDate\":null,\"endDate\":null,\"createdAt\":\"2026-01-01T00:00:00Z\"}]}")));
+                .setBody("{\"data\":[{\"id\":" + venteId + ",\"name\":\"Vente Test\",\"description\":\"Test\",\"status\":\"ACTIVE\",\"startDate\":null,\"endDate\":null,\"createdAt\":\"2026-01-01T00:00:00Z\"}],\"pageInfo\":{\"endCursor\":null,\"hasNext\":false}}")));
 
         page().navigate(PlaywrightHooks.testUrl() + "/admin/distribution");
         page().waitForSelector("[data-testid='distribution-order-row'], [data-testid='distribution-empty']",
@@ -300,7 +300,7 @@ public class BackofficeDistributionSteps {
         page().route("**/api/admin/ventes", route -> route.fulfill(new Route.FulfillOptions()
                 .setStatus(200)
                 .setContentType("application/json")
-                .setBody("{\"data\":[{\"id\":" + emptyVenteId + ",\"name\":\"Vente Vide\",\"description\":\"Test\",\"status\":\"ACTIVE\",\"startDate\":null,\"endDate\":null,\"createdAt\":\"2026-01-01T00:00:00Z\"}]}")));
+                .setBody("{\"data\":[{\"id\":" + emptyVenteId + ",\"name\":\"Vente Vide\",\"description\":\"Test\",\"status\":\"ACTIVE\",\"startDate\":null,\"endDate\":null,\"createdAt\":\"2026-01-01T00:00:00Z\"}],\"pageInfo\":{\"endCursor\":null,\"hasNext\":false}}")));
 
         page().navigate(PlaywrightHooks.testUrl() + "/admin/distribution");
         page().waitForSelector("[data-testid='distribution-order-row'], [data-testid='distribution-empty']",

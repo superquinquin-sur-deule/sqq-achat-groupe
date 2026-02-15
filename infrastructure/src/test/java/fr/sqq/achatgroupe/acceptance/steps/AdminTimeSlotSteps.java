@@ -39,7 +39,7 @@ public class AdminTimeSlotSteps {
         page().route("**/api/admin/ventes", route -> route.fulfill(new Route.FulfillOptions()
                 .setStatus(200)
                 .setContentType("application/json")
-                .setBody("{\"data\":[{\"id\":" + venteId + ",\"name\":\"Vente Test\",\"description\":\"Test\",\"status\":\"ACTIVE\",\"startDate\":null,\"endDate\":null,\"createdAt\":\"2026-01-01T00:00:00Z\"}]}")));
+                .setBody("{\"data\":[{\"id\":" + venteId + ",\"name\":\"Vente Test\",\"description\":\"Test\",\"status\":\"ACTIVE\",\"startDate\":null,\"endDate\":null,\"createdAt\":\"2026-01-01T00:00:00Z\"}],\"pageInfo\":{\"endCursor\":null,\"hasNext\":false}}")));
 
         if (hasReservationsScenario) {
             // Intercept the timeslots API to modify the response: add a timeslot with reservations
@@ -50,7 +50,7 @@ public class AdminTimeSlotSteps {
                 LocalDate futureDate = LocalDate.now().plusDays(30);
                 String injectedSlot = """
                         {"id":99999,"date":"%s","startTime":"16:00","endTime":"17:00","capacity":10,"reserved":3,"remainingPlaces":7}""".formatted(futureDate);
-                String modifiedBody = originalBody.replace("]}", "," + injectedSlot + "]}");
+                String modifiedBody = originalBody.replace("],\"pageInfo\"", "," + injectedSlot + "],\"pageInfo\"");
                 route.fulfill(new Route.FulfillOptions()
                         .setStatus(response.status())
                         .setHeaders(response.headers())

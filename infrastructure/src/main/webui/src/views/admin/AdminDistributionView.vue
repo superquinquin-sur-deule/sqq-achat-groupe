@@ -11,7 +11,14 @@ const toast = useToast()
 const venteStore = useVenteStore()
 const { selectedVenteId } = storeToRefs(venteStore)
 
-const { data: orders, isLoading: loading } = useAdminOrdersQuery(selectedVenteId)
+const { data: pageData, isLoading: loading } = useAdminOrdersQuery(
+  selectedVenteId,
+  null,
+  null,
+  null,
+  1000,
+)
+const orders = computed(() => pageData.value?.data ?? [])
 const pickupMutation = usePickupMutation(selectedVenteId)
 
 const searchQuery = ref('')

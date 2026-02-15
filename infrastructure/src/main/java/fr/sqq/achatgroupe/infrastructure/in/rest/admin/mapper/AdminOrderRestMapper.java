@@ -8,16 +8,19 @@ import fr.sqq.achatgroupe.infrastructure.in.rest.admin.dto.AdminOrderDetailRespo
 import fr.sqq.achatgroupe.infrastructure.in.rest.admin.dto.AdminOrderResponse;
 import org.mapstruct.Mapper;
 
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 
 @Mapper(componentModel = "cdi")
 public interface AdminOrderRestMapper {
 
+    DateTimeFormatter TIME_FORMAT = DateTimeFormatter.ofPattern("HH:mm");
+
     default AdminOrderResponse toListResponse(Order order, Map<Long, TimeSlot> timeSlotsById) {
         TimeSlot slot = timeSlotsById.get(order.timeSlotId());
         String timeSlotLabel = slot != null
-                ? slot.date() + " " + slot.startTime() + "-" + slot.endTime()
+                ? slot.date() + " " + slot.startTime().format(TIME_FORMAT) + "-" + slot.endTime().format(TIME_FORMAT)
                 : "Créneau inconnu";
         return new AdminOrderResponse(
                 order.id(),

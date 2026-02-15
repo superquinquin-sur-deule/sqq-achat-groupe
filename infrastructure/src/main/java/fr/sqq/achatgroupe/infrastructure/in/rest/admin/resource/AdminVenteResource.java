@@ -5,12 +5,15 @@ import fr.sqq.achatgroupe.application.command.CreateAdminVenteCommand;
 import fr.sqq.achatgroupe.application.command.DeactivateVenteCommand;
 import fr.sqq.achatgroupe.application.command.DeleteVenteCommand;
 import fr.sqq.achatgroupe.application.command.UpdateVenteCommand;
+import fr.sqq.achatgroupe.application.query.CursorPage;
+import fr.sqq.achatgroupe.application.query.CursorPageRequest;
 import fr.sqq.achatgroupe.application.query.ListAllVentesQuery;
 import fr.sqq.achatgroupe.domain.model.vente.Vente;
 import fr.sqq.achatgroupe.domain.model.vente.VenteId;
 import fr.sqq.achatgroupe.infrastructure.in.rest.admin.mapper.AdminVenteRestMapper;
 import fr.sqq.achatgroupe.infrastructure.in.rest.admin.dto.AdminVenteResponse;
 import fr.sqq.achatgroupe.infrastructure.in.rest.common.dto.CreateAdminVenteRequest;
+import fr.sqq.achatgroupe.infrastructure.in.rest.common.dto.CursorPageResponse;
 import fr.sqq.achatgroupe.infrastructure.in.rest.common.dto.DataResponse;
 import fr.sqq.achatgroupe.infrastructure.in.rest.common.dto.UpdateAdminVenteRequest;
 import fr.sqq.mediator.Mediator;
@@ -38,12 +41,15 @@ public class AdminVenteResource {
     }
 
     @GET
-    public DataResponse<List<AdminVenteResponse>> listAllVentes() {
-        List<Vente> ventes = mediator.send(new ListAllVentesQuery());
-        List<AdminVenteResponse> responses = ventes.stream()
+    public CursorPageResponse<AdminVenteResponse> listAllVentes(
+            @QueryParam("cursor") String cursor,
+            @QueryParam("size") @DefaultValue("20") int size) {
+        var pageRequest = cursor != null ? CursorPageRequest.after(cursor, size) : CursorPageRequest.first(size);
+        CursorPage<Vente> page = mediator.send(new ListAllVentesQuery(pageRequest));
+        List<AdminVenteResponse> responses = page.items().stream()
                 .map(mapper::toResponse)
                 .toList();
-        return new DataResponse<>(responses);
+        return new CursorPageResponse<>(responses, new CursorPageResponse.PageInfo(page.endCursor(), page.hasNext()));
     }
 
     @POST

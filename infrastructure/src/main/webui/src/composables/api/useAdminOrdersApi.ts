@@ -1,5 +1,5 @@
 import { computed, toValue, type MaybeRefOrGetter } from 'vue'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/vue-query'
+import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tanstack/vue-query'
 import { queryKeys } from '@/api/queryKeys'
 import {
   getApiAdminOrders,
@@ -7,14 +7,40 @@ import {
   putApiAdminOrdersIdPickup,
 } from '@/api/generated/admin-orders/admin-orders'
 
-export function useAdminOrdersQuery(venteId: MaybeRefOrGetter<number | null>) {
+export function useAdminOrdersQuery(
+  venteId: MaybeRefOrGetter<number | null>,
+  cursor: MaybeRefOrGetter<string | null> = null,
+  search: MaybeRefOrGetter<string | null> = null,
+  timeSlotId: MaybeRefOrGetter<number | null> = null,
+  size: MaybeRefOrGetter<number | null> = null,
+) {
   return useQuery({
-    queryKey: computed(() => queryKeys.admin.orders.list(toValue(venteId)!)),
+    queryKey: computed(() =>
+      queryKeys.admin.orders.list(
+        toValue(venteId)!,
+        toValue(cursor),
+        toValue(search),
+        toValue(timeSlotId),
+      ),
+    ),
     queryFn: async () => {
-      const response = await getApiAdminOrders({ venteId: toValue(venteId)! })
-      return response.data.data ?? []
+      const params: Record<string, unknown> = { venteId: toValue(venteId)! }
+      const c = toValue(cursor)
+      if (c) params.cursor = c
+      const s = toValue(search)
+      if (s) params.search = s
+      const tsId = toValue(timeSlotId)
+      if (tsId !== null && tsId !== undefined) params.timeSlotId = tsId
+      const sz = toValue(size)
+      if (sz !== null && sz !== undefined) params.size = sz
+      const response = await getApiAdminOrders(params)
+      return {
+        data: response.data.data ?? [],
+        pageInfo: response.data.pageInfo ?? { endCursor: null, hasNext: false },
+      }
     },
     enabled: () => toValue(venteId) !== null,
+    placeholderData: keepPreviousData,
   })
 }
 
@@ -35,7 +61,7 @@ export function usePickupMutation(venteId: MaybeRefOrGetter<number | null>) {
     onSuccess: () => {
       const id = toValue(venteId)
       if (id !== null) {
-        queryClient.invalidateQueries({ queryKey: queryKeys.admin.orders.list(id) })
+        queryClient.invalidateQueries({ queryKey: ['admin', 'orders'] })
       }
     },
   })

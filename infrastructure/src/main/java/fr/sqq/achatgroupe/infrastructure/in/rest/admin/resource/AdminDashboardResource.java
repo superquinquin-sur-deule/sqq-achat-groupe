@@ -34,7 +34,7 @@ public class AdminDashboardResource {
             throw new jakarta.ws.rs.BadRequestException("venteId is required");
         }
         DashboardStats stats = mediator.send(new GetDashboardStatsQuery(venteId));
-        List<TimeSlot> timeSlots = mediator.send(new ListAllTimeSlotsQuery(venteId));
+        List<TimeSlot> timeSlots = mediator.send(ListAllTimeSlotsQuery.all(venteId)).items();
         return new DataResponse<>(mapper.toResponse(stats, timeSlots));
     }
 }

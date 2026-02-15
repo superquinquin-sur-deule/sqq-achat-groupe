@@ -1,6 +1,8 @@
 package fr.sqq.achatgroupe.infrastructure.in.rest.admin.resource;
 
 import fr.sqq.achatgroupe.application.command.MarkOrderPickedUpCommand;
+import fr.sqq.achatgroupe.application.query.CursorPage;
+import fr.sqq.achatgroupe.application.query.CursorPageRequest;
 import fr.sqq.achatgroupe.application.query.GetOrderDetailsQuery;
 import fr.sqq.achatgroupe.application.query.ListAllProductsQuery;
 import fr.sqq.achatgroupe.application.query.ListAllTimeSlotsQuery;
@@ -11,6 +13,7 @@ import fr.sqq.achatgroupe.domain.model.planning.TimeSlot;
 import fr.sqq.achatgroupe.infrastructure.in.rest.admin.mapper.AdminOrderRestMapper;
 import fr.sqq.achatgroupe.infrastructure.in.rest.admin.dto.AdminOrderDetailResponse;
 import fr.sqq.achatgroupe.infrastructure.in.rest.admin.dto.AdminOrderResponse;
+import fr.sqq.achatgroupe.infrastructure.in.rest.common.dto.CursorPageResponse;
 import fr.sqq.achatgroupe.infrastructure.in.rest.common.dto.DataResponse;
 import fr.sqq.achatgroupe.infrastructure.in.rest.common.dto.ProblemDetailResponse;
 import fr.sqq.mediator.Mediator;
@@ -41,15 +44,22 @@ public class AdminOrderResource {
     }
 
     @GET
-    public DataResponse<List<AdminOrderResponse>> listOrders(@QueryParam("venteId") Long venteId) {
+    public CursorPageResponse<AdminOrderResponse> listOrders(
+            @QueryParam("venteId") Long venteId,
+            @QueryParam("cursor") String cursor,
+            @QueryParam("size") @DefaultValue("20") int size,
+            @QueryParam("search") String search,
+            @QueryParam("timeSlotId") Long timeSlotId) {
         if (venteId == null) {
             throw new BadRequestException("venteId is required");
         }
-        List<Order> orders = mediator.send(new ListOrdersQuery(venteId));
-        List<TimeSlot> timeSlots = mediator.send(new ListAllTimeSlotsQuery(venteId));
+        var pageRequest = cursor != null ? CursorPageRequest.after(cursor, size) : CursorPageRequest.first(size);
+        CursorPage<Order> page = mediator.send(new ListOrdersQuery(venteId, pageRequest, search, timeSlotId));
+        List<TimeSlot> timeSlots = mediator.send(ListAllTimeSlotsQuery.all(venteId)).items();
         Map<Long, TimeSlot> timeSlotsById = timeSlots.stream()
                 .collect(Collectors.toMap(TimeSlot::id, Function.identity()));
-        return new DataResponse<>(mapper.toListResponse(orders, timeSlotsById));
+        List<AdminOrderResponse> responses = mapper.toListResponse(page.items(), timeSlotsById);
+        return new CursorPageResponse<>(responses, new CursorPageResponse.PageInfo(page.endCursor(), page.hasNext()));
     }
 
     @PUT
@@ -72,10 +82,10 @@ public class AdminOrderResource {
     @Path("/{id}")
     public DataResponse<AdminOrderDetailResponse> getOrderDetail(@PathParam("id") UUID id) {
         Order order = mediator.send(new GetOrderDetailsQuery(id));
-        List<TimeSlot> timeSlots = mediator.send(new ListAllTimeSlotsQuery(order.venteId()));
+        List<TimeSlot> timeSlots = mediator.send(ListAllTimeSlotsQuery.all(order.venteId())).items();
         Map<Long, TimeSlot> timeSlotsById = timeSlots.stream()
                 .collect(Collectors.toMap(TimeSlot::id, Function.identity()));
-        List<Product> products = mediator.send(new ListAllProductsQuery(order.venteId()));
+        List<Product> products = mediator.send(ListAllProductsQuery.all(order.venteId())).items();
         Map<Long, Product> productsById = products.stream()
                 .collect(Collectors.toMap(Product::id, Function.identity()));
         return new DataResponse<>(mapper.toDetailResponse(order, timeSlotsById, productsById));
