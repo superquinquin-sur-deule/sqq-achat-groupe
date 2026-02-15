@@ -16,6 +16,6 @@ public record CreateOrderRequest(
         @NotNull(message = "Le créneau est requis") Long timeSlotId,
         @NotEmpty(message = "La commande doit contenir au moins un article")
         @Size(max = 50, message = "La commande ne peut pas contenir plus de 50 articles")
-        @Valid List<OrderItemRequest> items
+        List<@Valid OrderItemRequest> items
 ) {
 }
