@@ -16,6 +16,8 @@ public interface OrderRepository {
 
     Optional<Order> findOrderById(UUID id);
 
+    Optional<Order> findOrderByIdAndVenteId(UUID id, Long venteId);
+
     List<Order> findPendingOrdersBefore(Instant cutoff);
 
     long countPaidByVenteId(Long venteId);

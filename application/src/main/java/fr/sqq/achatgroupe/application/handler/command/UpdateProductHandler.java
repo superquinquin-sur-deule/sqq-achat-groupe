@@ -20,7 +20,7 @@ public class UpdateProductHandler implements CommandHandler<UpdateProductCommand
     @Override
     @Transactional
     public Product handle(UpdateProductCommand command) {
-        Product existing = productRepository.findById(command.id())
+        Product existing = productRepository.findByIdAndVenteId(command.id(), command.venteId())
                 .orElseThrow(() -> new ProductNotFoundException(command.id()));
 
         Product updated = new Product(

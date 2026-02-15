@@ -17,7 +17,7 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
 
-@Path("/api/admin/preparation")
+@Path("/api/admin/ventes/{venteId}/preparation")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 @Tag(name = "admin-preparation")
@@ -36,10 +36,7 @@ public class AdminPreparationResource {
     }
 
     @GET
-    public DataResponse<List<PreparationOrderResponse>> getPreparationList(@QueryParam("venteId") Long venteId) {
-        if (venteId == null) {
-            throw new BadRequestException("venteId is required");
-        }
+    public DataResponse<List<PreparationOrderResponse>> getPreparationList(@PathParam("venteId") Long venteId) {
         List<PreparationOrder> orders = mediator.send(new GeneratePreparationListQuery(venteId));
         return new DataResponse<>(mapper.toResponse(orders));
     }
@@ -48,10 +45,7 @@ public class AdminPreparationResource {
     @Path("/pdf")
     @Produces("application/pdf")
     @Operation(hidden = true)
-    public Response getPreparationPdf(@QueryParam("venteId") Long venteId) throws IOException {
-        if (venteId == null) {
-            throw new BadRequestException("venteId is required");
-        }
+    public Response getPreparationPdf(@PathParam("venteId") Long venteId) throws IOException {
         List<PreparationOrder> orders = mediator.send(new GeneratePreparationListQuery(venteId));
         byte[] pdf = pdfGenerator.generate(orders);
         String filename = "preparation-" + LocalDate.now() + ".pdf";

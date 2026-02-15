@@ -44,7 +44,7 @@ public class AdminTimeSlotSteps {
 
         if (hasReservationsScenario) {
             // Intercept the timeslots API to modify the response: add a timeslot with reservations
-            page().route("**/api/admin/timeslots**", route -> {
+            page().route("**/api/admin/ventes/*/timeslots**", route -> {
                 var response = route.fetch();
                 String originalBody = new String(response.body());
                 // Inject a timeslot with reservations into the response data array

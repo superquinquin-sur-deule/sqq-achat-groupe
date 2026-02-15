@@ -4,5 +4,5 @@ import fr.sqq.mediator.Command;
 
 import java.util.UUID;
 
-public record MarkOrderPickedUpCommand(UUID orderId) implements Command<Void> {
+public record MarkOrderPickedUpCommand(Long venteId, UUID orderId) implements Command<Void> {
 }

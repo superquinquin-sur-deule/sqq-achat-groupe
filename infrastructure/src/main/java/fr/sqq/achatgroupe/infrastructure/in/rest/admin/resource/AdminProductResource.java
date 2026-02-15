@@ -34,7 +34,7 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 
-@Path("/api/admin/products")
+@Path("/api/admin/ventes/{venteId}/products")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 @Tag(name = "admin-products")
@@ -52,7 +52,7 @@ public class AdminProductResource {
 
     @GET
     public CursorPageResponse<AdminProductResponse> listProducts(
-            @QueryParam("venteId") Long venteId,
+            @PathParam("venteId") Long venteId,
             @QueryParam("cursor") String cursor,
             @QueryParam("size") @DefaultValue("20") int size) {
         var pageRequest = cursor != null ? CursorPageRequest.after(cursor, size) : CursorPageRequest.first(size);
@@ -64,8 +64,8 @@ public class AdminProductResource {
     }
 
     @POST
-    public DataResponse<AdminProductResponse> createProduct(@Valid CreateProductRequest request) {
-        var command = mapper.toCreateCommand(request);
+    public DataResponse<AdminProductResponse> createProduct(@PathParam("venteId") Long venteId, @Valid CreateProductRequest request) {
+        var command = mapper.toCreateCommand(request, venteId);
         Product product = mediator.send(command);
         return new DataResponse<>(mapper.toResponse(product));
     }
@@ -76,8 +76,8 @@ public class AdminProductResource {
     @APIResponse(responseCode = "200", description = "Import result")
     @APIResponse(responseCode = "400", description = "Invalid CSV file")
     public Response importProducts(
-            @FormParam("file") FileUpload file,
-            @FormParam("venteId") Long venteId
+            @PathParam("venteId") Long venteId,
+            @FormParam("file") FileUpload file
     ) throws IOException {
         if (file == null || file.fileName() == null) {
             return Response.status(400)
@@ -141,15 +141,15 @@ public class AdminProductResource {
 
     @PUT
     @Path("/{id}")
-    public DataResponse<AdminProductResponse> updateProduct(@PathParam("id") Long id, @Valid UpdateProductRequest request) {
-        var command = mapper.toUpdateCommand(id, request);
+    public DataResponse<AdminProductResponse> updateProduct(@PathParam("venteId") Long venteId, @PathParam("id") Long id, @Valid UpdateProductRequest request) {
+        var command = mapper.toUpdateCommand(id, request, venteId);
         Product product = mediator.send(command);
         return new DataResponse<>(mapper.toResponse(product));
     }
 
     @DELETE
     @Path("/{id}")
-    public void deleteProduct(@PathParam("id") Long id) {
-        mediator.send(new DeleteProductCommand(new ProductId(id)));
+    public void deleteProduct(@PathParam("venteId") Long venteId, @PathParam("id") Long id) {
+        mediator.send(new DeleteProductCommand(venteId, new ProductId(id)));
     }
 }

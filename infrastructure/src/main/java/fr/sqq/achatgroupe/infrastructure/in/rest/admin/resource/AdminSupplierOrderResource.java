@@ -17,7 +17,7 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
 
-@Path("/api/admin/supplier-orders")
+@Path("/api/admin/ventes/{venteId}/supplier-orders")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 @Tag(name = "admin-supplier-orders")
@@ -36,10 +36,7 @@ public class AdminSupplierOrderResource {
     }
 
     @GET
-    public DataResponse<List<SupplierOrderLineResponse>> getSupplierOrder(@QueryParam("venteId") Long venteId) {
-        if (venteId == null) {
-            throw new BadRequestException("venteId is required");
-        }
+    public DataResponse<List<SupplierOrderLineResponse>> getSupplierOrder(@PathParam("venteId") Long venteId) {
         List<SupplierOrderLine> lines = mediator.send(new GenerateSupplierOrderQuery(venteId));
         return new DataResponse<>(mapper.toResponse(lines));
     }
@@ -48,10 +45,7 @@ public class AdminSupplierOrderResource {
     @Path("/xlsx")
     @Produces("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
     @Operation(hidden = true)
-    public Response getSupplierOrderXlsx(@QueryParam("venteId") Long venteId) throws IOException {
-        if (venteId == null) {
-            throw new BadRequestException("venteId is required");
-        }
+    public Response getSupplierOrderXlsx(@PathParam("venteId") Long venteId) throws IOException {
         List<SupplierOrderLine> lines = mediator.send(new GenerateSupplierOrderQuery(venteId));
         byte[] xlsx = excelGenerator.generate(lines);
         String filename = "bon-fournisseur-" + LocalDate.now() + ".xlsx";

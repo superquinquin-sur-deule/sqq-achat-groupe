@@ -7,6 +7,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 
 public record UpdateTimeSlotCommand(
+        Long venteId,
         Long id,
         LocalDate date,
         LocalTime startTime,

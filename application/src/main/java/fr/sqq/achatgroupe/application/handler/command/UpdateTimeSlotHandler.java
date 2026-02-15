@@ -20,7 +20,7 @@ public class UpdateTimeSlotHandler implements CommandHandler<UpdateTimeSlotComma
     @Override
     @Transactional
     public TimeSlot handle(UpdateTimeSlotCommand command) {
-        TimeSlot existing = timeSlotRepository.findSlotById(command.id())
+        TimeSlot existing = timeSlotRepository.findSlotByIdAndVenteId(command.id(), command.venteId())
                 .orElseThrow(() -> new TimeSlotNotFoundException(command.id()));
 
         TimeSlot updated = new TimeSlot(

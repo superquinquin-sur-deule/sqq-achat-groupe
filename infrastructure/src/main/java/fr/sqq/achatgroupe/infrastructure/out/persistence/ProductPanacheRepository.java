@@ -56,6 +56,12 @@ public class ProductPanacheRepository implements ProductRepository, PanacheRepos
     }
 
     @Override
+    public Optional<Product> findByIdAndVenteId(ProductId id, Long venteId) {
+        return find("id = ?1 AND venteId = ?2", id.value(), venteId).firstResultOptional()
+                .map(mapper::toDomain);
+    }
+
+    @Override
     public List<Product> findAllByVenteId(Long venteId) {
         return list("venteId = ?1", venteId).stream()
                 .map(mapper::toDomain)

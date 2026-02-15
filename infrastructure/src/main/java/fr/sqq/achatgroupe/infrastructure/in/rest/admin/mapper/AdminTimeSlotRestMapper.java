@@ -24,9 +24,9 @@ public interface AdminTimeSlotRestMapper {
     @Mapping(target = "remainingPlaces", expression = "java(timeSlot.remainingPlaces())")
     TimeSlotResponse toResponse(TimeSlot timeSlot);
 
-    default CreateTimeSlotCommand toCreateCommand(CreateTimeSlotRequest request) {
+    default CreateTimeSlotCommand toCreateCommand(CreateTimeSlotRequest request, Long venteId) {
         return new CreateTimeSlotCommand(
-                request.venteId(),
+                venteId,
                 LocalDate.parse(request.date()),
                 LocalTime.parse(request.startTime()),
                 LocalTime.parse(request.endTime()),
@@ -34,8 +34,9 @@ public interface AdminTimeSlotRestMapper {
         );
     }
 
-    default UpdateTimeSlotCommand toUpdateCommand(Long id, UpdateTimeSlotRequest request) {
+    default UpdateTimeSlotCommand toUpdateCommand(Long id, UpdateTimeSlotRequest request, Long venteId) {
         return new UpdateTimeSlotCommand(
+                venteId,
                 id,
                 LocalDate.parse(request.date()),
                 LocalTime.parse(request.startTime()),

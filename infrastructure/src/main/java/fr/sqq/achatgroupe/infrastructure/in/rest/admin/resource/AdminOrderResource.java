@@ -29,7 +29,7 @@ import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-@Path("/api/admin/orders")
+@Path("/api/admin/ventes/{venteId}/orders")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 @Tag(name = "admin-orders")
@@ -45,14 +45,11 @@ public class AdminOrderResource {
 
     @GET
     public CursorPageResponse<AdminOrderResponse> listOrders(
-            @QueryParam("venteId") Long venteId,
+            @PathParam("venteId") Long venteId,
             @QueryParam("cursor") String cursor,
             @QueryParam("size") @DefaultValue("20") int size,
             @QueryParam("search") String search,
             @QueryParam("timeSlotId") Long timeSlotId) {
-        if (venteId == null) {
-            throw new BadRequestException("venteId is required");
-        }
         var pageRequest = cursor != null ? CursorPageRequest.after(cursor, size) : CursorPageRequest.first(size);
         CursorPage<Order> page = mediator.send(new ListOrdersQuery(venteId, pageRequest, search, timeSlotId));
         List<TimeSlot> timeSlots = mediator.send(ListAllTimeSlotsQuery.all(venteId)).items();
@@ -66,9 +63,9 @@ public class AdminOrderResource {
     @Path("/{id}/pickup")
     @APIResponse(responseCode = "204", description = "No content")
     @APIResponse(responseCode = "409", description = "Conflict")
-    public Response markAsPickedUp(@PathParam("id") UUID id) {
+    public Response markAsPickedUp(@PathParam("venteId") Long venteId, @PathParam("id") UUID id) {
         try {
-            mediator.send(new MarkOrderPickedUpCommand(id));
+            mediator.send(new MarkOrderPickedUpCommand(venteId, id));
         } catch (IllegalStateException e) {
             return Response.status(Response.Status.CONFLICT)
                     .type(MediaType.valueOf("application/problem+json"))
@@ -80,12 +77,12 @@ public class AdminOrderResource {
 
     @GET
     @Path("/{id}")
-    public DataResponse<AdminOrderDetailResponse> getOrderDetail(@PathParam("id") UUID id) {
-        Order order = mediator.send(new GetOrderDetailsQuery(id));
-        List<TimeSlot> timeSlots = mediator.send(ListAllTimeSlotsQuery.all(order.venteId())).items();
+    public DataResponse<AdminOrderDetailResponse> getOrderDetail(@PathParam("venteId") Long venteId, @PathParam("id") UUID id) {
+        Order order = mediator.send(new GetOrderDetailsQuery(venteId, id));
+        List<TimeSlot> timeSlots = mediator.send(ListAllTimeSlotsQuery.all(venteId)).items();
         Map<Long, TimeSlot> timeSlotsById = timeSlots.stream()
                 .collect(Collectors.toMap(TimeSlot::id, Function.identity()));
-        List<Product> products = mediator.send(ListAllProductsQuery.all(order.venteId())).items();
+        List<Product> products = mediator.send(ListAllProductsQuery.all(venteId)).items();
         Map<Long, Product> productsById = products.stream()
                 .collect(Collectors.toMap(Product::id, Function.identity()));
         return new DataResponse<>(mapper.toDetailResponse(order, timeSlotsById, productsById));

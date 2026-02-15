@@ -19,7 +19,7 @@ public class DeleteProductHandler implements CommandHandler<DeleteProductCommand
     @Override
     @Transactional
     public Void handle(DeleteProductCommand command) {
-        productRepository.findById(command.id())
+        productRepository.findByIdAndVenteId(command.id(), command.venteId())
                 .orElseThrow(() -> new ProductNotFoundException(command.id()));
         productRepository.deleteById(command.id());
         return null;

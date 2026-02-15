@@ -2,10 +2,8 @@ package fr.sqq.achatgroupe.infrastructure.in.rest.common.dto;
 
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 
 public record CreateTimeSlotRequest(
-        @NotNull(message = "L'identifiant de vente est requis") Long venteId,
         @NotBlank(message = "La date est requise") String date,
         @NotBlank(message = "L'heure de début est requise") String startTime,
         @NotBlank(message = "L'heure de fin est requise") String endTime,

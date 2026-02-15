@@ -34,7 +34,7 @@ function handlePrint() {
 
 async function handleExportXls() {
   if (!selectedVenteId.value) return
-  const response = await fetch(`/api/admin/supplier-orders/xlsx?venteId=${selectedVenteId.value}`)
+  const response = await fetch(`/api/admin/ventes/${selectedVenteId.value}/supplier-orders/xlsx`)
   const blob = await response.blob()
   const disposition = response.headers.get('Content-Disposition')
   const match = disposition?.match(/filename="?(.+?)"?$/)

@@ -8,7 +8,6 @@ import jakarta.validation.constraints.NotNull;
 import java.math.BigDecimal;
 
 public record CreateProductRequest(
-        @NotNull(message = "L'identifiant de vente est requis") Long venteId,
         @NotBlank(message = "Le nom est requis") String name,
         String description,
         @NotNull(message = "Le prix est requis") @DecimalMin(value = "0.01", message = "Le prix doit être supérieur à 0") BigDecimal price,

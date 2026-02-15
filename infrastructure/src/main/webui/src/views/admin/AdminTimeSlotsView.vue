@@ -80,7 +80,6 @@ async function onSubmit(data: {
       toast.success('Créneau mis à jour')
     } else {
       const createData: CreateTimeSlotRequest = {
-        venteId: selectedVenteId.value,
         date: data.date,
         startTime: data.startTime,
         endTime: data.endTime,

@@ -134,7 +134,6 @@ async function onSubmit(data: {
       toast.success('Produit mis à jour')
     } else {
       const createData: CreateProductRequest = {
-        venteId: selectedVenteId.value,
         name: data.name,
         description: data.description,
         price: data.price,

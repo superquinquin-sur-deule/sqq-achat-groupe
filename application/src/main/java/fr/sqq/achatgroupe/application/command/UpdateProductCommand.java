@@ -7,6 +7,7 @@ import fr.sqq.mediator.Command;
 import java.math.BigDecimal;
 
 public record UpdateProductCommand(
+        Long venteId,
         ProductId id,
         String name,
         String description,

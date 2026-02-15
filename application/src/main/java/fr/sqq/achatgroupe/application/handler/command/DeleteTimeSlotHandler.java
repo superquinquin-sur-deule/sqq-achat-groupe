@@ -21,7 +21,7 @@ public class DeleteTimeSlotHandler implements CommandHandler<DeleteTimeSlotComma
     @Override
     @Transactional
     public Void handle(DeleteTimeSlotCommand command) {
-        TimeSlot existing = timeSlotRepository.findSlotById(command.id())
+        TimeSlot existing = timeSlotRepository.findSlotByIdAndVenteId(command.id(), command.venteId())
                 .orElseThrow(() -> new TimeSlotNotFoundException(command.id()));
 
         if (existing.reserved() > 0 && !command.force()) {

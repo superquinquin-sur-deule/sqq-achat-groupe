@@ -41,6 +41,12 @@ public class OrderPanacheRepository implements OrderRepository, PanacheRepositor
     }
 
     @Override
+    public Optional<Order> findOrderByIdAndVenteId(UUID id, Long venteId) {
+        return find("id = ?1 AND venteId = ?2", id, venteId).firstResultOptional()
+                .map(mapper::toDomain);
+    }
+
+    @Override
     public List<Order> findPendingOrdersBefore(Instant cutoff) {
         return list("status = ?1 and createdAt < ?2", "PENDING", cutoff).stream()
                 .map(mapper::toDomain)

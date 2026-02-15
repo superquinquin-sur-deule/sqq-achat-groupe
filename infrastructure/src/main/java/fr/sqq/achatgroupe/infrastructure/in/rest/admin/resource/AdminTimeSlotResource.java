@@ -19,7 +19,7 @@ import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 
 import java.util.List;
 
-@Path("/api/admin/timeslots")
+@Path("/api/admin/ventes/{venteId}/timeslots")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 @Tag(name = "admin-timeslots")
@@ -35,7 +35,7 @@ public class AdminTimeSlotResource {
 
     @GET
     public CursorPageResponse<TimeSlotResponse> listTimeSlots(
-            @QueryParam("venteId") Long venteId,
+            @PathParam("venteId") Long venteId,
             @QueryParam("cursor") String cursor,
             @QueryParam("size") @DefaultValue("20") int size) {
         var pageRequest = cursor != null ? CursorPageRequest.after(cursor, size) : CursorPageRequest.first(size);
@@ -47,23 +47,23 @@ public class AdminTimeSlotResource {
     }
 
     @POST
-    public DataResponse<TimeSlotResponse> createTimeSlot(@Valid CreateTimeSlotRequest request) {
-        var command = mapper.toCreateCommand(request);
+    public DataResponse<TimeSlotResponse> createTimeSlot(@PathParam("venteId") Long venteId, @Valid CreateTimeSlotRequest request) {
+        var command = mapper.toCreateCommand(request, venteId);
         TimeSlot timeSlot = mediator.send(command);
         return new DataResponse<>(mapper.toResponse(timeSlot));
     }
 
     @PUT
     @Path("/{id}")
-    public DataResponse<TimeSlotResponse> updateTimeSlot(@PathParam("id") Long id, @Valid UpdateTimeSlotRequest request) {
-        var command = mapper.toUpdateCommand(id, request);
+    public DataResponse<TimeSlotResponse> updateTimeSlot(@PathParam("venteId") Long venteId, @PathParam("id") Long id, @Valid UpdateTimeSlotRequest request) {
+        var command = mapper.toUpdateCommand(id, request, venteId);
         TimeSlot timeSlot = mediator.send(command);
         return new DataResponse<>(mapper.toResponse(timeSlot));
     }
 
     @DELETE
     @Path("/{id}")
-    public void deleteTimeSlot(@PathParam("id") Long id, @QueryParam("force") @DefaultValue("false") boolean force) {
-        mediator.send(new DeleteTimeSlotCommand(id, force));
+    public void deleteTimeSlot(@PathParam("venteId") Long venteId, @PathParam("id") Long id, @QueryParam("force") @DefaultValue("false") boolean force) {
+        mediator.send(new DeleteTimeSlotCommand(venteId, id, force));
     }
 }

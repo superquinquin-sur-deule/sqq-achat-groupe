@@ -11,6 +11,8 @@ public interface TimeSlotRepository {
 
     Optional<TimeSlot> findSlotById(Long id);
 
+    Optional<TimeSlot> findSlotByIdAndVenteId(Long id, Long venteId);
+
     List<TimeSlot> findAvailableByVenteId(Long venteId);
 
     void save(TimeSlot timeSlot);

@@ -1,12 +1,16 @@
 <script setup lang="ts">
 import { useRoute, RouterLink } from 'vue-router'
+import { storeToRefs } from 'pinia'
 import { useAdminOrderDetailQuery } from '@/composables/api/useAdminOrdersApi'
+import { useVenteStore } from '@/stores/venteStore'
 import { formatPrice, statusLabel, statusClasses } from '@/utils/order-formatters'
 
 const route = useRoute()
 const orderId = route.params.id as string
+const venteStore = useVenteStore()
+const { selectedVenteId } = storeToRefs(venteStore)
 
-const { data: order, isLoading: loading } = useAdminOrderDetailQuery(orderId)
+const { data: order, isLoading: loading } = useAdminOrderDetailQuery(selectedVenteId, orderId)
 
 function formatSlot(slot: { date: string; startTime: string; endTime: string } | null): string {
   if (!slot) return 'Créneau inconnu'

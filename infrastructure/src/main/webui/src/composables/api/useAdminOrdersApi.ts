@@ -2,9 +2,9 @@ import { computed, toValue, type MaybeRefOrGetter } from 'vue'
 import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tanstack/vue-query'
 import { queryKeys } from '@/api/queryKeys'
 import {
-  getApiAdminOrders,
-  getApiAdminOrdersId,
-  putApiAdminOrdersIdPickup,
+  getApiAdminVentesVenteIdOrders,
+  getApiAdminVentesVenteIdOrdersId,
+  putApiAdminVentesVenteIdOrdersIdPickup,
 } from '@/api/generated/admin-orders/admin-orders'
 
 export function useAdminOrdersQuery(
@@ -24,7 +24,7 @@ export function useAdminOrdersQuery(
       ),
     ),
     queryFn: async () => {
-      const params: Record<string, unknown> = { venteId: toValue(venteId)! }
+      const params: Record<string, unknown> = {}
       const c = toValue(cursor)
       if (c) params.cursor = c
       const s = toValue(search)
@@ -33,7 +33,7 @@ export function useAdminOrdersQuery(
       if (tsId !== null && tsId !== undefined) params.timeSlotId = tsId
       const sz = toValue(size)
       if (sz !== null && sz !== undefined) params.size = sz
-      const response = await getApiAdminOrders(params)
+      const response = await getApiAdminVentesVenteIdOrders(toValue(venteId)!, params)
       return {
         data: response.data.data ?? [],
         pageInfo: response.data.pageInfo ?? { endCursor: null, hasNext: false },
@@ -44,20 +44,25 @@ export function useAdminOrdersQuery(
   })
 }
 
-export function useAdminOrderDetailQuery(orderId: MaybeRefOrGetter<string>) {
+export function useAdminOrderDetailQuery(
+  venteId: MaybeRefOrGetter<number | null>,
+  orderId: MaybeRefOrGetter<string>,
+) {
   return useQuery({
     queryKey: computed(() => queryKeys.admin.orders.detail(toValue(orderId))),
     queryFn: async () => {
-      const response = await getApiAdminOrdersId(toValue(orderId))
+      const response = await getApiAdminVentesVenteIdOrdersId(toValue(venteId)!, toValue(orderId))
       return response.data.data ?? null
     },
+    enabled: () => toValue(venteId) !== null,
   })
 }
 
 export function usePickupMutation(venteId: MaybeRefOrGetter<number | null>) {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (orderId: string) => putApiAdminOrdersIdPickup(orderId),
+    mutationFn: (orderId: string) =>
+      putApiAdminVentesVenteIdOrdersIdPickup(toValue(venteId)!, orderId),
     onSuccess: () => {
       const id = toValue(venteId)
       if (id !== null) {

@@ -56,7 +56,7 @@ const todayFormatted = computed(() => {
 
 function handlePrint() {
   if (!selectedVenteId.value) return
-  window.open(`/api/admin/preparation/pdf?venteId=${selectedVenteId.value}`, '_blank')
+  window.open(`/api/admin/ventes/${selectedVenteId.value}/preparation/pdf`, '_blank')
 }
 </script>
 

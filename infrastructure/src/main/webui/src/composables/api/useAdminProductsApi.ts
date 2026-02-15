@@ -2,11 +2,11 @@ import { computed, toValue, type MaybeRefOrGetter } from 'vue'
 import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tanstack/vue-query'
 import { queryKeys } from '@/api/queryKeys'
 import {
-  getApiAdminProducts,
-  postApiAdminProducts,
-  putApiAdminProductsId,
-  deleteApiAdminProductsId,
-  postApiAdminProductsImport,
+  getApiAdminVentesVenteIdProducts,
+  postApiAdminVentesVenteIdProducts,
+  putApiAdminVentesVenteIdProductsId,
+  deleteApiAdminVentesVenteIdProductsId,
+  postApiAdminVentesVenteIdProductsImport,
 } from '@/api/generated/admin-products/admin-products'
 import type { CreateProductRequest, UpdateProductRequest } from '@/api/generated/model'
 
@@ -17,10 +17,10 @@ export function useAdminProductsQuery(
   return useQuery({
     queryKey: computed(() => queryKeys.admin.products.list(toValue(venteId)!, toValue(cursor))),
     queryFn: async () => {
-      const params: Record<string, unknown> = { venteId: toValue(venteId)! }
+      const params: Record<string, unknown> = {}
       const c = toValue(cursor)
       if (c) params.cursor = c
-      const response = await getApiAdminProducts(params)
+      const response = await getApiAdminVentesVenteIdProducts(toValue(venteId)!, params)
       return {
         data: response.data.data ?? [],
         pageInfo: response.data.pageInfo ?? { endCursor: null, hasNext: false },
@@ -34,7 +34,8 @@ export function useAdminProductsQuery(
 export function useCreateProductMutation(venteId: MaybeRefOrGetter<number | null>) {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (data: CreateProductRequest) => postApiAdminProducts(data),
+    mutationFn: (data: CreateProductRequest) =>
+      postApiAdminVentesVenteIdProducts(toValue(venteId)!, data),
     onSuccess: () => {
       const id = toValue(venteId)
       if (id !== null) {
@@ -48,7 +49,7 @@ export function useUpdateProductMutation(venteId: MaybeRefOrGetter<number | null
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: ({ id, data }: { id: number; data: UpdateProductRequest }) =>
-      putApiAdminProductsId(id, data),
+      putApiAdminVentesVenteIdProductsId(toValue(venteId)!, id, data),
     onSuccess: () => {
       const vid = toValue(venteId)
       if (vid !== null) {
@@ -61,7 +62,7 @@ export function useUpdateProductMutation(venteId: MaybeRefOrGetter<number | null
 export function useDeleteProductMutation(venteId: MaybeRefOrGetter<number | null>) {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (id: number) => deleteApiAdminProductsId(id),
+    mutationFn: (id: number) => deleteApiAdminVentesVenteIdProductsId(toValue(venteId)!, id),
     onSuccess: () => {
       const vid = toValue(venteId)
       if (vid !== null) {
@@ -74,7 +75,8 @@ export function useDeleteProductMutation(venteId: MaybeRefOrGetter<number | null
 export function useImportProductsMutation(venteId: MaybeRefOrGetter<number | null>) {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (file: File) => postApiAdminProductsImport({ file, venteId: toValue(venteId)! }),
+    mutationFn: (file: File) =>
+      postApiAdminVentesVenteIdProductsImport(toValue(venteId)!, { file }),
     onSuccess: () => {
       const vid = toValue(venteId)
       if (vid !== null) {

@@ -55,20 +55,20 @@ public class VenteSteps {
         // 2. Create products via admin endpoint
         List<String> products = List.of(
                 """
-                {"venteId": %d, "name": "Tomates bio", "description": "Tomates grappe biologiques cultivées localement", "price": 3.50, "supplier": "Ferme du Soleil", "stock": 25}
-                """.formatted(venteId),
+                {"name": "Tomates bio", "description": "Tomates grappe biologiques cultivées localement", "price": 3.50, "supplier": "Ferme du Soleil", "stock": 25}
+                """,
                 """
-                {"venteId": %d, "name": "Pain de campagne", "description": "Pain artisanal au levain naturel, 500g", "price": 4.20, "supplier": "Boulangerie Martin", "stock": 15}
-                """.formatted(venteId),
+                {"name": "Pain de campagne", "description": "Pain artisanal au levain naturel, 500g", "price": 4.20, "supplier": "Boulangerie Martin", "stock": 15}
+                """,
                 """
-                {"venteId": %d, "name": "Miel de fleurs", "description": "Miel toutes fleurs récolté en Île-de-France, 250g", "price": 8.90, "supplier": "Rucher des Lilas", "stock": 10}
-                """.formatted(venteId),
+                {"name": "Miel de fleurs", "description": "Miel toutes fleurs récolté en Île-de-France, 250g", "price": 8.90, "supplier": "Rucher des Lilas", "stock": 10}
+                """,
                 """
-                {"venteId": %d, "name": "Pommes Gala", "description": "Pommes Gala croquantes du verger, 1kg", "price": 2.80, "supplier": "Verger Dupont", "stock": 0}
-                """.formatted(venteId),
+                {"name": "Pommes Gala", "description": "Pommes Gala croquantes du verger, 1kg", "price": 2.80, "supplier": "Verger Dupont", "stock": 0}
+                """,
                 """
-                {"venteId": %d, "name": "Fromage de chèvre", "description": "Fromage frais de chèvre fermier, 200g", "price": 5.60, "supplier": "Chèvrerie du Val", "stock": 8}
-                """.formatted(venteId)
+                {"name": "Fromage de chèvre", "description": "Fromage frais de chèvre fermier, 200g", "price": 5.60, "supplier": "Chèvrerie du Val", "stock": 8}
+                """
         );
 
         List<Long> productIds = new ArrayList<>();
@@ -77,7 +77,7 @@ public class VenteSteps {
                     .contentType(ContentType.JSON)
                     .body(productBody)
                     .when()
-                    .post("/api/admin/products")
+                    .post("/api/admin/ventes/" + venteId + "/products")
                     .then()
                     .statusCode(200)
                     .extract()
@@ -98,14 +98,14 @@ public class VenteSteps {
 
         for (String[] slot : slots) {
             String timeSlotBody = """
-                    {"venteId": %d, "date": "%s", "startTime": "%s", "endTime": "%s", "capacity": 30}
-                    """.formatted(venteId, futureDate, slot[0], slot[1]);
+                    {"date": "%s", "startTime": "%s", "endTime": "%s", "capacity": 30}
+                    """.formatted(futureDate, slot[0], slot[1]);
 
             Long timeSlotId = RestAssured.given()
                     .contentType(ContentType.JSON)
                     .body(timeSlotBody)
                     .when()
-                    .post("/api/admin/timeslots")
+                    .post("/api/admin/ventes/" + venteId + "/timeslots")
                     .then()
                     .statusCode(200)
                     .extract()

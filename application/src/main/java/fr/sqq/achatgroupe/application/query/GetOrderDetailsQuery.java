@@ -5,5 +5,5 @@ import fr.sqq.mediator.Query;
 
 import java.util.UUID;
 
-public record GetOrderDetailsQuery(UUID orderId) implements Query<Order> {
+public record GetOrderDetailsQuery(Long venteId, UUID orderId) implements Query<Order> {
 }

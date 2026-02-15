@@ -23,10 +23,20 @@ public interface AdminProductRestMapper {
     @Mapping(target = "active", expression = "java(product.active())")
     AdminProductResponse toResponse(Product product);
 
-    CreateProductCommand toCreateCommand(CreateProductRequest request);
+    default CreateProductCommand toCreateCommand(CreateProductRequest request, Long venteId) {
+        return new CreateProductCommand(
+                venteId,
+                request.name(),
+                request.description(),
+                request.price(),
+                request.supplier(),
+                request.stock()
+        );
+    }
 
-    default UpdateProductCommand toUpdateCommand(Long id, UpdateProductRequest request) {
+    default UpdateProductCommand toUpdateCommand(Long id, UpdateProductRequest request, Long venteId) {
         return new UpdateProductCommand(
+                venteId,
                 new ProductId(id),
                 request.name(),
                 request.description(),

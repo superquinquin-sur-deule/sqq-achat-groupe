@@ -2,10 +2,10 @@ import { computed, toValue, type MaybeRefOrGetter } from 'vue'
 import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tanstack/vue-query'
 import { queryKeys } from '@/api/queryKeys'
 import {
-  getApiAdminTimeslots,
-  postApiAdminTimeslots,
-  putApiAdminTimeslotsId,
-  deleteApiAdminTimeslotsId,
+  getApiAdminVentesVenteIdTimeslots,
+  postApiAdminVentesVenteIdTimeslots,
+  putApiAdminVentesVenteIdTimeslotsId,
+  deleteApiAdminVentesVenteIdTimeslotsId,
 } from '@/api/generated/admin-timeslots/admin-timeslots'
 import type { CreateTimeSlotRequest, UpdateTimeSlotRequest } from '@/api/generated/model'
 
@@ -16,10 +16,10 @@ export function useAdminTimeslotsQuery(
   return useQuery({
     queryKey: computed(() => queryKeys.admin.timeslots.list(toValue(venteId)!, toValue(cursor))),
     queryFn: async () => {
-      const params: Record<string, unknown> = { venteId: toValue(venteId)! }
+      const params: Record<string, unknown> = {}
       const c = toValue(cursor)
       if (c) params.cursor = c
-      const response = await getApiAdminTimeslots(params)
+      const response = await getApiAdminVentesVenteIdTimeslots(toValue(venteId)!, params)
       return {
         data: response.data.data ?? [],
         pageInfo: response.data.pageInfo ?? { endCursor: null, hasNext: false },
@@ -33,7 +33,8 @@ export function useAdminTimeslotsQuery(
 export function useCreateTimeslotMutation(venteId: MaybeRefOrGetter<number | null>) {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: (data: CreateTimeSlotRequest) => postApiAdminTimeslots(data),
+    mutationFn: (data: CreateTimeSlotRequest) =>
+      postApiAdminVentesVenteIdTimeslots(toValue(venteId)!, data),
     onSuccess: () => {
       const id = toValue(venteId)
       if (id !== null) {
@@ -47,7 +48,7 @@ export function useUpdateTimeslotMutation(venteId: MaybeRefOrGetter<number | nul
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: ({ id, data }: { id: number; data: UpdateTimeSlotRequest }) =>
-      putApiAdminTimeslotsId(id, data),
+      putApiAdminVentesVenteIdTimeslotsId(toValue(venteId)!, id, data),
     onSuccess: () => {
       const vid = toValue(venteId)
       if (vid !== null) {
@@ -61,7 +62,11 @@ export function useDeleteTimeslotMutation(venteId: MaybeRefOrGetter<number | nul
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: ({ id, force }: { id: number; force?: boolean }) =>
-      deleteApiAdminTimeslotsId(id, force ? { force: true } : undefined),
+      deleteApiAdminVentesVenteIdTimeslotsId(
+        toValue(venteId)!,
+        id,
+        force ? { force: true } : undefined,
+      ),
     onSuccess: () => {
       const vid = toValue(venteId)
       if (vid !== null) {

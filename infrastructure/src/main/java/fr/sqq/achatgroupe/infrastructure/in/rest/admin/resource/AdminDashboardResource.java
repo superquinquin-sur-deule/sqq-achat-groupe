@@ -14,7 +14,7 @@ import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 
 import java.util.List;
 
-@Path("/api/admin/dashboard")
+@Path("/api/admin/ventes/{venteId}/dashboard")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 @Tag(name = "admin-dashboard")
@@ -29,10 +29,7 @@ public class AdminDashboardResource {
     }
 
     @GET
-    public DataResponse<DashboardStatsResponse> getDashboardStats(@QueryParam("venteId") Long venteId) {
-        if (venteId == null) {
-            throw new jakarta.ws.rs.BadRequestException("venteId is required");
-        }
+    public DataResponse<DashboardStatsResponse> getDashboardStats(@PathParam("venteId") Long venteId) {
         DashboardStats stats = mediator.send(new GetDashboardStatsQuery(venteId));
         List<TimeSlot> timeSlots = mediator.send(ListAllTimeSlotsQuery.all(venteId)).items();
         return new DataResponse<>(mapper.toResponse(stats, timeSlots));

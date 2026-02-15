@@ -16,6 +16,8 @@ public interface ProductRepository {
 
     Optional<Product> findById(ProductId id);
 
+    Optional<Product> findByIdAndVenteId(ProductId id, Long venteId);
+
     List<Product> findAllByVenteId(Long venteId);
 
     CursorPage<Product> findAllByVenteId(Long venteId, CursorPageRequest pageRequest);

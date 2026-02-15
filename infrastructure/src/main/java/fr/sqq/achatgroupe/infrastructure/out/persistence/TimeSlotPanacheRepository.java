@@ -30,6 +30,12 @@ public class TimeSlotPanacheRepository implements TimeSlotRepository, PanacheRep
     }
 
     @Override
+    public Optional<TimeSlot> findSlotByIdAndVenteId(Long id, Long venteId) {
+        return find("id = ?1 AND venteId = ?2", id, venteId).firstResultOptional()
+                .map(mapper::toDomain);
+    }
+
+    @Override
     public List<TimeSlot> findAvailableByVenteId(Long venteId) {
         return list("reserved < capacity and date >= ?1 and venteId = ?2 order by date, startTime", LocalDate.now(), venteId).stream()
                 .map(mapper::toDomain)

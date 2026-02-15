@@ -26,7 +26,7 @@ public class AdminProductSteps {
         response = RestAssured.given()
                 .accept(ContentType.JSON)
                 .when()
-                .get("/api/admin/products?venteId=" + testContext.venteId());
+                .get("/api/admin/ventes/" + testContext.venteId() + "/products");
     }
 
     @Alors("je reçois la liste de tous les produits")
@@ -52,21 +52,20 @@ public class AdminProductSteps {
     public void jeCreeProduitAdmin(String name, double price, String supplier, int stock) {
         String body = """
                 {
-                    "venteId": %d,
                     "name": "%s",
                     "description": "Description test",
                     "price": %s,
                     "supplier": "%s",
                     "stock": %d
                 }
-                """.formatted(testContext.venteId(), name, price, supplier, stock);
+                """.formatted(name, price, supplier, stock);
 
         response = RestAssured.given()
                 .contentType(ContentType.JSON)
                 .accept(ContentType.JSON)
                 .body(body)
                 .when()
-                .post("/api/admin/products");
+                .post("/api/admin/ventes/" + testContext.venteId() + "/products");
     }
 
     @Alors("le produit est créé avec succès")
@@ -108,7 +107,7 @@ public class AdminProductSteps {
                 .accept(ContentType.JSON)
                 .body(body)
                 .when()
-                .put("/api/admin/products/" + productId);
+                .put("/api/admin/ventes/" + testContext.venteId() + "/products/" + productId);
     }
 
     @Alors("le produit est modifié avec succès")
@@ -130,14 +129,14 @@ public class AdminProductSteps {
         Response listResponse = RestAssured.given()
                 .accept(ContentType.JSON)
                 .when()
-                .get("/api/admin/products?venteId=" + testContext.venteId());
+                .get("/api/admin/ventes/" + testContext.venteId() + "/products");
         initialProductCount = listResponse.jsonPath().getList("data").size();
 
         Long productId = testContext.productIds().get(0);
         response = RestAssured.given()
                 .accept(ContentType.JSON)
                 .when()
-                .delete("/api/admin/products/" + productId);
+                .delete("/api/admin/ventes/" + testContext.venteId() + "/products/" + productId);
     }
 
     @Alors("le produit est supprimé avec succès")
@@ -151,7 +150,7 @@ public class AdminProductSteps {
         Response listResponse = RestAssured.given()
                 .accept(ContentType.JSON)
                 .when()
-                .get("/api/admin/products?venteId=" + testContext.venteId());
+                .get("/api/admin/ventes/" + testContext.venteId() + "/products");
         listResponse.then()
                 .statusCode(200)
                 .body("data.size()", equalTo(initialProductCount - 1));
@@ -161,21 +160,20 @@ public class AdminProductSteps {
     public void jeCreeUnProduitAvecUnNomVide() {
         String body = """
                 {
-                    "venteId": %d,
                     "name": "",
                     "description": "",
                     "price": 3.50,
                     "supplier": "Test",
                     "stock": 10
                 }
-                """.formatted(testContext.venteId());
+                """;
 
         response = RestAssured.given()
                 .contentType(ContentType.JSON)
                 .accept(ContentType.JSON)
                 .body(body)
                 .when()
-                .post("/api/admin/products");
+                .post("/api/admin/ventes/" + testContext.venteId() + "/products");
     }
 
     @Alors("je reçois une erreur de validation 400")

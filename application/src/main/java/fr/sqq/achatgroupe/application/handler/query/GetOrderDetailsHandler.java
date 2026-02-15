@@ -21,7 +21,7 @@ public class GetOrderDetailsHandler implements QueryHandler<GetOrderDetailsQuery
     @Override
     @Transactional
     public Order handle(GetOrderDetailsQuery query) {
-        Order order = orderRepository.findOrderById(query.orderId())
+        Order order = orderRepository.findOrderByIdAndVenteId(query.orderId(), query.venteId())
                 .orElseThrow(() -> new OrderNotFoundException(query.orderId()));
         if (order.status() != OrderStatus.PAID && order.status() != OrderStatus.PICKED_UP) {
             throw new OrderNotFoundException(query.orderId());

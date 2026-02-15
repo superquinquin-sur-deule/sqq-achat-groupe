@@ -20,7 +20,7 @@ public class MarkOrderPickedUpHandler implements CommandHandler<MarkOrderPickedU
     @Override
     @Transactional
     public Void handle(MarkOrderPickedUpCommand command) {
-        Order order = orderRepository.findOrderById(command.orderId())
+        Order order = orderRepository.findOrderByIdAndVenteId(command.orderId(), command.venteId())
                 .orElseThrow(() -> new OrderNotFoundException(command.orderId()));
         order.markAsPickedUp();
         orderRepository.save(order);
