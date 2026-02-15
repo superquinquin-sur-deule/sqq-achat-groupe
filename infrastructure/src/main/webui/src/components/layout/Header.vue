@@ -15,8 +15,8 @@ const cartLink = computed(() => (venteId.value ? `/ventes/${venteId.value}/cart`
   <header class="bg-dark text-white">
     <div class="mx-auto flex items-center justify-between px-4 py-3">
       <RouterLink :to="homeLink" class="flex items-center gap-2 text-white no-underline">
-        <img src="/logo.svg" alt="SuperQuinquin" class="h-8 w-8" />
-        <span class="text-xl font-bold text-primary">SuperQuinquin</span>
+        <img src="/logo.svg" alt="SuperQuinquin" class="h-11 w-11" />
+        <span class="text-xl font-bold text-primary">SuperQuinquin - Achat Groupé</span>
       </RouterLink>
 
       <RouterLink
