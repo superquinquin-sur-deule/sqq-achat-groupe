@@ -47,13 +47,14 @@ public class CheckoutSteps {
                 .setTimeout(5000));
         PlaywrightHooks.page().locator("[data-testid='checkout-button']").click();
         PlaywrightHooks.page().waitForURL("**/checkout");
-        PlaywrightHooks.page().waitForSelector("#customer-name", new Page.WaitForSelectorOptions()
+        PlaywrightHooks.page().waitForSelector("#customer-last-name", new Page.WaitForSelectorOptions()
                 .setState(WaitForSelectorState.VISIBLE)
                 .setTimeout(5000));
     }
 
     private void fillCustomerForm() {
-        PlaywrightHooks.page().locator("#customer-name").fill("Marie Dupont");
+        PlaywrightHooks.page().locator("#customer-last-name").fill("Dupont");
+        PlaywrightHooks.page().locator("#customer-first-name").fill("Marie");
         PlaywrightHooks.page().locator("#customer-email").fill("marie@exemple.fr");
         PlaywrightHooks.page().locator("#customer-phone").fill("06 12 34 56 78");
     }
@@ -172,9 +173,10 @@ public class CheckoutSteps {
         assertEquals("2", stepText, "L'étape courante doit être 2");
     }
 
-    @Et("je vois les champs \"Nom complet\", \"Adresse email\" et \"Téléphone\"")
+    @Et("je vois les champs \"Nom\", \"Prénom\", \"Adresse email\" et \"Téléphone\"")
     public void jeVoisLesChampsDuFormulaire() {
-        assertTrue(PlaywrightHooks.page().locator("#customer-name").isVisible(), "Le champ nom doit être visible");
+        assertTrue(PlaywrightHooks.page().locator("#customer-last-name").isVisible(), "Le champ nom doit être visible");
+        assertTrue(PlaywrightHooks.page().locator("#customer-first-name").isVisible(), "Le champ prénom doit être visible");
         assertTrue(PlaywrightHooks.page().locator("#customer-email").isVisible(), "Le champ email doit être visible");
         assertTrue(PlaywrightHooks.page().locator("#customer-phone").isVisible(), "Le champ téléphone doit être visible");
     }

@@ -7,7 +7,8 @@ import java.util.UUID;
 public record AdminOrderResponse(
         UUID id,
         String orderNumber,
-        String customerName,
+        String customerFirstName,
+        String customerLastName,
         String customerEmail,
         String timeSlotLabel,
         BigDecimal totalAmount,

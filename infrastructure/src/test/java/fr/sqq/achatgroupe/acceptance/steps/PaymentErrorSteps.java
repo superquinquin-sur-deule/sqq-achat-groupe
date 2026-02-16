@@ -40,7 +40,8 @@ public class PaymentErrorSteps {
         Long timeSlotId = testContext.timeSlotIds().get(0);
         String body = """
                 {
-                    "customerName": "Marie Dupont",
+                    "customerFirstName": "Marie",
+                    "customerLastName": "Dupont",
                     "email": "marie@exemple.fr",
                     "phone": "06 12 34 56 78",
                     "timeSlotId": %d,

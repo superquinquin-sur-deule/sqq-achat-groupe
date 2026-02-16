@@ -10,7 +10,8 @@ import jakarta.validation.constraints.Size;
 import java.util.List;
 
 public record CreateOrderRequest(
-        @NotBlank(message = "Le nom est requis") String customerName,
+        @NotBlank(message = "Le prénom est requis") String customerFirstName,
+        @NotBlank(message = "Le nom est requis") String customerLastName,
         @NotBlank(message = "L'email est requis") @Email(message = "Email invalide") String email,
         @NotBlank(message = "Le téléphone est requis") String phone,
         @NotNull(message = "Le créneau est requis") Long timeSlotId,

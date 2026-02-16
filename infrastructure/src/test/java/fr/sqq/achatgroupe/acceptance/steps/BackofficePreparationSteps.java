@@ -55,7 +55,7 @@ public class BackofficePreparationSteps {
 
         // Commande 1 : créneau 1 — Alice
         Order order1 = mediator.send(new CreateOrderCommand(
-                venteId, "Alice Durand", "alice@test.fr", "0601020304", timeSlot1Id,
+                venteId, "Alice", "Durand", "alice@test.fr", "0601020304", timeSlot1Id,
                 List.of(new OrderItemCommand(product1Id, 3), new OrderItemCommand(product2Id, 2))
         ));
         order1.markAsPaid();
@@ -63,7 +63,7 @@ public class BackofficePreparationSteps {
 
         // Commande 2 : créneau 1 — Bob
         Order order2 = mediator.send(new CreateOrderCommand(
-                venteId, "Bob Martin", "bob@test.fr", "0605060708", timeSlot1Id,
+                venteId, "Bob", "Martin", "bob@test.fr", "0605060708", timeSlot1Id,
                 List.of(new OrderItemCommand(product1Id, 1), new OrderItemCommand(product3Id, 4))
         ));
         order2.markAsPaid();
@@ -71,7 +71,7 @@ public class BackofficePreparationSteps {
 
         // Commande 3 : créneau 2 — Claire
         Order order3 = mediator.send(new CreateOrderCommand(
-                venteId, "Claire Petit", "claire@test.fr", "0609101112", timeSlot2Id,
+                venteId, "Claire", "Petit", "claire@test.fr", "0609101112", timeSlot2Id,
                 List.of(new OrderItemCommand(product2Id, 1), new OrderItemCommand(product3Id, 2))
         ));
         order3.markAsPaid();
@@ -137,9 +137,9 @@ public class BackofficePreparationSteps {
 
         // Vérifier les valeurs réelles — les noms des coopérateurs doivent apparaître dans les fiches
         String allCardsText = page().locator("[data-testid='preparation-card']").allTextContents().toString();
-        assertTrue(allCardsText.contains("Alice Durand"), "Alice Durand doit apparaître dans les fiches");
-        assertTrue(allCardsText.contains("Bob Martin"), "Bob Martin doit apparaître dans les fiches");
-        assertTrue(allCardsText.contains("Claire Petit"), "Claire Petit doit apparaître dans les fiches");
+        assertTrue(allCardsText.contains("DURAND Alice"), "DURAND Alice doit apparaître dans les fiches");
+        assertTrue(allCardsText.contains("MARTIN Bob"), "MARTIN Bob doit apparaître dans les fiches");
+        assertTrue(allCardsText.contains("PETIT Claire"), "PETIT Claire doit apparaître dans les fiches");
 
         // Vérifier que les produits du setup sont présents
         assertTrue(allCardsText.contains("Tomates bio"), "Le produit 'Tomates bio' doit apparaître");

@@ -58,7 +58,7 @@ public class CreateOrderHandler implements CommandHandler<CreateOrderCommand, Or
 
         timeSlotRepository.save(timeSlot);
 
-        CustomerInfo customer = new CustomerInfo(command.customerName(), command.email(), command.phone());
+        CustomerInfo customer = new CustomerInfo(command.customerFirstName(), command.customerLastName(), command.email(), command.phone());
         OrderNumber orderNumber = OrderNumber.generate();
         Order order = Order.create(command.venteId(), orderNumber, customer, command.timeSlotId(), orderItems);
 

@@ -56,7 +56,7 @@ public class BackofficeDistributionSteps {
 
         // Commande 1 : créneau 1 — Alice
         Order order1 = mediator.send(new CreateOrderCommand(
-                venteId, "Alice Durand", "alice@test.fr", "0601020304", timeSlot1Id,
+                venteId, "Alice", "Durand", "alice@test.fr", "0601020304", timeSlot1Id,
                 List.of(new OrderItemCommand(product1Id, 3), new OrderItemCommand(product2Id, 2))
         ));
         order1.markAsPaid();
@@ -64,7 +64,7 @@ public class BackofficeDistributionSteps {
 
         // Commande 2 : créneau 1 — Bob
         Order order2 = mediator.send(new CreateOrderCommand(
-                venteId, "Bob Martin", "bob@test.fr", "0605060708", timeSlot1Id,
+                venteId, "Bob", "Martin", "bob@test.fr", "0605060708", timeSlot1Id,
                 List.of(new OrderItemCommand(product1Id, 1), new OrderItemCommand(product3Id, 4))
         ));
         order2.markAsPaid();
@@ -72,7 +72,7 @@ public class BackofficeDistributionSteps {
 
         // Commande 3 : créneau 2 — Claire
         Order order3 = mediator.send(new CreateOrderCommand(
-                venteId, "Claire Petit", "claire@test.fr", "0609101112", timeSlot2Id,
+                venteId, "Claire", "Petit", "claire@test.fr", "0609101112", timeSlot2Id,
                 List.of(new OrderItemCommand(product2Id, 1), new OrderItemCommand(product3Id, 2))
         ));
         order3.markAsPaid();
@@ -80,7 +80,7 @@ public class BackofficeDistributionSteps {
 
         // Commande 4 : créneau 2 — Diana (PICKED_UP — pour tester le filtre "Non récupérées")
         Order order4 = mediator.send(new CreateOrderCommand(
-                venteId, "Diana Lopez", "diana@test.fr", "0610111213", timeSlot2Id,
+                venteId, "Diana", "Lopez", "diana@test.fr", "0610111213", timeSlot2Id,
                 List.of(new OrderItemCommand(product1Id, 2))
         ));
         order4.markAsPaid();
@@ -137,10 +137,10 @@ public class BackofficeDistributionSteps {
 
         // Vérifier que les noms apparaissent
         String allText = rows.allTextContents().toString();
-        assertTrue(allText.contains("Alice Durand"), "Alice Durand doit apparaître");
-        assertTrue(allText.contains("Bob Martin"), "Bob Martin doit apparaître");
-        assertTrue(allText.contains("Claire Petit"), "Claire Petit doit apparaître");
-        assertTrue(allText.contains("Diana Lopez"), "Diana Lopez doit apparaître");
+        assertTrue(allText.contains("Durand Alice"), "Durand Alice doit apparaître");
+        assertTrue(allText.contains("Martin Bob"), "Martin Bob doit apparaître");
+        assertTrue(allText.contains("Petit Claire"), "Petit Claire doit apparaître");
+        assertTrue(allText.contains("Lopez Diana"), "Lopez Diana doit apparaître");
 
         // Vérifier les badges de statut (mix PAID et PICKED_UP)
         Locator statuses = page().locator("[data-testid='distribution-order-status']");
@@ -261,8 +261,8 @@ public class BackofficeDistributionSteps {
 
         // Vérifier que les commandes PICKED_UP sont bien exclues
         String allText = rows.allTextContents().toString();
-        assertFalse(allText.contains("Diana Lopez"),
-                "Diana Lopez (PICKED_UP) ne doit PAS apparaître dans le filtre 'Non récupérées'");
+        assertFalse(allText.contains("Lopez Diana"),
+                "Lopez Diana (PICKED_UP) ne doit PAS apparaître dans le filtre 'Non récupérées'");
     }
 
     @Étantdonnéque("une vente sans commande pour la distribution")

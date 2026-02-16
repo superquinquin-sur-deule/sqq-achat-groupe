@@ -50,14 +50,14 @@ public class BackofficeOrderSteps {
 
         // Créer deux commandes PAID sur des créneaux différents
         Order order1 = mediator.send(new CreateOrderCommand(
-                venteId, "Marie Dupont", "marie@exemple.fr", "0612345678", timeSlotId1,
+                venteId, "Marie", "Dupont", "marie@exemple.fr", "0612345678", timeSlotId1,
                 List.of(new OrderItemCommand(productId, 2))
         ));
         order1.markAsPaid();
         orderRepository.save(order1);
 
         Order order2 = mediator.send(new CreateOrderCommand(
-                venteId, "Jean Martin", "jean@exemple.fr", "0698765432", timeSlotId2,
+                venteId, "Jean", "Martin", "jean@exemple.fr", "0698765432", timeSlotId2,
                 List.of(new OrderItemCommand(productId, 1))
         ));
         order2.markAsPaid();

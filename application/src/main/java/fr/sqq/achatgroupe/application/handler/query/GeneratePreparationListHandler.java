@@ -67,7 +67,8 @@ public class GeneratePreparationListHandler implements QueryHandler<GeneratePrep
                     return new PreparationOrder(
                             order.id(),
                             order.orderNumber().value(),
-                            order.customer().name(),
+                            order.customer().firstName(),
+                            order.customer().lastName(),
                             order.customer().email(),
                             order.customer().phone(),
                             timeSlotLabel,
@@ -75,7 +76,7 @@ public class GeneratePreparationListHandler implements QueryHandler<GeneratePrep
                     );
                 })
                 .sorted(Comparator.comparing(PreparationOrder::timeSlotLabel)
-                        .thenComparing(PreparationOrder::customerName))
+                        .thenComparing(PreparationOrder::customerLastName))
                 .toList();
     }
 }

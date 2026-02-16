@@ -10,7 +10,7 @@ Fonctionnalité: Formulaire de commande et sélection de créneau
     Et j'ai des produits dans mon panier
     Quand je navigue vers le checkout
     Alors je vois le Stepper à l'étape 2 "Coordonnées"
-    Et je vois les champs "Nom complet", "Adresse email" et "Téléphone"
+    Et je vois les champs "Nom", "Prénom", "Adresse email" et "Téléphone"
 
   Scénario: La validation affiche des messages d'erreur bienveillants
     Étant donné qu'une vente existe avec des produits et des créneaux

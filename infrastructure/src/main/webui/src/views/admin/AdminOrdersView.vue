@@ -105,7 +105,7 @@ const timeSlots = computed(() => timeslotsPageData.value?.data ?? [])
             {{ order.orderNumber }}
           </RouterLink>
         </td>
-        <td class="border-t border-gray-100 px-4 py-3 text-dark">{{ order.customerName }}</td>
+        <td class="border-t border-gray-100 px-4 py-3 text-dark">{{ order.customerLastName }} {{ order.customerFirstName }}</td>
         <td class="border-t border-gray-100 px-4 py-3 text-dark">{{ order.customerEmail }}</td>
         <td class="border-t border-gray-100 px-4 py-3 text-dark">{{ order.timeSlotLabel }}</td>
         <td class="border-t border-gray-100 px-4 py-3 text-dark">

@@ -54,7 +54,11 @@ const filteredOrders = computed(() => {
 
   if (searchQuery.value.trim()) {
     const query = searchQuery.value.trim().toLowerCase()
-    result = result.filter((o) => o.customerName.toLowerCase().includes(query))
+    result = result.filter(
+      (o) =>
+        o.customerLastName.toLowerCase().includes(query) ||
+        o.customerFirstName.toLowerCase().includes(query),
+    )
   }
 
   return result
@@ -186,7 +190,7 @@ async function handlePickup(orderId: string) {
         >
           <div class="flex-1">
             <span class="font-medium text-dark" data-testid="distribution-order-name">
-              {{ order.customerName }}
+              {{ order.customerLastName }} {{ order.customerFirstName }}
             </span>
             <span class="ml-2 text-sm text-brown">{{ order.orderNumber }}</span>
             <span class="ml-2 text-sm text-brown">{{ order.timeSlotLabel }}</span>

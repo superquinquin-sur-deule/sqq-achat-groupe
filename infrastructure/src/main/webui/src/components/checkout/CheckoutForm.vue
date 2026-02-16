@@ -6,13 +6,14 @@ import Input from '@/components/ui/Input.vue'
 import Button from '@/components/ui/Button.vue'
 
 const emit = defineEmits<{
-  submit: [info: { name: string; email: string; phone: string }]
+  submit: [info: { firstName: string; lastName: string; email: string; phone: string }]
   back: []
 }>()
 
 const schema = toTypedSchema(
   z.object({
-    name: z.string().min(1, "Merci d'indiquer votre nom"),
+    lastName: z.string().min(1, "Merci d'indiquer votre nom"),
+    firstName: z.string().min(1, "Merci d'indiquer votre prénom"),
     email: z
       .string()
       .min(1, "Merci d'indiquer votre email")
@@ -26,7 +27,8 @@ const schema = toTypedSchema(
 
 const { handleSubmit } = useForm({ validationSchema: schema })
 
-const { value: name, errorMessage: nameError, handleBlur: nameBlur } = useField<string>('name')
+const { value: lastName, errorMessage: lastNameError, handleBlur: lastNameBlur } = useField<string>('lastName')
+const { value: firstName, errorMessage: firstNameError, handleBlur: firstNameBlur } = useField<string>('firstName')
 const { value: email, errorMessage: emailError, handleBlur: emailBlur } = useField<string>('email')
 const { value: phone, errorMessage: phoneError, handleBlur: phoneBlur } = useField<string>('phone')
 
@@ -38,15 +40,26 @@ const onSubmit = handleSubmit((values) => {
 <template>
   <form class="mx-auto flex w-full max-w-[480px] flex-col gap-4" @submit.prevent="onSubmit">
     <Input
-      id="customer-name"
-      v-model="name"
-      label="Nom complet"
+      id="customer-last-name"
+      v-model="lastName"
+      label="Nom"
       type="text"
-      placeholder="Marie Dupont"
-      autocomplete="name"
-      :error="nameError ?? ''"
+      placeholder="Dupont"
+      autocomplete="family-name"
+      :error="lastNameError ?? ''"
       required
-      @blur="nameBlur"
+      @blur="lastNameBlur"
+    />
+    <Input
+      id="customer-first-name"
+      v-model="firstName"
+      label="Prénom"
+      type="text"
+      placeholder="Marie"
+      autocomplete="given-name"
+      :error="firstNameError ?? ''"
+      required
+      @blur="firstNameBlur"
     />
     <Input
       id="customer-email"

@@ -7,7 +7,8 @@ import java.util.List;
 
 public record CreateOrderCommand(
         Long venteId,
-        String customerName,
+        String customerFirstName,
+        String customerLastName,
         String email,
         String phone,
         Long timeSlotId,

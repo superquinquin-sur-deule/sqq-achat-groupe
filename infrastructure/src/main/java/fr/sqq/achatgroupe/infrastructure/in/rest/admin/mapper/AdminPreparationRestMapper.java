@@ -20,7 +20,7 @@ public interface AdminPreparationRestMapper {
         List<PreparationItemResponse> items = order.items().stream()
                 .map(item -> new PreparationItemResponse(item.productName(), item.quantity()))
                 .toList();
-        return new PreparationOrderResponse(order.orderId(), order.orderNumber(), order.customerName(),
-                order.customerEmail(), order.customerPhone(), order.timeSlotLabel(), items);
+        return new PreparationOrderResponse(order.orderId(), order.orderNumber(), order.customerFirstName(),
+                order.customerLastName(), order.customerEmail(), order.customerPhone(), order.timeSlotLabel(), items);
     }
 }

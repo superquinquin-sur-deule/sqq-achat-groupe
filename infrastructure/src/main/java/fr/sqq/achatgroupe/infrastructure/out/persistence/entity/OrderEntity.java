@@ -29,8 +29,11 @@ public class OrderEntity {
     @Column(name = "order_number", nullable = false, unique = true)
     private String orderNumber;
 
-    @Column(name = "customer_name", nullable = false)
-    private String customerName;
+    @Column(name = "customer_first_name", nullable = false)
+    private String customerFirstName;
+
+    @Column(name = "customer_last_name", nullable = false)
+    private String customerLastName;
 
     @Column(name = "customer_email", nullable = false)
     private String customerEmail;
@@ -69,8 +72,11 @@ public class OrderEntity {
     public String getOrderNumber() { return orderNumber; }
     public void setOrderNumber(String orderNumber) { this.orderNumber = orderNumber; }
 
-    public String getCustomerName() { return customerName; }
-    public void setCustomerName(String customerName) { this.customerName = customerName; }
+    public String getCustomerFirstName() { return customerFirstName; }
+    public void setCustomerFirstName(String customerFirstName) { this.customerFirstName = customerFirstName; }
+
+    public String getCustomerLastName() { return customerLastName; }
+    public void setCustomerLastName(String customerLastName) { this.customerLastName = customerLastName; }
 
     public String getCustomerEmail() { return customerEmail; }
     public void setCustomerEmail(String customerEmail) { this.customerEmail = customerEmail; }

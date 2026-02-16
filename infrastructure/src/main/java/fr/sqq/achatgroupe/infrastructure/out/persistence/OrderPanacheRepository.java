@@ -92,7 +92,7 @@ public class OrderPanacheRepository implements OrderRepository, PanacheRepositor
         params.put("statuses", List.of("PAID", "PICKED_UP"));
 
         if (searchName != null && !searchName.isBlank()) {
-            conditions.add("LOWER(customerName) LIKE :searchName");
+            conditions.add("(LOWER(customerFirstName) LIKE :searchName OR LOWER(customerLastName) LIKE :searchName)");
             params.put("searchName", "%" + searchName.toLowerCase() + "%");
         }
 

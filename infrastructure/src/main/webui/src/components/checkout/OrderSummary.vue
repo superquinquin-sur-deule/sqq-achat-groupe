@@ -5,7 +5,8 @@ import Card from '@/components/ui/Card.vue'
 import Button from '@/components/ui/Button.vue'
 
 interface CustomerInfo {
-  name: string
+  firstName: string
+  lastName: string
   email: string
   phone: string
 }
@@ -49,7 +50,7 @@ function formatDate(dateStr: string): string {
       <dl class="flex flex-col gap-1 text-sm text-dark">
         <div class="flex gap-2">
           <dt class="font-medium">Nom :</dt>
-          <dd>{{ customerInfo.name }}</dd>
+          <dd>{{ customerInfo.lastName }} {{ customerInfo.firstName }}</dd>
         </div>
         <div class="flex gap-2">
           <dt class="font-medium">Email :</dt>

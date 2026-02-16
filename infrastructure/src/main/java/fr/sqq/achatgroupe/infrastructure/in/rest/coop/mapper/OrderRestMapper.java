@@ -17,7 +17,8 @@ public interface OrderRestMapper {
                 .toList();
         return new CreateOrderCommand(
                 venteId,
-                request.customerName(),
+                request.customerFirstName(),
+                request.customerLastName(),
                 request.email(),
                 request.phone(),
                 request.timeSlotId(),

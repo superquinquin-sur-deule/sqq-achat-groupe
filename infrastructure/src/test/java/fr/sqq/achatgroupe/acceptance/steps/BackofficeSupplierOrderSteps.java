@@ -55,7 +55,7 @@ public class BackofficeSupplierOrderSteps {
 
         // Commande 1 : 3x produit1 + 2x produit2
         Order order1 = mediator.send(new CreateOrderCommand(
-                venteId, "Alice Durand", "alice@test.fr", "0601020304", timeSlotId,
+                venteId, "Alice", "Durand", "alice@test.fr", "0601020304", timeSlotId,
                 List.of(new OrderItemCommand(product1Id, 3), new OrderItemCommand(product2Id, 2))
         ));
         order1.markAsPaid();
@@ -63,7 +63,7 @@ public class BackofficeSupplierOrderSteps {
 
         // Commande 2 : 1x produit1 + 4x produit3
         Order order2 = mediator.send(new CreateOrderCommand(
-                venteId, "Bob Martin", "bob@test.fr", "0605060708", timeSlotId,
+                venteId, "Bob", "Martin", "bob@test.fr", "0605060708", timeSlotId,
                 List.of(new OrderItemCommand(product1Id, 1), new OrderItemCommand(product3Id, 4))
         ));
         order2.markAsPaid();

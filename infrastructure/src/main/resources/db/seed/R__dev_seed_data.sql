@@ -103,32 +103,32 @@ SELECT setval('time_slots_id_seq', 22);
 -- Uses dynamic dates and updated time slot references
 -- ============================================================================
 -- Orders for Vente 1 (Active sale) - Various statuses
-INSERT INTO orders (id, vente_id, order_number, customer_name, customer_email, customer_phone, time_slot_id, status, total_amount, created_at) VALUES
+INSERT INTO orders (id, vente_id, order_number, customer_first_name, customer_last_name, customer_email, customer_phone, time_slot_id, status, total_amount, created_at) VALUES
 -- PENDING orders (awaiting payment) - for past time slots
-('a1b2c3d4-e5f6-7890-abcd-ef1234567890', 1, 'AG-2024-00001', 'Marie Dupont', 'marie.dupont@email.fr', '0612345678', 1, 'PENDING', 44.00, CURRENT_TIMESTAMP - INTERVAL '5 days'),
-('b2c3d4e5-f6a7-8901-bcde-f12345678901', 1, 'AG-2024-00002', 'Jean Martin', 'jean.martin@email.fr', '0623456789', 1, 'PENDING', 31.40, CURRENT_TIMESTAMP - INTERVAL '4 days'),
+('a1b2c3d4-e5f6-7890-abcd-ef1234567890', 1, 'AG-2024-00001', 'Marie', 'Dupont', 'marie.dupont@email.fr', '0612345678', 1, 'PENDING', 44.00, CURRENT_TIMESTAMP - INTERVAL '5 days'),
+('b2c3d4e5-f6a7-8901-bcde-f12345678901', 1, 'AG-2024-00002', 'Jean', 'Martin', 'jean.martin@email.fr', '0623456789', 1, 'PENDING', 31.40, CURRENT_TIMESTAMP - INTERVAL '4 days'),
 
 -- PAID orders (payment received, awaiting pickup)
-('c3d4e5f6-a7b8-9012-cdef-123456789012', 1, 'AG-2024-00003', 'Sophie Bernard', 'sophie.bernard@email.fr', '0634567890', 2, 'PAID', 56.50, CURRENT_TIMESTAMP - INTERVAL '4 days'),
-('d4e5f6a7-b8c9-0123-def0-234567890123', 1, 'AG-2024-00004', 'Pierre Dubois', 'pierre.dubois@email.fr', '0645678901', 2, 'PAID', 25.00, CURRENT_TIMESTAMP - INTERVAL '4 days'),
-('e5f6a7b8-c9d0-1234-ef01-345678901234', 1, 'AG-2024-00005', 'Isabelle Moreau', 'isabelle.moreau@email.fr', '0656789012', 3, 'PAID', 68.90, CURRENT_TIMESTAMP - INTERVAL '3 days'),
+('c3d4e5f6-a7b8-9012-cdef-123456789012', 1, 'AG-2024-00003', 'Sophie', 'Bernard', 'sophie.bernard@email.fr', '0634567890', 2, 'PAID', 56.50, CURRENT_TIMESTAMP - INTERVAL '4 days'),
+('d4e5f6a7-b8c9-0123-def0-234567890123', 1, 'AG-2024-00004', 'Pierre', 'Dubois', 'pierre.dubois@email.fr', '0645678901', 2, 'PAID', 25.00, CURRENT_TIMESTAMP - INTERVAL '4 days'),
+('e5f6a7b8-c9d0-1234-ef01-345678901234', 1, 'AG-2024-00005', 'Isabelle', 'Moreau', 'isabelle.moreau@email.fr', '0656789012', 3, 'PAID', 68.90, CURRENT_TIMESTAMP - INTERVAL '3 days'),
 
 -- PICKED_UP orders (completed)
-('f6a7b8c9-d0e1-2345-f012-456789012345', 1, 'AG-2024-00006', 'Francois Petit', 'francois.petit@email.fr', '0667890123', 4, 'PICKED_UP', 37.50, CURRENT_TIMESTAMP - INTERVAL '3 days'),
-('a7b8c9d0-e1f2-3456-0123-567890123456', 1, 'AG-2024-00007', 'Catherine Leroy', 'catherine.leroy@email.fr', '0678901234', 4, 'PICKED_UP', 49.40, CURRENT_TIMESTAMP - INTERVAL '3 days'),
+('f6a7b8c9-d0e1-2345-f012-456789012345', 1, 'AG-2024-00006', 'Francois', 'Petit', 'francois.petit@email.fr', '0667890123', 4, 'PICKED_UP', 37.50, CURRENT_TIMESTAMP - INTERVAL '3 days'),
+('a7b8c9d0-e1f2-3456-0123-567890123456', 1, 'AG-2024-00007', 'Catherine', 'Leroy', 'catherine.leroy@email.fr', '0678901234', 4, 'PICKED_UP', 49.40, CURRENT_TIMESTAMP - INTERVAL '3 days'),
 
 -- CANCELLED order
-('b8c9d0e1-f2a3-4567-1234-678901234567', 1, 'AG-2024-00008', 'Michel Roux', 'michel.roux@email.fr', '0689012345', 5, 'CANCELLED', 25.00, CURRENT_TIMESTAMP - INTERVAL '2 days'),
+('b8c9d0e1-f2a3-4567-1234-678901234567', 1, 'AG-2024-00008', 'Michel', 'Roux', 'michel.roux@email.fr', '0689012345', 5, 'CANCELLED', 25.00, CURRENT_TIMESTAMP - INTERVAL '2 days'),
 
 -- New orders for future time slots (for demo purposes)
-('11111111-1111-1111-1111-111111111111', 1, 'AG-2024-00009', 'Claire Fontaine', 'claire.fontaine@email.fr', '0611111111', 8, 'PAID', 37.00, CURRENT_TIMESTAMP - INTERVAL '1 day'),
-('22222222-2222-2222-2222-222222222222', 1, 'AG-2024-00010', 'Marc Riviere', 'marc.riviere@email.fr', '0622222222', 8, 'PENDING', 29.50, CURRENT_TIMESTAMP - INTERVAL '12 hours');
+('11111111-1111-1111-1111-111111111111', 1, 'AG-2024-00009', 'Claire', 'Fontaine', 'claire.fontaine@email.fr', '0611111111', 8, 'PAID', 37.00, CURRENT_TIMESTAMP - INTERVAL '1 day'),
+('22222222-2222-2222-2222-222222222222', 1, 'AG-2024-00010', 'Marc', 'Riviere', 'marc.riviere@email.fr', '0622222222', 8, 'PENDING', 29.50, CURRENT_TIMESTAMP - INTERVAL '12 hours');
 
 -- Orders for Vente 2 (Closed sale) - All picked up
-INSERT INTO orders (id, vente_id, order_number, customer_name, customer_email, customer_phone, time_slot_id, status, total_amount, created_at) VALUES
-('c9d0e1f2-a3b4-5678-2345-789012345678', 2, 'AG-2023-00101', 'Anne Richard', 'anne.richard@email.fr', '0690123456', 13, 'PICKED_UP', 84.50, CURRENT_TIMESTAMP - INTERVAL '40 days'),
-('d0e1f2a3-b4c5-6789-3456-890123456789', 2, 'AG-2023-00102', 'Luc Simon', 'luc.simon@email.fr', '0601234567', 13, 'PICKED_UP', 118.50, CURRENT_TIMESTAMP - INTERVAL '39 days'),
-('e1f2a3b4-c5d6-7890-4567-901234567890', 2, 'AG-2023-00103', 'Nathalie Blanc', 'nathalie.blanc@email.fr', '0612345670', 14, 'PICKED_UP', 56.00, CURRENT_TIMESTAMP - INTERVAL '38 days');
+INSERT INTO orders (id, vente_id, order_number, customer_first_name, customer_last_name, customer_email, customer_phone, time_slot_id, status, total_amount, created_at) VALUES
+('c9d0e1f2-a3b4-5678-2345-789012345678', 2, 'AG-2023-00101', 'Anne', 'Richard', 'anne.richard@email.fr', '0690123456', 13, 'PICKED_UP', 84.50, CURRENT_TIMESTAMP - INTERVAL '40 days'),
+('d0e1f2a3-b4c5-6789-3456-890123456789', 2, 'AG-2023-00102', 'Luc', 'Simon', 'luc.simon@email.fr', '0601234567', 13, 'PICKED_UP', 118.50, CURRENT_TIMESTAMP - INTERVAL '39 days'),
+('e1f2a3b4-c5d6-7890-4567-901234567890', 2, 'AG-2023-00103', 'Nathalie', 'Blanc', 'nathalie.blanc@email.fr', '0612345670', 14, 'PICKED_UP', 56.00, CURRENT_TIMESTAMP - INTERVAL '38 days');
 
 -- ============================================================================
 -- ORDER ITEMS

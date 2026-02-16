@@ -19,8 +19,8 @@ public class PreparationPdfGenerator {
 
     private static final float MARGIN = 50;
     private static final float LINE_HEIGHT = 16;
-    private static final float HEADER_FONT_SIZE = 16;
-    private static final float LABEL_FONT_SIZE = 10;
+    private static final float SUBTITLE_FONT_SIZE = 10;
+    private static final float CUSTOMER_NAME_FONT_SIZE = 22;
     private static final float TEXT_FONT_SIZE = 10;
     private static final float TABLE_HEADER_FONT_SIZE = 9;
     private static final float TABLE_FONT_SIZE = 9;
@@ -52,17 +52,20 @@ public class PreparationPdfGenerator {
         try (PDPageContentStream cs = new PDPageContentStream(document, page)) {
             float y = page.getMediaBox().getHeight() - MARGIN;
 
-            // Title
-            y = drawText(cs, "SuperQuinquin — Bon de préparation", fontBold, HEADER_FONT_SIZE, MARGIN, y);
-            y -= LINE_HEIGHT;
+            // Customer name in large bold — top of page
+            String displayName = order.customerLastName().toUpperCase() + " " + order.customerFirstName();
+            y = drawText(cs, displayName, fontBold, CUSTOMER_NAME_FONT_SIZE, MARGIN, y);
+
+            // Subtitle aligned right
+            String subtitle = "SuperQuinquin — Bon de préparation";
+            float subtitleWidth = fontRegular.getStringWidth(subtitle) / 1000 * SUBTITLE_FONT_SIZE;
+            drawText(cs, subtitle, fontRegular, SUBTITLE_FONT_SIZE, pageWidth - MARGIN - subtitleWidth, page.getMediaBox().getHeight() - MARGIN);
+            y -= LINE_HEIGHT * 0.5f;
 
             // Order info
             y = drawText(cs, "Commande : " + order.orderNumber(), fontRegular, TEXT_FONT_SIZE, MARGIN, y);
             y = drawText(cs, "Créneau : " + order.timeSlotLabel(), fontRegular, TEXT_FONT_SIZE, MARGIN, y);
             y -= LINE_HEIGHT * 0.5f;
-
-            // Customer info
-            y = drawText(cs, "Coopérateur : " + order.customerName(), fontBold, TEXT_FONT_SIZE, MARGIN, y);
             if (order.customerEmail() != null && !order.customerEmail().isBlank()) {
                 y = drawText(cs, "Email : " + order.customerEmail(), fontRegular, TEXT_FONT_SIZE, MARGIN, y);
             }

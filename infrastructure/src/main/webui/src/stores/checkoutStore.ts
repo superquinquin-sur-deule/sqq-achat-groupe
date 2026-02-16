@@ -5,13 +5,14 @@ import { postApiVentesVenteIdOrders, postApiOrdersIdPayment } from '@/api/genera
 import { useCartStore } from '@/stores/cartStore'
 
 interface CustomerInfo {
-  name: string
+  firstName: string
+  lastName: string
   email: string
   phone: string
 }
 
 export const useCheckoutStore = defineStore('checkout', () => {
-  const customerInfo = ref<CustomerInfo>({ name: '', email: '', phone: '' })
+  const customerInfo = ref<CustomerInfo>({ firstName: '', lastName: '', email: '', phone: '' })
   const selectedTimeSlotId = ref<number | null>(null)
   const currentStep = ref(2)
   const isSubmitting = ref(false)
@@ -32,7 +33,8 @@ export const useCheckoutStore = defineStore('checkout', () => {
     error.value = null
 
     const response = await postApiVentesVenteIdOrders(venteId, {
-      customerName: customerInfo.value.name,
+      customerFirstName: customerInfo.value.firstName,
+      customerLastName: customerInfo.value.lastName,
       email: customerInfo.value.email,
       phone: customerInfo.value.phone,
       timeSlotId: selectedTimeSlotId.value!,
@@ -77,7 +79,7 @@ export const useCheckoutStore = defineStore('checkout', () => {
   }
 
   function reset() {
-    customerInfo.value = { name: '', email: '', phone: '' }
+    customerInfo.value = { firstName: '', lastName: '', email: '', phone: '' }
     selectedTimeSlotId.value = null
     currentStep.value = 2
     isSubmitting.value = false

@@ -39,7 +39,7 @@ onMounted(() => {
   checkoutStore.reset()
 })
 
-function handleCustomerSubmit(info: { name: string; email: string; phone: string }) {
+function handleCustomerSubmit(info: { firstName: string; lastName: string; email: string; phone: string }) {
   checkoutStore.setCustomerInfo(info)
 }
 

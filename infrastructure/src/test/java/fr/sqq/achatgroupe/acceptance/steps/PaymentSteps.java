@@ -64,13 +64,14 @@ public class PaymentSteps {
                 .setTimeout(5000));
         PlaywrightHooks.page().locator("[data-testid='checkout-button']").click();
         PlaywrightHooks.page().waitForURL("**/checkout");
-        PlaywrightHooks.page().waitForSelector("#customer-name", new Page.WaitForSelectorOptions()
+        PlaywrightHooks.page().waitForSelector("#customer-last-name", new Page.WaitForSelectorOptions()
                 .setState(WaitForSelectorState.VISIBLE)
                 .setTimeout(5000));
     }
 
     private void fillAndSubmitCustomerForm() {
-        PlaywrightHooks.page().locator("#customer-name").fill("Marie Dupont");
+        PlaywrightHooks.page().locator("#customer-last-name").fill("Dupont");
+        PlaywrightHooks.page().locator("#customer-first-name").fill("Marie");
         PlaywrightHooks.page().locator("#customer-email").fill("marie@exemple.fr");
         PlaywrightHooks.page().locator("#customer-phone").fill("06 12 34 56 78");
         PlaywrightHooks.page().locator("button:has-text('Continuer')").first().click();
@@ -96,7 +97,8 @@ public class PaymentSteps {
         Long timeSlotId = testContext.timeSlotIds().get(0);
         String body = """
                 {
-                    "customerName": "Marie Dupont",
+                    "customerFirstName": "Marie",
+                    "customerLastName": "Dupont",
                     "email": "marie@exemple.fr",
                     "phone": "06 12 34 56 78",
                     "timeSlotId": %d,

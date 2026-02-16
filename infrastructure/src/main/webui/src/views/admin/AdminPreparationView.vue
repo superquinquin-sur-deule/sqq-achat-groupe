@@ -145,7 +145,7 @@ function handlePrint() {
           >
             <div class="mb-3 flex items-baseline justify-between">
               <h3 class="text-lg font-bold text-dark" data-testid="preparation-card-customer">
-                {{ order.customerName }}
+                {{ order.customerLastName.toUpperCase() }} {{ order.customerFirstName }}
               </h3>
               <span class="text-sm text-brown" data-testid="preparation-card-order-number">
                 {{ order.orderNumber }}
