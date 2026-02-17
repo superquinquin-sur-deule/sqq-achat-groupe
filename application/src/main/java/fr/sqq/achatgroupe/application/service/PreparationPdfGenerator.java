@@ -12,7 +12,10 @@ import org.apache.pdfbox.pdmodel.font.Standard14Fonts;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @ApplicationScoped
 public class PreparationPdfGenerator {
@@ -98,31 +101,49 @@ public class PreparationPdfGenerator {
             cs.lineTo(tableX + contentWidth, y);
             cs.stroke();
 
-            // Table rows
-            for (PreparationItem item : order.items()) {
+            // Table rows grouped by supplier
+            Map<String, List<PreparationItem>> itemsBySupplier = order.items().stream()
+                    .collect(Collectors.groupingBy(PreparationItem::supplier, LinkedHashMap::new, Collectors.toList()));
+
+            for (Map.Entry<String, List<PreparationItem>> entry : itemsBySupplier.entrySet()) {
+                // Supplier header row
                 y -= LINE_HEIGHT;
-
-                // Checkbox
-                float cbX = tableX + 6;
-                float cbY = y + 2;
-                cs.setLineWidth(0.5f);
-                cs.addRect(cbX, cbY, CHECKBOX_SIZE, CHECKBOX_SIZE);
-                cs.stroke();
-
-                // Product name
-                drawText(cs, item.productName(), fontRegular, TABLE_FONT_SIZE,
-                        tableX + checkboxColWidth + 5, y + 3);
-
-                // Quantity
-                drawText(cs, String.valueOf(item.quantity()), fontRegular, TABLE_FONT_SIZE,
-                        tableX + checkboxColWidth + productColWidth + 10, y + 3);
-
-                // Row separator
+                cs.setNonStrokingColor(0.92f, 0.92f, 0.92f);
+                cs.addRect(tableX, y - 2, contentWidth, LINE_HEIGHT);
+                cs.fill();
+                cs.setNonStrokingColor(0, 0, 0);
+                drawText(cs, entry.getKey(), fontBold, TABLE_FONT_SIZE, tableX + 5, y + 3);
                 y -= 4;
                 cs.setLineWidth(0.2f);
                 cs.moveTo(tableX, y);
                 cs.lineTo(tableX + contentWidth, y);
                 cs.stroke();
+
+                for (PreparationItem item : entry.getValue()) {
+                    y -= LINE_HEIGHT;
+
+                    // Checkbox
+                    float cbX = tableX + 6;
+                    float cbY = y + 2;
+                    cs.setLineWidth(0.5f);
+                    cs.addRect(cbX, cbY, CHECKBOX_SIZE, CHECKBOX_SIZE);
+                    cs.stroke();
+
+                    // Product name
+                    drawText(cs, item.productName(), fontRegular, TABLE_FONT_SIZE,
+                            tableX + checkboxColWidth + 5, y + 3);
+
+                    // Quantity
+                    drawText(cs, String.valueOf(item.quantity()), fontRegular, TABLE_FONT_SIZE,
+                            tableX + checkboxColWidth + productColWidth + 10, y + 3);
+
+                    // Row separator
+                    y -= 4;
+                    cs.setLineWidth(0.2f);
+                    cs.moveTo(tableX, y);
+                    cs.lineTo(tableX + contentWidth, y);
+                    cs.stroke();
+                }
             }
         }
     }

@@ -146,6 +146,20 @@ public class BackofficePreparationSteps {
         assertTrue(allCardsText.contains("Pain de campagne"), "Le produit 'Pain de campagne' doit apparaître");
     }
 
+    @Alors("les produits sont groupés par fournisseur dans les fiches de préparation")
+    public void lesProduitsGroupesParFournisseur() {
+        Locator supplierHeaders = page().locator("[data-testid='preparation-supplier-header']");
+        assertTrue(supplierHeaders.count() >= 1,
+                "Il doit y avoir au moins 1 en-tête fournisseur, trouvé: " + supplierHeaders.count());
+
+        // Verify supplier names appear in the headers
+        String allHeaders = supplierHeaders.allTextContents().toString();
+        assertTrue(allHeaders.contains("Ferme du Soleil"),
+                "Le fournisseur 'Ferme du Soleil' doit apparaître dans les en-têtes");
+        assertTrue(allHeaders.contains("Boulangerie Martin"),
+                "Le fournisseur 'Boulangerie Martin' doit apparaître dans les en-têtes");
+    }
+
     @Et("je sélectionne un créneau dans le filtre préparation")
     public void jeSelectionneUnCreneauDansLeFiltrePreparation() {
         Locator filter = page().locator("[data-testid='preparation-slot-filter']");

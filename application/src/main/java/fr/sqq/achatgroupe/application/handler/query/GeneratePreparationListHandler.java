@@ -59,9 +59,13 @@ public class GeneratePreparationListHandler implements QueryHandler<GeneratePrep
                                 String productName = product != null
                                         ? product.name()
                                         : "Produit inconnu (ID: " + item.productId() + ")";
-                                return new PreparationItem(productName, item.quantity());
+                                String supplier = product != null
+                                        ? product.supplier()
+                                        : "Fournisseur inconnu";
+                                return new PreparationItem(productName, supplier, item.quantity());
                             })
-                            .sorted(Comparator.comparing(PreparationItem::productName))
+                            .sorted(Comparator.comparing(PreparationItem::supplier)
+                                    .thenComparing(PreparationItem::productName))
                             .toList();
 
                     return new PreparationOrder(

@@ -12,6 +12,6 @@ public record GeneratePreparationListQuery(Long venteId) implements Query<List<G
                                    List<PreparationItem> items) {
     }
 
-    public record PreparationItem(String productName, int quantity) {
+    public record PreparationItem(String productName, String supplier, int quantity) {
     }
 }

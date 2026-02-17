@@ -14,6 +14,10 @@ Fonctionnalité: Listes de préparation
     Et je vois les fiches de préparation groupées par créneau
     Et chaque fiche contient le numéro de commande, le nom du coopérateur et les produits
 
+  Scénario: Produits groupés par fournisseur dans les fiches
+    Quand je navigue vers la page listes de préparation
+    Alors les produits sont groupés par fournisseur dans les fiches de préparation
+
   Scénario: Filtre par créneau
     Quand je navigue vers la page listes de préparation
     Et je sélectionne un créneau dans le filtre préparation

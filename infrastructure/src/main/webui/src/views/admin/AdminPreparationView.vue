@@ -54,6 +54,18 @@ const todayFormatted = computed(() => {
   return now.toLocaleDateString('fr-FR', { year: 'numeric', month: '2-digit', day: '2-digit' })
 })
 
+function groupItemsBySupplier(items: { productName: string; supplier: string; quantity: number }[]) {
+  const groups: Record<string, typeof items> = {}
+  for (const item of items) {
+    const supplier = item.supplier
+    if (!groups[supplier]) {
+      groups[supplier] = []
+    }
+    groups[supplier]!.push(item)
+  }
+  return groups
+}
+
 function handlePrint() {
   if (!selectedVenteId.value) return
   window.open(`/api/admin/ventes/${selectedVenteId.value}/preparation/pdf`, '_blank')
@@ -162,14 +174,30 @@ function handlePrint() {
                 </tr>
               </thead>
               <tbody>
-                <tr
-                  v-for="item in order.items"
-                  :key="item.productName"
-                  class="border-b border-gray-100 print:border-gray-300"
+                <template
+                  v-for="(group, supplier) in groupItemsBySupplier(order.items)"
+                  :key="supplier"
                 >
-                  <td class="py-1 text-dark">{{ item.productName }}</td>
-                  <td class="py-1 text-right text-dark">{{ item.quantity }}</td>
-                </tr>
+                  <tr
+                    class="bg-gray-100 print:bg-gray-200"
+                    data-testid="preparation-supplier-header"
+                  >
+                    <td
+                      colspan="2"
+                      class="py-1 font-bold text-dark"
+                    >
+                      {{ supplier }}
+                    </td>
+                  </tr>
+                  <tr
+                    v-for="item in group"
+                    :key="item.productName"
+                    class="border-b border-gray-100 print:border-gray-300"
+                  >
+                    <td class="py-1 pl-4 text-dark">{{ item.productName }}</td>
+                    <td class="py-1 text-right text-dark">{{ item.quantity }}</td>
+                  </tr>
+                </template>
               </tbody>
             </table>
           </div>

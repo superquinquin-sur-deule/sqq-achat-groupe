@@ -18,7 +18,7 @@ public interface AdminPreparationRestMapper {
 
     default PreparationOrderResponse toResponse(PreparationOrder order) {
         List<PreparationItemResponse> items = order.items().stream()
-                .map(item -> new PreparationItemResponse(item.productName(), item.quantity()))
+                .map(item -> new PreparationItemResponse(item.productName(), item.supplier(), item.quantity()))
                 .toList();
         return new PreparationOrderResponse(order.orderId(), order.orderNumber(), order.customerFirstName(),
                 order.customerLastName(), order.customerEmail(), order.customerPhone(), order.timeSlotLabel(), items);
