@@ -148,6 +148,15 @@ public class CartSteps {
         PlaywrightHooks.page().waitForTimeout(300);
     }
 
+    @Quand("je clique sur \"Continuer mes achats\"")
+    public void jeCliqueSurContinuerMesAchats() {
+        PlaywrightHooks.page().locator("[data-testid='continue-shopping']").click();
+        PlaywrightHooks.page().waitForURL("**/ventes/" + testContext.venteId());
+        PlaywrightHooks.page().waitForSelector("[data-testid='product-card']", new Page.WaitForSelectorOptions()
+                .setState(WaitForSelectorState.VISIBLE)
+                .setTimeout(15000));
+    }
+
     @Quand("je clique sur \"Découvrir nos produits\"")
     public void jeCliqueSurDecouvrirNosProduits() {
         PlaywrightHooks.page().locator("[data-testid='discover-products']").click();

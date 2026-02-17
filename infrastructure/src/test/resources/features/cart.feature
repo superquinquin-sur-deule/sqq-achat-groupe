@@ -69,6 +69,13 @@ Fonctionnalité: Panier d'achat
     Alors le bouton "Ajouter" réapparaît sur le premier produit
     Et le compteur du panier dans le header n'est plus visible
 
+  Scénario: Continuer mes achats depuis le panier rempli
+    Étant donné qu'une vente existe avec des produits et des créneaux
+    Et j'ai ajouté un produit au panier depuis le catalogue
+    Quand je consulte mon panier
+    Et je clique sur "Continuer mes achats"
+    Alors je suis redirigé vers le catalogue
+
   Scénario: Panier vide avec message et lien vers le catalogue
     Étant donné qu'une vente existe avec des produits et des créneaux
     Quand je navigue vers la page panier
