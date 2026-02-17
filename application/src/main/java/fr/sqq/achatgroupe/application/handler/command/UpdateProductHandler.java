@@ -1,20 +1,26 @@
 package fr.sqq.achatgroupe.application.handler.command;
 
 import fr.sqq.achatgroupe.application.command.UpdateProductCommand;
+import fr.sqq.achatgroupe.application.port.out.OrderRepository;
 import fr.sqq.achatgroupe.application.port.out.ProductRepository;
+import fr.sqq.achatgroupe.domain.exception.ProductModificationForbiddenException;
 import fr.sqq.achatgroupe.domain.exception.ProductNotFoundException;
 import fr.sqq.achatgroupe.domain.model.catalog.Product;
 import fr.sqq.mediator.CommandHandler;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 
+import java.util.Objects;
+
 @ApplicationScoped
 public class UpdateProductHandler implements CommandHandler<UpdateProductCommand, Product> {
 
     private final ProductRepository productRepository;
+    private final OrderRepository orderRepository;
 
-    public UpdateProductHandler(ProductRepository productRepository) {
+    public UpdateProductHandler(ProductRepository productRepository, OrderRepository orderRepository) {
         this.productRepository = productRepository;
+        this.orderRepository = orderRepository;
     }
 
     @Override
@@ -22,6 +28,17 @@ public class UpdateProductHandler implements CommandHandler<UpdateProductCommand
     public Product handle(UpdateProductCommand command) {
         Product existing = productRepository.findByIdAndVenteId(command.id(), command.venteId())
                 .orElseThrow(() -> new ProductNotFoundException(command.id()));
+
+        if (orderRepository.existsNonCancelledByVenteId(command.venteId())) {
+            boolean onlyActiveChanged = Objects.equals(existing.name(), command.name())
+                    && Objects.equals(existing.description(), command.description())
+                    && existing.price().compareTo(command.price()) == 0
+                    && Objects.equals(existing.supplier(), command.supplier())
+                    && existing.stock() == command.stock();
+            if (!onlyActiveChanged) {
+                throw new ProductModificationForbiddenException();
+            }
+        }
 
         Product updated = new Product(
                 existing.id(),

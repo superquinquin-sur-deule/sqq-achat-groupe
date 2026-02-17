@@ -27,8 +27,16 @@ const schema = toTypedSchema(
 
 const { handleSubmit } = useForm({ validationSchema: schema })
 
-const { value: lastName, errorMessage: lastNameError, handleBlur: lastNameBlur } = useField<string>('lastName')
-const { value: firstName, errorMessage: firstNameError, handleBlur: firstNameBlur } = useField<string>('firstName')
+const {
+  value: lastName,
+  errorMessage: lastNameError,
+  handleBlur: lastNameBlur,
+} = useField<string>('lastName')
+const {
+  value: firstName,
+  errorMessage: firstNameError,
+  handleBlur: firstNameBlur,
+} = useField<string>('firstName')
 const { value: email, errorMessage: emailError, handleBlur: emailBlur } = useField<string>('email')
 const { value: phone, errorMessage: phoneError, handleBlur: phoneBlur } = useField<string>('phone')
 

@@ -15,5 +15,5 @@ public interface AdminVenteRestMapper {
     @Mapping(target = "startDate", expression = "java(vente.startDate())")
     @Mapping(target = "endDate", expression = "java(vente.endDate())")
     @Mapping(target = "createdAt", expression = "java(vente.createdAt())")
-    AdminVenteResponse toResponse(Vente vente);
+    AdminVenteResponse toResponse(Vente vente, boolean hasOrders);
 }

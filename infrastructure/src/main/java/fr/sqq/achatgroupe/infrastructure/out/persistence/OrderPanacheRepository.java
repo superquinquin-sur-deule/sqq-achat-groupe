@@ -139,6 +139,11 @@ public class OrderPanacheRepository implements OrderRepository, PanacheRepositor
     }
 
     @Override
+    public boolean existsNonCancelledByVenteId(Long venteId) {
+        return count("venteId = ?1 and status != 'CANCELLED'", venteId) > 0;
+    }
+
+    @Override
     public List<TopProduct> findTopSellingProducts(Long venteId, int limit) {
         List<Object[]> rows = getEntityManager()
                 .createQuery("SELECT oi.productId, SUM(oi.quantity) FROM OrderItemEntity oi JOIN oi.order o WHERE o.venteId = ?1 AND o.status IN ('PAID', 'PICKED_UP') GROUP BY oi.productId ORDER BY SUM(oi.quantity) DESC", Object[].class)

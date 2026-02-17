@@ -7,10 +7,12 @@ import fr.sqq.achatgroupe.domain.exception.OrderNotFoundException;
 import fr.sqq.achatgroupe.domain.exception.PaymentAlreadySucceededException;
 import fr.sqq.achatgroupe.domain.exception.PaymentSessionCreationException;
 import fr.sqq.achatgroupe.domain.exception.PaymentWebhookException;
+import fr.sqq.achatgroupe.domain.exception.ProductModificationForbiddenException;
 import fr.sqq.achatgroupe.domain.exception.ProductNotFoundException;
 import fr.sqq.achatgroupe.domain.exception.TimeSlotFullException;
 import fr.sqq.achatgroupe.domain.exception.TimeSlotHasReservationsException;
 import fr.sqq.achatgroupe.domain.exception.TimeSlotNotFoundException;
+import fr.sqq.achatgroupe.domain.exception.VenteHasOrdersException;
 import fr.sqq.achatgroupe.domain.exception.VenteNotFoundException;
 import fr.sqq.achatgroupe.infrastructure.in.rest.common.dto.ProblemDetailResponse;
 import jakarta.ws.rs.core.MediaType;
@@ -51,6 +53,12 @@ public class DomainExceptionMapper implements ExceptionMapper<DomainException> {
         }
         if (e instanceof PaymentSessionCreationException) {
             return buildResponse("https://api.sqq.fr/errors/payment-session-creation", "Erreur de paiement", 502, e.getMessage());
+        }
+        if (e instanceof VenteHasOrdersException) {
+            return buildResponse("https://api.sqq.fr/errors/vente-has-orders", "Vente avec commandes", 409, e.getMessage());
+        }
+        if (e instanceof ProductModificationForbiddenException) {
+            return buildResponse("https://api.sqq.fr/errors/product-modification-forbidden", "Modification interdite", 409, e.getMessage());
         }
         if (e instanceof PaymentWebhookException) {
             return buildResponse("about:blank", "Webhook Error", 400, e.getMessage());

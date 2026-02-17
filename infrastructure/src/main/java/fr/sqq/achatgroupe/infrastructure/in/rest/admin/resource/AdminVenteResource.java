@@ -5,6 +5,7 @@ import fr.sqq.achatgroupe.application.command.CreateAdminVenteCommand;
 import fr.sqq.achatgroupe.application.command.DeactivateVenteCommand;
 import fr.sqq.achatgroupe.application.command.DeleteVenteCommand;
 import fr.sqq.achatgroupe.application.command.UpdateVenteCommand;
+import fr.sqq.achatgroupe.application.query.CheckVenteHasOrdersQuery;
 import fr.sqq.achatgroupe.application.query.CursorPage;
 import fr.sqq.achatgroupe.application.query.CursorPageRequest;
 import fr.sqq.achatgroupe.application.query.ListAllVentesQuery;
@@ -47,7 +48,7 @@ public class AdminVenteResource {
         var pageRequest = cursor != null ? CursorPageRequest.after(cursor, size) : CursorPageRequest.first(size);
         CursorPage<Vente> page = mediator.send(new ListAllVentesQuery(pageRequest));
         List<AdminVenteResponse> responses = page.items().stream()
-                .map(mapper::toResponse)
+                .map(this::toResponseWithHasOrders)
                 .toList();
         return new CursorPageResponse<>(responses, new CursorPageResponse.PageInfo(page.endCursor(), page.hasNext()));
     }
@@ -57,7 +58,7 @@ public class AdminVenteResource {
         var cmd = new CreateAdminVenteCommand(
                 request.name(), request.description(), request.startDate(), request.endDate());
         Vente vente = mediator.send(cmd);
-        return RestResponse.status(RestResponse.Status.CREATED, new DataResponse<>(mapper.toResponse(vente)));
+        return RestResponse.status(RestResponse.Status.CREATED, new DataResponse<>(mapper.toResponse(vente, false)));
     }
 
     @PUT
@@ -66,7 +67,7 @@ public class AdminVenteResource {
         var cmd = new UpdateVenteCommand(
                 new VenteId(id), request.name(), request.description(), request.startDate(), request.endDate());
         Vente vente = mediator.send(cmd);
-        return new DataResponse<>(mapper.toResponse(vente));
+        return new DataResponse<>(toResponseWithHasOrders(vente));
     }
 
     @DELETE
@@ -80,13 +81,25 @@ public class AdminVenteResource {
     @Path("/{id}/activate")
     public DataResponse<AdminVenteResponse> activateVente(@PathParam("id") Long id) {
         Vente vente = mediator.send(new ActivateVenteCommand(new VenteId(id)));
-        return new DataResponse<>(mapper.toResponse(vente));
+        return new DataResponse<>(toResponseWithHasOrders(vente));
     }
 
     @PUT
     @Path("/{id}/deactivate")
     public DataResponse<AdminVenteResponse> deactivateVente(@PathParam("id") Long id) {
         Vente vente = mediator.send(new DeactivateVenteCommand(new VenteId(id)));
-        return new DataResponse<>(mapper.toResponse(vente));
+        return new DataResponse<>(toResponseWithHasOrders(vente));
+    }
+
+    private AdminVenteResponse toResponseWithHasOrders(Vente vente) {
+        boolean hasOrders = mediator.send(new CheckVenteHasOrdersQuery(vente.id()));
+        return mapper.toResponse(vente, hasOrders);
+    }
+
+    @GET
+    @Path("/{id}/has-orders")
+    public DataResponse<Boolean> hasOrders(@PathParam("id") Long id) {
+        Boolean result = mediator.send(new CheckVenteHasOrdersQuery(id));
+        return new DataResponse<>(result);
     }
 }

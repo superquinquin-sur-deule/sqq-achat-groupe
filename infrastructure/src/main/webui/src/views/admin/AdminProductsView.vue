@@ -16,6 +16,7 @@ import {
   useDeleteProductMutation,
   useImportProductsMutation,
 } from '@/composables/api/useAdminProductsApi'
+import { useVenteHasOrdersQuery } from '@/composables/api/useAdminVentesApi'
 import AdminTable from '@/components/admin/AdminTable.vue'
 import type {
   AdminProductResponse,
@@ -41,6 +42,9 @@ const createMutation = useCreateProductMutation(selectedVenteId)
 const updateMutation = useUpdateProductMutation(selectedVenteId)
 const deleteMutation = useDeleteProductMutation(selectedVenteId)
 const importMutation = useImportProductsMutation(selectedVenteId)
+
+const { data: hasOrdersData } = useVenteHasOrdersQuery(selectedVenteId)
+const hasOrders = computed(() => hasOrdersData.value === true)
 
 const showForm = ref(false)
 const editingProduct = ref<AdminProductResponse | undefined>(undefined)
@@ -170,6 +174,24 @@ async function confirmDelete(id: number) {
   }
 }
 
+async function toggleActive(product: AdminProductResponse) {
+  if (!selectedVenteId.value) return
+  try {
+    const updateData: UpdateProductRequest = {
+      name: product.name,
+      description: product.description,
+      price: product.price,
+      supplier: product.supplier,
+      stock: product.stock,
+      active: !product.active,
+    }
+    await updateMutation.mutateAsync({ id: product.id, data: updateData })
+    toast.success(product.active ? 'Produit désactivé' : 'Produit activé')
+  } catch {
+    toast.error('Erreur lors de la modification du produit')
+  }
+}
+
 function formatPrice(price: number): string {
   return (
     price.toLocaleString('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' €'
@@ -209,6 +231,14 @@ function formatPrice(price: number): string {
       @cancel="closeForm"
     />
 
+    <div
+      v-if="hasOrders"
+      class="mb-4 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-800"
+    >
+      Cette vente contient des commandes. La modification et la suppression des produits sont
+      désactivées. Vous pouvez toujours activer ou désactiver un produit.
+    </div>
+
     <div v-if="loading" class="py-12 text-center text-brown">Chargement des produits...</div>
 
     <EmptyState
@@ -246,7 +276,17 @@ function formatPrice(price: number): string {
         </td>
         <td class="px-4 py-3">
           <div class="flex gap-2">
-            <template v-if="confirmingDeleteId === product.id">
+            <template v-if="hasOrders">
+              <Button
+                :variant="product.active ? 'secondary' : 'primary'"
+                size="md"
+                :aria-label="(product.active ? 'Désactiver ' : 'Activer ') + product.name"
+                @click="toggleActive(product)"
+              >
+                {{ product.active ? 'Désactiver' : 'Activer' }}
+              </Button>
+            </template>
+            <template v-else-if="confirmingDeleteId === product.id">
               <Button
                 variant="danger"
                 size="md"

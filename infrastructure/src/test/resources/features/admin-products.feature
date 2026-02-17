@@ -31,3 +31,23 @@ Fonctionnalité: Gestion des produits (CRUD admin)
   Scénario: Créer un produit avec des données invalides
     Quand je crée un produit admin avec un nom vide
     Alors je reçois une erreur de validation 400
+
+  Scénario: Modification produit bloquée quand la vente a des commandes
+    Étant donné qu'une commande existe sur la vente
+    Quand je modifie le premier produit avec le nom "Tomates cerises bio" et le prix 4.20
+    Alors je reçois une erreur de conflit 409
+
+  Scénario: Désactivation produit autorisée quand la vente a des commandes
+    Étant donné qu'une commande existe sur la vente
+    Quand je désactive le premier produit
+    Alors le produit est modifié avec succès
+
+  Scénario: Suppression produit bloquée quand la vente a des commandes
+    Étant donné qu'une commande existe sur la vente
+    Quand je supprime le premier produit
+    Alors je reçois une erreur de conflit 409
+
+  Scénario: Suppression vente bloquée quand elle a des commandes
+    Étant donné qu'une commande existe sur la vente
+    Quand je supprime la vente
+    Alors je reçois une erreur de conflit 409

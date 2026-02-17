@@ -38,10 +38,22 @@ function goToCatalogue() {
     </div>
 
     <div class="mt-4 flex flex-col gap-2 sm:flex-row-reverse">
-      <Button variant="primary" size="lg" class="w-full sm:w-auto sm:flex-1" data-testid="checkout-button" @click="goToCheckout">
+      <Button
+        variant="primary"
+        size="lg"
+        class="w-full sm:w-auto sm:flex-1"
+        data-testid="checkout-button"
+        @click="goToCheckout"
+      >
         Valider mon panier
       </Button>
-      <Button variant="secondary" size="lg" class="w-full sm:w-auto sm:flex-1" data-testid="continue-shopping" @click="goToCatalogue">
+      <Button
+        variant="secondary"
+        size="lg"
+        class="w-full sm:w-auto sm:flex-1"
+        data-testid="continue-shopping"
+        @click="goToCatalogue"
+      >
         Continuer mes achats
       </Button>
     </div>

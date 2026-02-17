@@ -36,5 +36,7 @@ public interface OrderRepository {
 
     record SlotOrderCount(Long slotId, long orderCount) {}
 
+    boolean existsNonCancelledByVenteId(Long venteId);
+
     record TopProduct(Long productId, long totalQuantity) {}
 }

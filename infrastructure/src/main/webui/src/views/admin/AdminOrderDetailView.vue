@@ -50,7 +50,9 @@ function formatSlot(slot: { date: string; startTime: string; endTime: string } |
         <dl class="grid grid-cols-1 gap-3 sm:grid-cols-3">
           <div>
             <dt class="text-sm text-brown">Nom</dt>
-            <dd class="font-medium text-dark">{{ order.customerLastName }} {{ order.customerFirstName }}</dd>
+            <dd class="font-medium text-dark">
+              {{ order.customerLastName }} {{ order.customerFirstName }}
+            </dd>
           </div>
           <div>
             <dt class="text-sm text-brown">Email</dt>

@@ -215,6 +215,7 @@ function formatDate(isoStr: string | null): string {
                 {{ vente.status === 'ACTIVE' ? 'Désactiver' : 'Activer' }}
               </Button>
               <Button
+                v-if="!vente.hasOrders"
                 variant="danger"
                 size="md"
                 :aria-label="'Supprimer ' + vente.name"

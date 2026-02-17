@@ -1,6 +1,7 @@
 import { computed, toValue, type MaybeRefOrGetter } from 'vue'
 import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tanstack/vue-query'
 import { queryKeys } from '@/api/queryKeys'
+import { customFetch } from '@/api/mutator/custom-fetch'
 import {
   getApiAdminVentes,
   postApiAdminVentes,
@@ -81,5 +82,19 @@ export function useDeactivateVenteMutation() {
       queryClient.invalidateQueries({ queryKey: queryKeys.admin.ventes.all })
       queryClient.invalidateQueries({ queryKey: queryKeys.ventes.all })
     },
+  })
+}
+
+export function useVenteHasOrdersQuery(venteId: MaybeRefOrGetter<number | null>) {
+  return useQuery({
+    queryKey: computed(() => queryKeys.admin.ventes.hasOrders(toValue(venteId)!)),
+    queryFn: async () => {
+      const response = await customFetch<{ data: { data: boolean } }>(
+        `/api/admin/ventes/${toValue(venteId)}/has-orders`,
+        { method: 'GET' },
+      )
+      return response.data.data
+    },
+    enabled: () => toValue(venteId) !== null,
   })
 }

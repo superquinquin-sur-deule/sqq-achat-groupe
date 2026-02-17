@@ -13,6 +13,7 @@ export const queryKeys = {
     ventes: {
       all: ['admin', 'ventes'] as const,
       list: (cursor?: string | null) => ['admin', 'ventes', { cursor }] as const,
+      hasOrders: (venteId: number) => ['admin', 'ventes', 'has-orders', { venteId }] as const,
     },
     products: {
       list: (venteId: number, cursor?: string | null) =>

@@ -67,13 +67,13 @@ const groupedByDate = computed(() => {
           </p>
 
           <div v-else class="mt-2 space-y-1">
-            <p
-              v-for="group in groupedByDate"
-              :key="group.date"
-              class="text-sm text-dark"
-            >
+            <p v-for="group in groupedByDate" :key="group.date" class="text-sm text-dark">
               <span class="font-medium capitalize">{{ group.formattedDate }}</span> :
-              {{ group.slots.map((s) => `${formatTime(s.startTime)} — ${formatTime(s.endTime)}`).join(', ') }}
+              {{
+                group.slots
+                  .map((s) => `${formatTime(s.startTime)} — ${formatTime(s.endTime)}`)
+                  .join(', ')
+              }}
             </p>
           </div>
         </div>

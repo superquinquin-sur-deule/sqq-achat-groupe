@@ -9,6 +9,7 @@ public record AdminVenteResponse(
         String status,
         Instant startDate,
         Instant endDate,
-        Instant createdAt
+        Instant createdAt,
+        boolean hasOrders
 ) {
 }
