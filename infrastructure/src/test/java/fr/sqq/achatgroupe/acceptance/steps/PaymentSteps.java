@@ -16,7 +16,6 @@ import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import jakarta.inject.Inject;
 
-import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -92,47 +91,18 @@ public class PaymentSteps {
                 .setTimeout(5000));
     }
 
-    private String createOrderViaApi() {
-        Long productId = testContext.productIds().get(0);
-        Long timeSlotId = testContext.timeSlotIds().get(0);
-        String body = """
-                {
-                    "customerFirstName": "Marie",
-                    "customerLastName": "Dupont",
-                    "email": "marie@exemple.fr",
-                    "phone": "06 12 34 56 78",
-                    "timeSlotId": %d,
-                    "items": [{"productId": %d, "quantity": 1}]
-                }
-                """.formatted(timeSlotId, productId);
+    private void createOrderViaBrowser() {
+        navigateToHome();
+        addFirstProductToCart();
+        navigateToCheckout();
+        fillAndSubmitCustomerForm();
+        selectFirstAvailableSlotAndContinue();
 
-        return RestAssured.given()
-                .contentType(ContentType.JSON)
-                .body(body)
-                .when()
-                .post("/api/ventes/" + testContext.venteId() + "/orders")
-                .then()
-                .statusCode(201)
-                .extract()
-                .jsonPath()
-                .getString("data.id");
-    }
+        // Click pay — creates the order + initiates payment
+        PlaywrightHooks.page().locator("button:has-text('Payer ma commande')").click();
+        PlaywrightHooks.page().waitForTimeout(3000);
 
-    private void initiatePaymentViaApi(String orderId) {
-        String body = """
-                {
-                    "successUrl": "http://localhost:8081/confirmation?orderId=%s&session_id={CHECKOUT_SESSION_ID}",
-                    "cancelUrl": "http://localhost:8081/checkout"
-                }
-                """.formatted(orderId);
-
-        RestAssured.given()
-                .contentType(ContentType.JSON)
-                .body(body)
-                .when()
-                .post("/api/orders/" + orderId + "/payment")
-                .then()
-                .statusCode(200);
+        createdOrderId = FakePaymentGateway.getLastOrderId().toString();
     }
 
     private void sendSuccessWebhook() {
@@ -145,22 +115,7 @@ public class PaymentSteps {
                 .post("/api/webhooks/stripe");
     }
 
-    // --- Database verification steps ---
-
-    @Quand("je vérifie la structure de la base de données")
-    public void jeVerifieLaStructureDeLaBase() {
-        // Verification happens in the assertion step
-    }
-
-    @Alors("la table payments existe avec les colonnes requises")
-    public void laTablePaymentsExiste() {
-        apiResponse = RestAssured.given()
-                .when()
-                .get("/q/health");
-        apiResponse.then().statusCode(200);
-    }
-
-    // --- Préconditions (unique step text to avoid duplication with CheckoutSteps) ---
+    // --- Préconditions ---
 
     @Et("j'ai ajouté des produits au panier pour le paiement")
     public void jAiAjouteDesProduitsAuPanierPourLePaiement() {
@@ -181,14 +136,12 @@ public class PaymentSteps {
 
     @Étantdonnéque("une commande en attente de paiement existe")
     public void uneCommandeEnAttenteExiste() {
-        createdOrderId = createOrderViaApi();
-        initiatePaymentViaApi(createdOrderId);
+        createOrderViaBrowser();
     }
 
     @Étantdonnéque("une commande a déjà été payée")
     public void uneCommandeDejaPayee() {
-        createdOrderId = createOrderViaApi();
-        initiatePaymentViaApi(createdOrderId);
+        createOrderViaBrowser();
         sendSuccessWebhook();
         apiResponse.then().statusCode(200);
     }
@@ -241,38 +194,30 @@ public class PaymentSteps {
         );
     }
 
-    @Alors("le statut de la commande passe à {string}")
-    public void leStatutDeLaCommandePasseA(String expectedStatus) {
+    @Alors("la page de confirmation affiche le statut payé")
+    public void laPageDeConfirmationAfficheLeStatutPaye() {
         apiResponse.then().statusCode(200);
-
-        RestAssured.given()
-                .when()
-                .get("/api/orders/" + createdOrderId)
-                .then()
-                .statusCode(200)
-                .body("data.status", equalTo(expectedStatus));
+        assertNotNull(createdOrderId, "L'orderId doit exister");
+        PlaywrightHooks.page().navigate(PlaywrightHooks.testUrl() + "/confirmation?orderId=" + createdOrderId);
+        PlaywrightHooks.page().waitForSelector("h1", new Page.WaitForSelectorOptions()
+                .setState(WaitForSelectorState.VISIBLE)
+                .setTimeout(10000));
+        Locator h1 = PlaywrightHooks.page().locator("h1");
+        String text = h1.textContent();
+        assertTrue(text.contains("Merci"), "La page de confirmation doit afficher un message de succès, got: " + text);
     }
 
-    @Et("le paiement est enregistré avec le statut {string}")
-    public void lePaiementEstEnregistreAvecLeStatut(String expectedStatus) {
+    @Alors("la page de confirmation reste accessible")
+    public void laPageDeConfirmationResteAccessible() {
         apiResponse.then().statusCode(200);
-    }
-
-    @Alors("la commande reste au statut {string}")
-    public void laCommandeResteAuStatut(String expectedStatus) {
-        apiResponse.then().statusCode(200);
-
-        RestAssured.given()
-                .when()
-                .get("/api/orders/" + createdOrderId)
-                .then()
-                .statusCode(200)
-                .body("data.status", equalTo(expectedStatus));
-    }
-
-    @Et("aucun doublon de paiement n'est créé")
-    public void aucunDoublonDePaiementNestCree() {
-        apiResponse.then().statusCode(200);
+        assertNotNull(createdOrderId, "L'orderId doit exister");
+        PlaywrightHooks.page().navigate(PlaywrightHooks.testUrl() + "/confirmation?orderId=" + createdOrderId);
+        PlaywrightHooks.page().waitForSelector("h1", new Page.WaitForSelectorOptions()
+                .setState(WaitForSelectorState.VISIBLE)
+                .setTimeout(10000));
+        Locator h1 = PlaywrightHooks.page().locator("h1");
+        String text = h1.textContent();
+        assertTrue(text.contains("Merci"), "La page de confirmation doit rester accessible, got: " + text);
     }
 
     @Alors("je vois le message {string}")

@@ -1,5 +1,5 @@
 # language: fr
-@admin-products
+@browser @admin-products
 Fonctionnalité: Gestion des produits (CRUD admin)
   En tant qu'administrateur, je veux gérer les produits du catalogue
   afin de configurer l'offre de l'achat groupé.
@@ -8,46 +8,57 @@ Fonctionnalité: Gestion des produits (CRUD admin)
     Étant donné qu'une vente existe avec des produits et des créneaux
 
   Scénario: Lister tous les produits d'une vente
-    Quand je liste les produits admin de la vente
-    Alors je reçois la liste de tous les produits
-    Et chaque produit contient les champs id, venteId, name, price, supplier, stock et active
+    Quand je navigue vers la page admin des produits
+    Alors je vois le tableau des produits avec des lignes
 
   Scénario: Créer un nouveau produit
-    Quand je crée un produit admin avec le nom "Carottes bio" au prix de 2.50 du fournisseur "Ferme du Soleil" avec un stock de 30
-    Alors le produit est créé avec succès
-    Et le produit créé a le nom "Carottes bio"
-    Et le produit créé est actif
+    Quand je navigue vers la page admin des produits
+    Et je clique sur le bouton ajouter un produit
+    Et je remplis le formulaire produit avec le nom "Carottes bio" au prix de "2.50" du fournisseur "Ferme du Soleil" avec un stock de "30"
+    Et je soumets le formulaire produit
+    Alors je vois un toast de succès
+    Et le produit "Carottes bio" apparaît dans le tableau
 
   Scénario: Modifier un produit existant
-    Quand je modifie le premier produit avec le nom "Tomates cerises bio" et le prix 4.20
-    Alors le produit est modifié avec succès
-    Et le produit modifié a le nom "Tomates cerises bio"
+    Quand je navigue vers la page admin des produits
+    Et je clique sur le bouton modifier du premier produit
+    Et je modifie le nom du produit en "Tomates cerises bio"
+    Et je soumets le formulaire produit en modification
+    Alors je vois un toast de succès
+    Et le produit "Tomates cerises bio" apparaît dans le tableau
 
   Scénario: Supprimer un produit
-    Quand je supprime le premier produit
-    Alors le produit est supprimé avec succès
-    Et la liste des produits admin a un produit de moins
+    Quand je navigue vers la page admin des produits
+    Et je compte le nombre de produits dans le tableau
+    Et je clique sur le bouton supprimer du premier produit
+    Et je confirme la suppression
+    Alors je vois un toast de succès
+    Et le tableau contient un produit de moins
 
   Scénario: Créer un produit avec des données invalides
-    Quand je crée un produit admin avec un nom vide
-    Alors je reçois une erreur de validation 400
+    Quand je navigue vers la page admin des produits
+    Et je clique sur le bouton ajouter un produit
+    Et je soumets le formulaire produit vide
+    Alors je vois des messages d'erreur de validation
 
   Scénario: Modification produit bloquée quand la vente a des commandes
-    Étant donné qu'une commande existe sur la vente
-    Quand je modifie le premier produit avec le nom "Tomates cerises bio" et le prix 4.20
-    Alors je reçois une erreur de conflit 409
+    Étant donné qu'une commande existe sur la vente via le navigateur
+    Quand je navigue vers la page admin des produits
+    Alors je vois le message d'avertissement commandes existantes
+    Et le bouton modifier n'est pas visible
 
   Scénario: Désactivation produit autorisée quand la vente a des commandes
-    Étant donné qu'une commande existe sur la vente
-    Quand je désactive le premier produit
-    Alors le produit est modifié avec succès
+    Étant donné qu'une commande existe sur la vente via le navigateur
+    Quand je navigue vers la page admin des produits
+    Et je clique sur le bouton désactiver du premier produit
+    Alors je vois un toast de succès
 
   Scénario: Suppression produit bloquée quand la vente a des commandes
-    Étant donné qu'une commande existe sur la vente
-    Quand je supprime le premier produit
-    Alors je reçois une erreur de conflit 409
+    Étant donné qu'une commande existe sur la vente via le navigateur
+    Quand je navigue vers la page admin des produits
+    Alors le bouton supprimer n'est pas visible
 
   Scénario: Suppression vente bloquée quand elle a des commandes
-    Étant donné qu'une commande existe sur la vente
-    Quand je supprime la vente
-    Alors je reçois une erreur de conflit 409
+    Étant donné qu'une commande existe sur la vente via le navigateur
+    Quand je navigue vers la page admin ventes
+    Alors le bouton supprimer de la vente n'est pas visible

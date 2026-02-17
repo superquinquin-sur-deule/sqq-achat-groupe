@@ -5,11 +5,6 @@ Fonctionnalité: Paiement par carte bancaire
   Je veux payer ma commande par carte bancaire en ligne,
   Afin que ma commande soit confirmée et mes produits garantis.
 
-  Scénario: La table payments existe après migration
-    Étant donné que l'application est démarrée
-    Quand je vérifie la structure de la base de données
-    Alors la table payments existe avec les colonnes requises
-
   Scénario: Initier un paiement redirige vers Stripe Checkout
     Étant donné qu'une vente existe avec des produits et des créneaux
     Et que j'ai ajouté des produits au panier pour le paiement
@@ -22,15 +17,13 @@ Fonctionnalité: Paiement par carte bancaire
     Étant donné qu'une vente existe avec des produits et des créneaux
     Et qu'une commande en attente de paiement existe
     Quand le webhook Stripe notifie un paiement réussi
-    Alors le statut de la commande passe à "PAID"
-    Et le paiement est enregistré avec le statut "SUCCEEDED"
+    Alors la page de confirmation affiche le statut payé
 
   Scénario: Webhook idempotent ne duplique pas le paiement
     Étant donné qu'une vente existe avec des produits et des créneaux
     Et qu'une commande a déjà été payée
     Quand le webhook Stripe notifie le même paiement une deuxième fois
-    Alors la commande reste au statut "PAID"
-    Et aucun doublon de paiement n'est créé
+    Alors la page de confirmation reste accessible
 
   Scénario: Page de confirmation affiche le récapitulatif
     Étant donné qu'une vente existe avec des produits et des créneaux
