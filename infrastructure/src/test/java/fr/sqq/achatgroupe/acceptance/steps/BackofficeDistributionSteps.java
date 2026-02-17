@@ -108,6 +108,14 @@ public class BackofficeDistributionSteps {
                         .setTimeout(15000));
     }
 
+    @Alors("je vois le bouton imprimer PDF distribution")
+    public void jeVoisLeBoutonImprimerPDFDistribution() {
+        Locator printBtn = page().locator("[data-testid='distribution-print-btn']");
+        assertTrue(printBtn.isVisible(), "Le bouton 'Imprimer PDF' doit être visible");
+        assertTrue(printBtn.textContent().contains("Imprimer PDF"),
+                "Le bouton doit contenir le texte 'Imprimer PDF'");
+    }
+
     @Alors("je vois le titre distribution {string}")
     public void jeVoisLeTitreDistribution(String title) {
         Locator titleEl = page().locator("[data-testid='distribution-title']");

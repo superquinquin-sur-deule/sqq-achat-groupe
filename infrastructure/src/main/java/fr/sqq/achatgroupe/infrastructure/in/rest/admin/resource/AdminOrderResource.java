@@ -3,10 +3,13 @@ package fr.sqq.achatgroupe.infrastructure.in.rest.admin.resource;
 import fr.sqq.achatgroupe.application.command.MarkOrderPickedUpCommand;
 import fr.sqq.achatgroupe.application.query.CursorPage;
 import fr.sqq.achatgroupe.application.query.CursorPageRequest;
+import fr.sqq.achatgroupe.application.query.GenerateDistributionListQuery;
+import fr.sqq.achatgroupe.application.query.GenerateDistributionListQuery.DistributionOrder;
 import fr.sqq.achatgroupe.application.query.GetOrderDetailsQuery;
 import fr.sqq.achatgroupe.application.query.ListAllProductsQuery;
 import fr.sqq.achatgroupe.application.query.ListAllTimeSlotsQuery;
 import fr.sqq.achatgroupe.application.query.ListOrdersQuery;
+import fr.sqq.achatgroupe.application.service.DistributionPdfGenerator;
 import fr.sqq.achatgroupe.domain.model.catalog.Product;
 import fr.sqq.achatgroupe.domain.model.order.Order;
 import fr.sqq.achatgroupe.domain.model.planning.TimeSlot;
@@ -20,9 +23,12 @@ import fr.sqq.mediator.Mediator;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.responses.APIResponse;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 
+import java.io.IOException;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -37,10 +43,13 @@ public class AdminOrderResource {
 
     private final Mediator mediator;
     private final AdminOrderRestMapper mapper;
+    private final DistributionPdfGenerator distributionPdfGenerator;
 
-    public AdminOrderResource(Mediator mediator, AdminOrderRestMapper mapper) {
+    public AdminOrderResource(Mediator mediator, AdminOrderRestMapper mapper,
+                              DistributionPdfGenerator distributionPdfGenerator) {
         this.mediator = mediator;
         this.mapper = mapper;
+        this.distributionPdfGenerator = distributionPdfGenerator;
     }
 
     @GET
@@ -73,6 +82,19 @@ public class AdminOrderResource {
                     .build();
         }
         return Response.noContent().build();
+    }
+
+    @GET
+    @Path("/distribution-pdf")
+    @Produces("application/pdf")
+    @Operation(hidden = true)
+    public Response getDistributionPdf(@PathParam("venteId") Long venteId) throws IOException {
+        List<DistributionOrder> orders = mediator.send(new GenerateDistributionListQuery(venteId));
+        byte[] pdf = distributionPdfGenerator.generate(orders);
+        String filename = "distribution-" + LocalDate.now() + ".pdf";
+        return Response.ok(pdf)
+                .header("Content-Disposition", "inline; filename=\"" + filename + "\"")
+                .build();
     }
 
     @GET

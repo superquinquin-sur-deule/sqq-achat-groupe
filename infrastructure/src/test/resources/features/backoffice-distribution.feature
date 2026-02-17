@@ -35,6 +35,10 @@ Fonctionnalité: Distribution et suivi des retraits
     Et je clique sur le bouton "Non récupérées" dans la distribution
     Alors seules les commandes en statut "Payé" sont affichées dans la distribution
 
+  Scénario: Bouton imprimer PDF visible
+    Quand je navigue vers la page distribution
+    Alors je vois le bouton imprimer PDF distribution
+
   @backoffice-distribution-empty
   Scénario: Aucune commande — état vide
     Étant donné une vente sans commande pour la distribution
