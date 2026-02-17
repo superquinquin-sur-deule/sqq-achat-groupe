@@ -5,8 +5,10 @@ import { useToast } from '@/composables/useToast'
 import { useCartStore } from '@/stores/cartStore'
 import { useVenteQuery } from '@/composables/api/useVentesApi'
 import { useVenteProductsQuery } from '@/composables/api/useProductsApi'
+import { useVenteTimeslotsQuery } from '@/composables/api/useTimeslotsApi'
 import type { ProductResponse } from '@/api/generated/model'
 import WelcomeBanner from '@/components/catalog/WelcomeBanner.vue'
+import TimeSlotBanner from '@/components/catalog/TimeSlotBanner.vue'
 import ProductGrid from '@/components/catalog/ProductGrid.vue'
 
 const route = useRoute()
@@ -25,6 +27,8 @@ const { data: products, isLoading: loading } = useVenteProductsQuery(
   computed(() => !venteClosed.value),
 )
 
+const { data: timeSlots, isLoading: timeSlotsLoading } = useVenteTimeslotsQuery(venteId)
+
 function handleAddToCart(product: ProductResponse) {
   cartStore.addItem(product)
   toast.success('Produit ajouté')
@@ -39,6 +43,7 @@ function handleAddToCart(product: ProductResponse) {
     </div>
     <template v-else>
       <WelcomeBanner />
+      <TimeSlotBanner :time-slots="timeSlots ?? []" :is-loading="timeSlotsLoading" />
       <div class="py-8">
         <ProductGrid :products="products ?? []" :loading="loading" @add="handleAddToCart" />
       </div>

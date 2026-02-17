@@ -157,6 +157,16 @@ public class CatalogueFrontendSteps {
         }
     }
 
+    @Alors("je vois les créneaux de retrait disponibles")
+    public void jeVoisLesCreneauxDeRetraitDisponibles() {
+        Locator banner = PlaywrightHooks.page().locator("[data-testid='timeslot-banner']");
+        assertTrue(banner.isVisible(), "Le bandeau des créneaux de retrait doit être visible");
+        String text = banner.textContent();
+        assertNotNull(text);
+        assertTrue(text.contains("Créneaux de retrait"), "Le bandeau doit contenir le titre 'Créneaux de retrait'");
+        assertTrue(text.contains("10h00"), "Le bandeau doit afficher un horaire de créneau");
+    }
+
     @Alors("les cartes s'affichent en 1 colonne")
     public void lesCartesEnUneColonne() {
         Locator grid = PlaywrightHooks.page().locator("[data-testid='product-grid']");

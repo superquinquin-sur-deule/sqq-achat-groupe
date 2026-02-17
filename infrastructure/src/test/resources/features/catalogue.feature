@@ -36,6 +36,11 @@ Fonctionnalité: Catalogue produits frontend
     Quand j'accède à la page d'accueil en mode desktop
     Alors les cartes s'affichent en 3 colonnes
 
+  Scénario: Affichage des créneaux de retrait sur la page d'accueil
+    Étant donné qu'une vente existe avec des produits et des créneaux
+    Quand j'accède à la page d'accueil
+    Alors je vois les créneaux de retrait disponibles
+
   Scénario: Skeleton screens pendant le chargement
     Étant donné qu'une vente existe avec des produits et des créneaux
     Quand la page d'accueil est en cours de chargement
