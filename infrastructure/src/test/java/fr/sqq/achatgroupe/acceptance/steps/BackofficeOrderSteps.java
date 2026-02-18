@@ -112,26 +112,28 @@ public class BackofficeOrderSteps {
         assertTrue(table.isVisible(), "Le tableau des commandes doit être visible");
     }
 
-    @Et("chaque ligne affiche numéro, nom, email, créneau, montant et statut")
+    @Et("chaque ligne affiche numéro, date, nom, email, créneau, montant et statut")
     public void chaqueLigneAfficheLesDonnees() {
         Locator rows = page().locator("[data-testid='backoffice-order-row']");
         assertTrue(rows.count() >= 2, "Il doit y avoir au moins 2 commandes, trouvé: " + rows.count());
 
         Locator firstRow = rows.first();
         Locator cells = firstRow.locator("td");
-        assertEquals(6, cells.count(), "Chaque ligne doit avoir 6 colonnes");
+        assertEquals(7, cells.count(), "Chaque ligne doit avoir 7 colonnes");
         // Colonne 1 : numéro (lien)
         assertFalse(cells.nth(0).textContent().isBlank(), "Le numéro ne doit pas être vide");
-        // Colonne 2 : nom
-        assertFalse(cells.nth(1).textContent().isBlank(), "Le nom ne doit pas être vide");
-        // Colonne 3 : email
-        assertTrue(cells.nth(2).textContent().contains("@"), "L'email doit contenir '@'");
-        // Colonne 4 : créneau
-        assertFalse(cells.nth(3).textContent().isBlank(), "Le créneau ne doit pas être vide");
-        // Colonne 5 : montant
-        assertTrue(cells.nth(4).textContent().contains("€"), "Le montant doit contenir '€'");
-        // Colonne 6 : statut
-        String statusText = cells.nth(5).textContent();
+        // Colonne 2 : date
+        assertFalse(cells.nth(1).textContent().isBlank(), "La date ne doit pas être vide");
+        // Colonne 3 : nom
+        assertFalse(cells.nth(2).textContent().isBlank(), "Le nom ne doit pas être vide");
+        // Colonne 4 : email
+        assertTrue(cells.nth(3).textContent().contains("@"), "L'email doit contenir '@'");
+        // Colonne 5 : créneau
+        assertFalse(cells.nth(4).textContent().isBlank(), "Le créneau ne doit pas être vide");
+        // Colonne 6 : montant
+        assertTrue(cells.nth(5).textContent().contains("€"), "Le montant doit contenir '€'");
+        // Colonne 7 : statut
+        String statusText = cells.nth(6).textContent();
         assertTrue(statusText.contains("Payé") || statusText.contains("Récupéré"),
                 "Le statut doit être 'Payé' ou 'Récupéré', got: " + statusText);
     }

@@ -6,7 +6,7 @@ import { storeToRefs } from 'pinia'
 import { useAdminOrdersQuery } from '@/composables/api/useAdminOrdersApi'
 import { useAdminTimeslotsQuery } from '@/composables/api/useAdminTimeslotsApi'
 import { useCursorPagination } from '@/composables/useCursorPagination'
-import { formatPrice, statusLabel, statusClasses } from '@/utils/order-formatters'
+import { formatPrice, formatDateTime, statusLabel, statusClasses } from '@/utils/order-formatters'
 import AdminTable from '@/components/admin/AdminTable.vue'
 import EmptyState from '@/components/ui/EmptyState.vue'
 import Pagination from '@/components/ui/Pagination.vue'
@@ -87,7 +87,7 @@ const timeSlots = computed(() => timeslotsPageData.value?.data ?? [])
 
     <AdminTable
       v-else
-      :columns="['Numéro', 'Nom', 'Email', 'Créneau', 'Montant', 'Statut']"
+      :columns="['Numéro', 'Date', 'Nom', 'Email', 'Créneau', 'Montant', 'Statut']"
       caption="Liste des commandes"
       dataTestid="backoffice-orders-table"
     >
@@ -104,6 +104,9 @@ const timeSlots = computed(() => timeslotsPageData.value?.data ?? [])
           >
             {{ order.orderNumber }}
           </RouterLink>
+        </td>
+        <td class="border-t border-gray-100 px-4 py-3 text-dark">
+          {{ formatDateTime(order.createdAt) }}
         </td>
         <td class="border-t border-gray-100 px-4 py-3 text-dark">
           {{ order.customerLastName }} {{ order.customerFirstName }}

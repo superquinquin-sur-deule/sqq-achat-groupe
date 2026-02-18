@@ -16,7 +16,7 @@ Fonctionnalité: Liste des commandes back-office
   Scénario: Affichage de la liste des commandes
     Quand je navigue vers la page backoffice commandes
     Alors je vois le tableau des commandes backoffice
-    Et chaque ligne affiche numéro, nom, email, créneau, montant et statut
+    Et chaque ligne affiche numéro, date, nom, email, créneau, montant et statut
     Et les badges de statut sont colorés correctement
 
   Scénario: Recherche par nom dans les commandes

@@ -1,10 +1,10 @@
 package fr.sqq.achatgroupe.acceptance.support;
 
-import jakarta.enterprise.context.ApplicationScoped;
+import io.quarkiverse.cucumber.ScenarioScope;
 
 import java.util.List;
 
-@ApplicationScoped
+@ScenarioScope
 public class TestContext {
 
     private Long venteId;

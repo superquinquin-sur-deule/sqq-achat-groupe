@@ -3,7 +3,7 @@ import { useRoute, RouterLink } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import { useAdminOrderDetailQuery } from '@/composables/api/useAdminOrdersApi'
 import { useVenteStore } from '@/stores/venteStore'
-import { formatPrice, statusLabel, statusClasses } from '@/utils/order-formatters'
+import { formatPrice, formatDateTime, statusLabel, statusClasses } from '@/utils/order-formatters'
 
 const route = useRoute()
 const orderId = route.params.id as string
@@ -40,6 +40,7 @@ function formatSlot(slot: { date: string; startTime: string; endTime: string } |
           {{ statusLabel(order.status) }}
         </span>
       </div>
+      <p class="text-sm text-brown">Créée le {{ formatDateTime(order.createdAt) }}</p>
 
       <!-- Coordonnées -->
       <div

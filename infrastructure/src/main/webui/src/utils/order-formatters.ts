@@ -25,3 +25,13 @@ export function statusLabel(status: string): string {
 export function statusClasses(status: string): string {
   return STATUS_CLASSES[status] ?? 'bg-gray-100 text-gray-800'
 }
+
+export function formatDateTime(instant: string): string {
+  return new Date(instant).toLocaleDateString('fr-FR', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  })
+}
