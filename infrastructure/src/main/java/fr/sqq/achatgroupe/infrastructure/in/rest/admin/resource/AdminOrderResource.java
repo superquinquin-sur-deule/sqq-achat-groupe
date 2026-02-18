@@ -20,6 +20,7 @@ import fr.sqq.achatgroupe.infrastructure.in.rest.common.dto.CursorPageResponse;
 import fr.sqq.achatgroupe.infrastructure.in.rest.common.dto.DataResponse;
 import fr.sqq.achatgroupe.infrastructure.in.rest.common.dto.ProblemDetailResponse;
 import fr.sqq.mediator.Mediator;
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
@@ -39,6 +40,7 @@ import java.util.stream.Collectors;
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 @Tag(name = "admin-orders")
+@RolesAllowed({"SQQ_ADMIN", "SQQ_DISTRIB"})
 public class AdminOrderResource {
 
     private final Mediator mediator;
@@ -99,6 +101,7 @@ public class AdminOrderResource {
 
     @GET
     @Path("/{id}")
+    @RolesAllowed("SQQ_ADMIN")
     public DataResponse<AdminOrderDetailResponse> getOrderDetail(@PathParam("venteId") Long venteId, @PathParam("id") UUID id) {
         Order order = mediator.send(new GetOrderDetailsQuery(venteId, id));
         List<TimeSlot> timeSlots = mediator.send(ListAllTimeSlotsQuery.all(venteId)).items();

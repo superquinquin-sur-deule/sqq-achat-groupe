@@ -33,7 +33,10 @@ public class AuthResource {
     public DataResponse<UserInfoResponse> me() {
         var name = getClaim("name", securityIdentity.getPrincipal().getName());
         var email = getClaim("email", "");
-        return new DataResponse<>(new UserInfoResponse(name, email));
+        var roles = securityIdentity.getRoles().stream()
+                .filter(role -> role.startsWith("SQQ_"))
+                .toList();
+        return new DataResponse<>(new UserInfoResponse(name, email, roles));
     }
 
     private String getClaim(String claimName, String defaultValue) {

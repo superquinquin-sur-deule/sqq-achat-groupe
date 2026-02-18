@@ -12,6 +12,7 @@ import fr.sqq.achatgroupe.infrastructure.in.rest.common.dto.DataResponse;
 import fr.sqq.achatgroupe.infrastructure.in.rest.common.dto.TimeSlotResponse;
 import fr.sqq.achatgroupe.infrastructure.in.rest.common.dto.UpdateTimeSlotRequest;
 import fr.sqq.mediator.Mediator;
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
@@ -23,6 +24,7 @@ import java.util.List;
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 @Tag(name = "admin-timeslots")
+@RolesAllowed("SQQ_ADMIN")
 public class AdminTimeSlotResource {
 
     private final Mediator mediator;

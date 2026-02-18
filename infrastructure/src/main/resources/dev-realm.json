@@ -1,0 +1,71 @@
+{
+  "realm": "quarkus",
+  "enabled": true,
+  "roles": {
+    "realm": [
+      {
+        "name": "SQQ_ADMIN",
+        "description": "Full admin access to all features"
+      },
+      {
+        "name": "SQQ_DISTRIB",
+        "description": "Access to distribution and preparation pages only"
+      }
+    ]
+  },
+  "clients": [
+    {
+      "clientId": "quarkus-app",
+      "enabled": true,
+      "publicClient": false,
+      "secret": "secret",
+      "redirectUris": [
+        "*"
+      ],
+      "webOrigins": [
+        "*"
+      ],
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": true,
+      "protocol": "openid-connect"
+    }
+  ],
+  "users": [
+    {
+      "username": "admin",
+      "enabled": true,
+      "email": "admin@sqq.fr",
+      "firstName": "Admin",
+      "lastName": "SuperQuinquin",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "admin",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "default-roles-quarkus",
+        "SQQ_ADMIN"
+      ]
+    },
+    {
+      "username": "distrib",
+      "enabled": true,
+      "email": "distrib@sqq.fr",
+      "firstName": "Distributeur",
+      "lastName": "SuperQuinquin",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "distrib",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "default-roles-quarkus",
+        "SQQ_DISTRIB"
+      ]
+    }
+  ]
+}

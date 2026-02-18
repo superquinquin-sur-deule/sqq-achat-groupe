@@ -1,4 +1,6 @@
 package fr.sqq.achatgroupe.infrastructure.in.rest.common.dto;
 
-public record UserInfoResponse(String name, String email) {
+import java.util.List;
+
+public record UserInfoResponse(String name, String email, List<String> roles) {
 }

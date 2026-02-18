@@ -18,6 +18,7 @@ import fr.sqq.achatgroupe.infrastructure.in.rest.common.dto.CursorPageResponse;
 import fr.sqq.achatgroupe.infrastructure.in.rest.common.dto.DataResponse;
 import fr.sqq.achatgroupe.infrastructure.in.rest.common.dto.UpdateAdminVenteRequest;
 import fr.sqq.mediator.Mediator;
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
@@ -31,6 +32,7 @@ import java.util.List;
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 @Tag(name = "admin-ventes")
+@RolesAllowed({"SQQ_ADMIN", "SQQ_DISTRIB"})
 public class AdminVenteResource {
 
     private final Mediator mediator;
@@ -54,6 +56,7 @@ public class AdminVenteResource {
     }
 
     @POST
+    @RolesAllowed("SQQ_ADMIN")
     public RestResponse<DataResponse<AdminVenteResponse>> createVente(@Valid CreateAdminVenteRequest request) {
         var cmd = new CreateAdminVenteCommand(
                 request.name(), request.description(), request.startDate(), request.endDate());
@@ -63,6 +66,7 @@ public class AdminVenteResource {
 
     @PUT
     @Path("/{id}")
+    @RolesAllowed("SQQ_ADMIN")
     public DataResponse<AdminVenteResponse> updateVente(@PathParam("id") Long id, @Valid UpdateAdminVenteRequest request) {
         var cmd = new UpdateVenteCommand(
                 new VenteId(id), request.name(), request.description(), request.startDate(), request.endDate());
@@ -73,12 +77,14 @@ public class AdminVenteResource {
     @DELETE
     @Path("/{id}")
     @APIResponse(responseCode = "204", description = "No content")
+    @RolesAllowed("SQQ_ADMIN")
     public void deleteVente(@PathParam("id") Long id) {
         mediator.send(new DeleteVenteCommand(new VenteId(id)));
     }
 
     @PUT
     @Path("/{id}/activate")
+    @RolesAllowed("SQQ_ADMIN")
     public DataResponse<AdminVenteResponse> activateVente(@PathParam("id") Long id) {
         Vente vente = mediator.send(new ActivateVenteCommand(new VenteId(id)));
         return new DataResponse<>(toResponseWithHasOrders(vente));
@@ -86,6 +92,7 @@ public class AdminVenteResource {
 
     @PUT
     @Path("/{id}/deactivate")
+    @RolesAllowed("SQQ_ADMIN")
     public DataResponse<AdminVenteResponse> deactivateVente(@PathParam("id") Long id) {
         Vente vente = mediator.send(new DeactivateVenteCommand(new VenteId(id)));
         return new DataResponse<>(toResponseWithHasOrders(vente));

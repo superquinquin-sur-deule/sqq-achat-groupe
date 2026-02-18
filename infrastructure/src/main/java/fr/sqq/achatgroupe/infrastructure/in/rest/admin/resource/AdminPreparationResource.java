@@ -7,6 +7,7 @@ import fr.sqq.achatgroupe.infrastructure.in.rest.admin.mapper.AdminPreparationRe
 import fr.sqq.achatgroupe.infrastructure.in.rest.common.dto.DataResponse;
 import fr.sqq.achatgroupe.infrastructure.in.rest.common.dto.PreparationOrderResponse;
 import fr.sqq.mediator.Mediator;
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
@@ -21,6 +22,7 @@ import java.util.List;
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 @Tag(name = "admin-preparation")
+@RolesAllowed({"SQQ_ADMIN", "SQQ_DISTRIB"})
 public class AdminPreparationResource {
 
     private final Mediator mediator;

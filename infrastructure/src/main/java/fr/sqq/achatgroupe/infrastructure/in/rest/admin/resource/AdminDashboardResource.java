@@ -8,6 +8,7 @@ import fr.sqq.achatgroupe.infrastructure.in.rest.admin.mapper.AdminDashboardRest
 import fr.sqq.achatgroupe.infrastructure.in.rest.common.dto.DashboardStatsResponse;
 import fr.sqq.achatgroupe.infrastructure.in.rest.common.dto.DataResponse;
 import fr.sqq.mediator.Mediator;
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
@@ -18,6 +19,7 @@ import java.util.List;
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 @Tag(name = "admin-dashboard")
+@RolesAllowed("SQQ_ADMIN")
 public class AdminDashboardResource {
 
     private final Mediator mediator;

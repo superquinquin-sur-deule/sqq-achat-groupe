@@ -20,6 +20,7 @@ import fr.sqq.achatgroupe.infrastructure.in.rest.common.dto.ImportProductsRespon
 import fr.sqq.achatgroupe.infrastructure.in.rest.common.dto.ProblemDetailResponse;
 import fr.sqq.achatgroupe.infrastructure.in.rest.common.dto.UpdateProductRequest;
 import fr.sqq.mediator.Mediator;
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
@@ -38,6 +39,7 @@ import java.util.List;
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 @Tag(name = "admin-products")
+@RolesAllowed("SQQ_ADMIN")
 public class AdminProductResource {
 
     private final Mediator mediator;

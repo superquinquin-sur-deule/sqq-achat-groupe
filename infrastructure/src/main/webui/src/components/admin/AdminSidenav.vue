@@ -11,36 +11,43 @@ defineProps<{ modelValue: boolean }>()
 const emit = defineEmits<{ 'update:modelValue': [value: boolean] }>()
 
 const route = useRoute()
-const { user } = useAuth()
+const { user, isAdmin } = useAuth()
 const venteStore = useVenteStore()
 const { selectedVenteId } = storeToRefs(venteStore)
 const { data: pageData } = useAdminVentesQuery()
 const ventes = computed(() => pageData.value?.data ?? [])
 
-const adminLinks = [
-  { to: '/admin/dashboard', label: 'Dashboard', testid: 'sidenav-dashboard', icon: 'dashboard' },
-  { to: '/admin/products', label: 'Produits', testid: 'sidenav-products', icon: 'products' },
-  { to: '/admin/timeslots', label: 'Créneaux', testid: 'sidenav-timeslots', icon: 'timeslots' },
-  { to: '/admin/orders', label: 'Commandes', testid: 'sidenav-orders', icon: 'orders' },
+const allAdminLinks = [
+  { to: '/admin/dashboard', label: 'Dashboard', testid: 'sidenav-dashboard', icon: 'dashboard', adminOnly: true },
+  { to: '/admin/products', label: 'Produits', testid: 'sidenav-products', icon: 'products', adminOnly: true },
+  { to: '/admin/timeslots', label: 'Créneaux', testid: 'sidenav-timeslots', icon: 'timeslots', adminOnly: true },
+  { to: '/admin/orders', label: 'Commandes', testid: 'sidenav-orders', icon: 'orders', adminOnly: true },
   {
     to: '/admin/supplier-order',
     label: 'Bon fournisseur',
     testid: 'sidenav-supplier',
     icon: 'supplier',
+    adminOnly: true,
   },
   {
     to: '/admin/preparation',
     label: 'Préparation',
     testid: 'sidenav-preparation',
     icon: 'preparation',
+    adminOnly: false,
   },
   {
     to: '/admin/distribution',
     label: 'Distribution',
     testid: 'sidenav-distribution',
     icon: 'distribution',
+    adminOnly: false,
   },
 ]
+
+const adminLinks = computed(() =>
+  allAdminLinks.filter((link) => !link.adminOnly || isAdmin.value),
+)
 
 const ventesLinks = [
   { to: '/admin/ventes', label: 'Ventes', testid: 'sidenav-ventes', icon: 'ventes' },
@@ -268,6 +275,7 @@ function onVenteChange(event: Event) {
           </RouterLink>
         </li>
       </ul>
+      <template v-if="isAdmin">
       <p class="mb-2 px-3 text-xs font-semibold uppercase tracking-wider text-white/40">
         Gestion des ventes
       </p>
@@ -297,6 +305,7 @@ function onVenteChange(event: Event) {
           </RouterLink>
         </li>
       </ul>
+      </template>
     </nav>
 
     <!-- User info -->
