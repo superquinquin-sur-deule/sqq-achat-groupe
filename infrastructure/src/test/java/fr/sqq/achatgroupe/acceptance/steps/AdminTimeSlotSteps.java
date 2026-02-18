@@ -187,30 +187,21 @@ public class AdminTimeSlotSteps {
         // This is done when navigating to the page
     }
 
-    @Et("je clique sur \"Supprimer\" du créneau avec réservations")
-    public void jeCliqueSurSupprimerDuCreneauAvecReservations() {
-        // Find the row that contains the injected timeslot with 3 reservations (3 / 10)
+    @Alors("le bouton \"Supprimer\" du créneau avec réservations est désactivé")
+    public void leBoutonSupprimerDuCreneauAvecReservationsEstDesactive() {
         Locator rows = page().locator("[data-testid='timeslot-row']");
         boolean found = false;
         for (int i = 0; i < rows.count(); i++) {
             Locator row = rows.nth(i);
             String text = row.textContent();
             if (text.contains("3 / 10")) {
-                row.locator("button", new Locator.LocatorOptions().setHasText("Supprimer")).click();
+                Locator deleteBtn = row.locator("button", new Locator.LocatorOptions().setHasText("Supprimer"));
+                assertTrue(deleteBtn.isDisabled(), "Le bouton Supprimer doit être désactivé pour un créneau avec réservations");
                 found = true;
                 break;
             }
         }
-        assertTrue(found, "Le créneau avec réservations (3 / 10) doit être trouvé dans la table. Lignes: " + rows.count());
-    }
-
-    @Alors("je vois un avertissement de réservations sur le créneau")
-    public void jeVoisUnAvertissementDeReservations() {
-        Locator warning = page().getByText("La suppression est irréversible");
-        warning.waitFor(new Locator.WaitForOptions()
-                .setState(WaitForSelectorState.VISIBLE)
-                .setTimeout(5000));
-        assertTrue(warning.isVisible(), "L'avertissement de réservations doit être visible");
+        assertTrue(found, "Le créneau avec réservations (3 / 10) doit être trouvé dans la table");
     }
 
     @Et("je soumets le formulaire créneau sans remplir les champs")

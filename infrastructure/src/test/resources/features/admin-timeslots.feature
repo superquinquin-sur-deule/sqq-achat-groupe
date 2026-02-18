@@ -34,11 +34,10 @@ Fonctionnalité: Gestion des créneaux de retrait (admin)
     Alors je vois un toast de succès "Créneau supprimé"
     Et la table des créneaux contient un créneau de moins
 
-  Scénario: Tentative de suppression d'un créneau avec réservations
+  Scénario: Le bouton supprimer est désactivé pour un créneau avec réservations
     Étant donné qu'un créneau a des réservations
     Quand je navigue vers la page admin créneaux
-    Et je clique sur "Supprimer" du créneau avec réservations
-    Alors je vois un avertissement de réservations sur le créneau
+    Alors le bouton "Supprimer" du créneau avec réservations est désactivé
 
   Scénario: Validation des données invalides côté client
     Quand je navigue vers la page admin créneaux
