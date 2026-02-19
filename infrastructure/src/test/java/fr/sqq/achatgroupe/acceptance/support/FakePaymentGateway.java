@@ -38,6 +38,11 @@ public class FakePaymentGateway implements PaymentGateway {
     }
 
     @Override
+    public RefundResult createRefund(String stripePaymentIntentId, long amountInCents) {
+        return new RefundResult("re_test_fake_" + System.nanoTime(), true);
+    }
+
+    @Override
     public PaymentWebhookResult parseWebhookEvent(String payload, String signature) {
         UUID orderId = UUID.fromString(payload);
         String paymentIntentId = "pi_test_fake_" + orderId;

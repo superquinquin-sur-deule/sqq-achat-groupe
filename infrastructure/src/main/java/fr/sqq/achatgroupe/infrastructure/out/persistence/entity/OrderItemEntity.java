@@ -34,6 +34,9 @@ public class OrderItemEntity {
     @Column(name = "unit_price", nullable = false, precision = 10, scale = 2)
     private BigDecimal unitPrice;
 
+    @Column(name = "cancelled_quantity", nullable = false)
+    private int cancelledQuantity;
+
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
@@ -48,4 +51,7 @@ public class OrderItemEntity {
 
     public BigDecimal getUnitPrice() { return unitPrice; }
     public void setUnitPrice(BigDecimal unitPrice) { this.unitPrice = unitPrice; }
+
+    public int getCancelledQuantity() { return cancelledQuantity; }
+    public void setCancelledQuantity(int cancelledQuantity) { this.cancelledQuantity = cancelledQuantity; }
 }

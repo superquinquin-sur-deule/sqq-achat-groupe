@@ -32,7 +32,10 @@ public interface OrderPersistenceMapper {
         );
     }
 
-    OrderItem toDomain(OrderItemEntity entity);
+    default OrderItem toDomain(OrderItemEntity entity) {
+        return new OrderItem(entity.getId(), entity.getProductId(), entity.getQuantity(),
+                entity.getUnitPrice(), entity.getCancelledQuantity());
+    }
 
     default OrderEntity toEntity(Order domain) {
         var entity = new OrderEntity();
@@ -63,6 +66,7 @@ public interface OrderPersistenceMapper {
         entity.setProductId(domain.productId());
         entity.setQuantity(domain.quantity());
         entity.setUnitPrice(domain.unitPrice());
+        entity.setCancelledQuantity(domain.cancelledQuantity());
         return entity;
     }
 }

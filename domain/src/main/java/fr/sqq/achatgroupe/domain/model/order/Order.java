@@ -70,6 +70,24 @@ public class Order {
         this.status = OrderStatus.CANCELLED;
     }
 
+    public BigDecimal effectiveTotalAmount() {
+        return items.stream()
+                .map(OrderItem::effectiveSubtotal)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    public BigDecimal refundAmount() {
+        return totalAmount.subtract(effectiveTotalAmount());
+    }
+
+    public boolean hasAdjustments() {
+        return items.stream().anyMatch(item -> item.cancelledQuantity() > 0);
+    }
+
+    public boolean isFullyCancelled() {
+        return items.stream().allMatch(OrderItem::isFullyCancelled);
+    }
+
     public UUID id() { return id; }
     public Long venteId() { return venteId; }
     public OrderNumber orderNumber() { return orderNumber; }

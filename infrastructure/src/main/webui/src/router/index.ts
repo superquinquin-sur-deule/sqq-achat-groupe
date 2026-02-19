@@ -88,6 +88,11 @@ const router = createRouter({
           name: 'admin-distribution',
           component: () => import('@/views/admin/AdminDistributionView.vue'),
         },
+        {
+          path: 'reception',
+          name: 'admin-reception',
+          component: () => import('@/views/admin/AdminReceptionView.vue'),
+        },
       ],
     },
     {
