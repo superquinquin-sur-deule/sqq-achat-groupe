@@ -215,7 +215,11 @@ function formatTime(startTime: string, endTime: string): string {
                   size="md"
                   :disabled="slot.reserved > 0"
                   :aria-label="'Supprimer le créneau de ' + slot.startTime + ' à ' + slot.endTime"
-                  :title="slot.reserved > 0 ? 'Impossible de supprimer un créneau avec des réservations' : undefined"
+                  :title="
+                    slot.reserved > 0
+                      ? 'Impossible de supprimer un créneau avec des réservations'
+                      : undefined
+                  "
                   @click="startDelete(slot.id)"
                 >
                   Supprimer

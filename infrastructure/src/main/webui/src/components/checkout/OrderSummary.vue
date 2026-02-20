@@ -73,7 +73,8 @@ function formatDate(dateStr: string): string {
 
     <Card>
       <h3 class="mb-3 text-base font-semibold text-dark">Votre commande</h3>
-      <ul class="flex flex-col gap-2">
+      <p v-if="items.length === 0" class="text-center text-sm text-brown">Votre panier est vide</p>
+      <ul v-else class="flex flex-col gap-2">
         <li
           v-for="item in items"
           :key="item.productId"

@@ -242,6 +242,11 @@ watch(
       <div class="mb-8" data-testid="reception-suppliers">
         <h2 class="mb-4 text-lg font-semibold text-dark">Réceptions par fournisseur</h2>
         <div class="space-y-3">
+          <EmptyState
+            v-if="receptionStatus.suppliers.length === 0"
+            message="Aucun fournisseur pour cette vente"
+            data-testid="reception-no-suppliers"
+          />
           <div
             v-for="supplier in receptionStatus.suppliers"
             :key="supplier.supplier"

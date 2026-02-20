@@ -100,6 +100,11 @@ function formatSlot(slot: { date: string; startTime: string; endTime: string } |
               <td class="px-6 py-3 text-dark">{{ formatPrice(item.unitPrice) }}</td>
               <td class="px-6 py-3 text-dark">{{ formatPrice(item.subtotal) }}</td>
             </tr>
+            <tr v-if="order.items.length === 0">
+              <td colspan="4" class="px-6 py-6 text-center text-brown">
+                Aucun produit dans cette commande
+              </td>
+            </tr>
           </tbody>
         </table>
       </div>

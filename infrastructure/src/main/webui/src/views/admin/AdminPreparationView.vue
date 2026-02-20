@@ -54,7 +54,9 @@ const todayFormatted = computed(() => {
   return now.toLocaleDateString('fr-FR', { year: 'numeric', month: '2-digit', day: '2-digit' })
 })
 
-function groupItemsBySupplier(items: { productName: string; supplier: string; quantity: number }[]) {
+function groupItemsBySupplier(
+  items: { productName: string; supplier: string; quantity: number }[],
+) {
   const groups: Record<string, typeof items> = {}
   for (const item of items) {
     const supplier = item.supplier
@@ -182,10 +184,7 @@ function handlePrint() {
                     class="bg-gray-100 print:bg-gray-200"
                     data-testid="preparation-supplier-header"
                   >
-                    <td
-                      colspan="2"
-                      class="py-1 font-bold text-dark"
-                    >
+                    <td colspan="2" class="py-1 font-bold text-dark">
                       {{ supplier }}
                     </td>
                   </tr>

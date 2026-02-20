@@ -92,7 +92,10 @@ function formatDate(dateStr: string): string {
       <!-- Order items -->
       <Card class="w-full">
         <h2 class="mb-3 text-base font-semibold text-dark">Votre commande</h2>
-        <ul class="flex flex-col gap-2">
+        <p v-if="order.items.length === 0" class="text-center text-sm text-brown">
+          Aucun produit dans cette commande
+        </p>
+        <ul v-else class="flex flex-col gap-2">
           <li
             v-for="(item, index) in order.items"
             :key="index"

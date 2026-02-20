@@ -28,6 +28,11 @@ const emit = defineEmits<{
       />
     </div>
 
+    <!-- Empty state -->
+    <p v-else-if="products.length === 0" class="py-12 text-center text-brown">
+      Aucun produit disponible pour le moment.
+    </p>
+
     <!-- Product cards -->
     <div
       v-else
