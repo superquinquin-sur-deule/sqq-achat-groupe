@@ -118,6 +118,26 @@ public class CatalogueFrontendSteps {
         }
     }
 
+    @Et("chaque carte affiche la catégorie")
+    public void chaqueCarteAfficheLaCategorie() {
+        Locator cards = PlaywrightHooks.page().locator("[data-testid='product-card']");
+        for (int i = 0; i < cards.count(); i++) {
+            Locator category = cards.nth(i).locator("[data-testid='product-category']");
+            assertTrue(category.isVisible(), "La catégorie doit être visible (carte " + i + ")");
+            assertFalse(category.textContent().isBlank(), "La catégorie ne doit pas être vide");
+        }
+    }
+
+    @Et("chaque carte affiche la marque")
+    public void chaqueCarteAfficheLaMarque() {
+        Locator cards = PlaywrightHooks.page().locator("[data-testid='product-card']");
+        for (int i = 0; i < cards.count(); i++) {
+            Locator brand = cards.nth(i).locator("[data-testid='product-brand']");
+            assertTrue(brand.isVisible(), "La marque doit être visible (carte " + i + ")");
+            assertFalse(brand.textContent().isBlank(), "La marque ne doit pas être vide");
+        }
+    }
+
     @Et("chaque carte affiche un bouton Ajouter")
     public void chaqueCarteAfficheUnBoutonAjouter() {
         Locator cards = PlaywrightHooks.page().locator("[data-testid='product-card']:not([data-exhausted='true'])");

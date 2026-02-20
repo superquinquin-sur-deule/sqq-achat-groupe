@@ -28,35 +28,35 @@ SELECT setval('ventes_id_seq', 3);
 -- PRODUCTS
 -- ============================================================================
 -- Products for Vente 1 (Printemps Bio 2024)
-INSERT INTO products (id, vente_id, name, description, price, supplier, stock, active, version) VALUES
-(1, 1, 'Panier de legumes bio', 'Assortiment de legumes de saison: carottes, poireaux, choux, navets (environ 5kg)', 25.00, 'Ferme du Soleil', 50, true, 0),
-(2, 1, 'Pommes Golden bio', 'Pommes Golden issues de vergers locaux - caisse de 3kg', 12.50, 'Vergers de la Vallee', 30, true, 0),
-(3, 1, 'Oeufs fermiers bio', 'Boite de 12 oeufs de poules elevees en plein air', 6.50, 'Ferme du Soleil', 100, true, 0),
-(4, 1, 'Fromage de chevre frais', 'Fromage de chevre artisanal - 200g', 8.90, 'Chevrerie des Monts', 40, true, 0),
-(5, 1, 'Miel de fleurs bio', 'Pot de miel toutes fleurs - 500g', 14.00, 'Rucher du Vallon', 25, true, 0),
-(6, 1, 'Pain de campagne bio', 'Pain au levain naturel - 800g', 5.50, 'Boulangerie Artisanale', 60, true, 0),
-(7, 1, 'Jus de pomme artisanal', 'Bouteille de jus de pomme pur - 1L', 4.50, 'Vergers de la Vallee', 80, true, 0),
-(8, 1, 'Yaourts nature bio', 'Lot de 4 yaourts nature au lait entier', 4.20, 'Laiterie du Terroir', 45, true, 0);
+INSERT INTO products (id, vente_id, name, description, price, supplier, stock, active, version, reference, category, brand) VALUES
+(1, 1, 'Panier de legumes bio', 'Assortiment de legumes de saison: carottes, poireaux, choux, navets (environ 5kg)', 25.00, 'Ferme du Soleil', 50, true, 0, 'LEG-001', 'Legumes', 'Ferme du Soleil'),
+(2, 1, 'Pommes Golden bio', 'Pommes Golden issues de vergers locaux - caisse de 3kg', 12.50, 'Vergers de la Vallee', 30, true, 0, 'FRU-001', 'Fruits', 'Vergers de la Vallee'),
+(3, 1, 'Oeufs fermiers bio', 'Boite de 12 oeufs de poules elevees en plein air', 6.50, 'Ferme du Soleil', 100, true, 0, 'OEU-001', 'Oeufs et produits laitiers', 'Ferme du Soleil'),
+(4, 1, 'Fromage de chevre frais', 'Fromage de chevre artisanal - 200g', 8.90, 'Chevrerie des Monts', 40, true, 0, 'FRO-001', 'Oeufs et produits laitiers', 'Chevrerie des Monts'),
+(5, 1, 'Miel de fleurs bio', 'Pot de miel toutes fleurs - 500g', 14.00, 'Rucher du Vallon', 25, true, 0, 'MIE-001', 'Epicerie', 'Rucher du Vallon'),
+(6, 1, 'Pain de campagne bio', 'Pain au levain naturel - 800g', 5.50, 'Boulangerie Artisanale', 60, true, 0, 'PAI-001', 'Boulangerie', 'Boulangerie Artisanale'),
+(7, 1, 'Jus de pomme artisanal', 'Bouteille de jus de pomme pur - 1L', 4.50, 'Vergers de la Vallee', 80, true, 0, 'JUS-001', 'Boissons', 'Vergers de la Vallee'),
+(8, 1, 'Yaourts nature bio', 'Lot de 4 yaourts nature au lait entier', 4.20, 'Laiterie du Terroir', 45, true, 0, 'YAO-001', 'Oeufs et produits laitiers', 'Laiterie du Terroir');
 
 -- Products for Vente 2 (Panier de Noel 2023) - Closed sale
-INSERT INTO products (id, vente_id, name, description, price, supplier, stock, active, version) VALUES
-(9, 2, 'Foie gras de canard', 'Bloc de foie gras mi-cuit - 200g', 32.00, 'Ferme des Palmipedes', 0, true, 0),
-(10, 2, 'Champagne brut', 'Bouteille de champagne brut - 75cl', 28.50, 'Cave du Terroir', 0, true, 0),
-(11, 2, 'Buche glacee', 'Buche glacee artisanale 6 parts - chocolat/vanille', 24.00, 'Patisserie Gourmande', 0, true, 0),
-(12, 2, 'Coffret chocolats', 'Assortiment de chocolats fins - 250g', 18.00, 'Chocolaterie Artisanale', 0, true, 0),
-(13, 2, 'Saumon fume', 'Saumon fume artisanal - 200g', 15.00, 'Fumoir du Littoral', 0, true, 0);
+INSERT INTO products (id, vente_id, name, description, price, supplier, stock, active, version, reference, category, brand) VALUES
+(9, 2, 'Foie gras de canard', 'Bloc de foie gras mi-cuit - 200g', 32.00, 'Ferme des Palmipedes', 0, true, 0, 'FOI-001', 'Traiteur', 'Ferme des Palmipedes'),
+(10, 2, 'Champagne brut', 'Bouteille de champagne brut - 75cl', 28.50, 'Cave du Terroir', 0, true, 0, 'CHA-001', 'Boissons', 'Cave du Terroir'),
+(11, 2, 'Buche glacee', 'Buche glacee artisanale 6 parts - chocolat/vanille', 24.00, 'Patisserie Gourmande', 0, true, 0, 'BUC-001', 'Desserts', 'Patisserie Gourmande'),
+(12, 2, 'Coffret chocolats', 'Assortiment de chocolats fins - 250g', 18.00, 'Chocolaterie Artisanale', 0, true, 0, 'CHO-001', 'Desserts', 'Chocolaterie Artisanale'),
+(13, 2, 'Saumon fume', 'Saumon fume artisanal - 200g', 15.00, 'Fumoir du Littoral', 0, true, 0, 'SAU-001', 'Traiteur', 'Fumoir du Littoral');
 
 -- Products for Vente 3 (Ete Gourmand 2024)
-INSERT INTO products (id, vente_id, name, description, price, supplier, stock, active, version) VALUES
-(14, 3, 'Tomates anciennes bio', 'Assortiment de tomates anciennes - caisse 2kg', 9.80, 'Ferme du Soleil', 40, true, 0),
-(15, 3, 'Courgettes bio', 'Courgettes de plein champ - lot de 1kg', 4.50, 'Ferme du Soleil', 60, true, 0),
-(16, 3, 'Melon charentais', 'Melon charentais sucre - piece', 5.50, 'Maraicher Local', 35, true, 0),
-(17, 3, 'Saucisses artisanales', 'Lot de 6 saucisses pur porc - 600g', 12.00, 'Boucherie du Village', 30, true, 0),
-(18, 3, 'Cotes de porc', 'Lot de 4 cotes de porc fermier', 16.50, 'Boucherie du Village', 25, true, 0),
-(19, 3, 'Peches bio', 'Barquette de peches jaunes - 1kg', 7.90, 'Vergers de la Vallee', 45, true, 0),
-(20, 3, 'Glaces artisanales', 'Pot de glace artisanale 500ml - parfum au choix', 8.50, 'Glacier du Terroir', 50, true, 0),
-(21, 3, 'Vin rose local', 'Bouteille de rose AOC - 75cl', 9.00, 'Cave du Terroir', 40, true, 0),
-(22, 3, 'Salade mesclun', 'Sachet de mesclun frais - 200g', 3.50, 'Ferme du Soleil', 70, false, 0);
+INSERT INTO products (id, vente_id, name, description, price, supplier, stock, active, version, reference, category, brand) VALUES
+(14, 3, 'Tomates anciennes bio', 'Assortiment de tomates anciennes - caisse 2kg', 9.80, 'Ferme du Soleil', 40, true, 0, 'TOM-001', 'Legumes', 'Ferme du Soleil'),
+(15, 3, 'Courgettes bio', 'Courgettes de plein champ - lot de 1kg', 4.50, 'Ferme du Soleil', 60, true, 0, 'COU-001', 'Legumes', 'Ferme du Soleil'),
+(16, 3, 'Melon charentais', 'Melon charentais sucre - piece', 5.50, 'Maraicher Local', 35, true, 0, 'MEL-001', 'Fruits', 'Maraicher Local'),
+(17, 3, 'Saucisses artisanales', 'Lot de 6 saucisses pur porc - 600g', 12.00, 'Boucherie du Village', 30, true, 0, 'SAU-002', 'Viandes', 'Boucherie du Village'),
+(18, 3, 'Cotes de porc', 'Lot de 4 cotes de porc fermier', 16.50, 'Boucherie du Village', 25, true, 0, 'COT-001', 'Viandes', 'Boucherie du Village'),
+(19, 3, 'Peches bio', 'Barquette de peches jaunes - 1kg', 7.90, 'Vergers de la Vallee', 45, true, 0, 'PEC-001', 'Fruits', 'Vergers de la Vallee'),
+(20, 3, 'Glaces artisanales', 'Pot de glace artisanale 500ml - parfum au choix', 8.50, 'Glacier du Terroir', 50, true, 0, 'GLA-001', 'Desserts', 'Glacier du Terroir'),
+(21, 3, 'Vin rose local', 'Bouteille de rose AOC - 75cl', 9.00, 'Cave du Terroir', 40, true, 0, 'VIN-001', 'Boissons', 'Cave du Terroir'),
+(22, 3, 'Salade mesclun', 'Sachet de mesclun frais - 200g', 3.50, 'Ferme du Soleil', 70, false, 0, 'SAL-001', 'Legumes', 'Ferme du Soleil');
 
 SELECT setval('products_id_seq', 22);
 

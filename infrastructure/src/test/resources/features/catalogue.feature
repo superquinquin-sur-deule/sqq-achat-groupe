@@ -17,6 +17,8 @@ Fonctionnalité: Catalogue produits frontend
     Et chaque carte affiche le fournisseur
     Et chaque carte affiche la description du produit
     Et chaque carte affiche le prix
+    Et chaque carte affiche la catégorie
+    Et chaque carte affiche la marque
     Et chaque carte affiche un bouton Ajouter
 
   Scénario: Produit épuisé affiché comme indisponible

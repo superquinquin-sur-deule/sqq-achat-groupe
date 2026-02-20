@@ -18,5 +18,8 @@ public interface ProductPersistenceMapper {
     @Mapping(target = "supplier", expression = "java(domain.supplier())")
     @Mapping(target = "stock", expression = "java(domain.stock())")
     @Mapping(target = "active", expression = "java(domain.active())")
+    @Mapping(target = "reference", expression = "java(domain.reference())")
+    @Mapping(target = "category", expression = "java(domain.category())")
+    @Mapping(target = "brand", expression = "java(domain.brand())")
     ProductEntity toEntity(Product domain);
 }

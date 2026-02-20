@@ -72,6 +72,18 @@ function onQuantityInput(event: Event) {
   >
     <Card>
       <h3 class="text-xl font-semibold text-dark">{{ product.name }}</h3>
+      <div class="mt-1 flex flex-wrap gap-2">
+        <span
+          data-testid="product-category"
+          class="inline-block rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary"
+          >{{ product.category }}</span
+        >
+        <span
+          data-testid="product-brand"
+          class="inline-block rounded-full bg-brown/10 px-2 py-0.5 text-xs font-medium text-brown"
+          >{{ product.brand }}</span
+        >
+      </div>
       <p data-testid="product-supplier" class="mt-1 text-sm text-brown">{{ product.supplier }}</p>
       <p data-testid="product-description" class="mt-2 text-base text-dark">
         {{ product.description }}

@@ -14,7 +14,7 @@ Fonctionnalité: Gestion des produits (CRUD admin)
   Scénario: Créer un nouveau produit
     Quand je navigue vers la page admin des produits
     Et je clique sur le bouton ajouter un produit
-    Et je remplis le formulaire produit avec le nom "Carottes bio" au prix de "2.50" du fournisseur "Ferme du Soleil" avec un stock de "30"
+    Et je remplis le formulaire produit avec le nom "Carottes bio" au prix de "2.50" du fournisseur "Ferme du Soleil" avec un stock de "30" la référence "CAR-002" la catégorie "Légumes" et la marque "Ferme du Soleil"
     Et je soumets le formulaire produit
     Alors je vois un toast de succès
     Et le produit "Carottes bio" apparaît dans le tableau

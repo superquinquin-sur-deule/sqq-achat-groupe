@@ -18,8 +18,8 @@ import java.util.Set;
 @ApplicationScoped
 public class CsvProductParser {
 
-    private static final Set<String> REQUIRED_COLUMNS = Set.of("nom", "prix", "fournisseur", "stock");
-    private static final Set<String> ALL_COLUMNS = Set.of("nom", "description", "prix", "fournisseur", "stock");
+    private static final Set<String> REQUIRED_COLUMNS = Set.of("nom", "prix", "fournisseur", "stock", "reference", "categorie", "marque");
+    private static final Set<String> ALL_COLUMNS = Set.of("nom", "description", "prix", "fournisseur", "stock", "reference", "categorie", "marque");
 
     public CsvParseResult parse(InputStream inputStream) {
         List<CsvProductRow> rows = new ArrayList<>();
@@ -36,13 +36,13 @@ public class CsvProductParser {
 
             if (columnIndex == null) {
                 return CsvParseResult.failure(
-                        "Le fichier doit être au format CSV avec les colonnes : nom, description, prix, fournisseur, stock");
+                        "Le fichier doit être au format CSV avec les colonnes : nom, description, prix, fournisseur, stock, reference, categorie, marque");
             }
 
             for (String missing : REQUIRED_COLUMNS) {
                 if (!columnIndex.containsKey(missing)) {
                     return CsvParseResult.failure(
-                            "Le fichier doit être au format CSV avec les colonnes : nom, description, prix, fournisseur, stock");
+                            "Le fichier doit être au format CSV avec les colonnes : nom, description, prix, fournisseur, stock, reference, categorie, marque");
                 }
             }
 
@@ -100,12 +100,24 @@ public class CsvProductParser {
         String priceStr = getColumn(values, columnIndex, "prix");
         String supplier = getColumn(values, columnIndex, "fournisseur");
         String stockStr = getColumn(values, columnIndex, "stock");
+        String reference = getColumn(values, columnIndex, "reference");
+        String category = getColumn(values, columnIndex, "categorie");
+        String brand = getColumn(values, columnIndex, "marque");
 
         if (name == null || name.isBlank()) {
             throw new CsvLineParseException("Le nom est requis");
         }
         if (supplier == null || supplier.isBlank()) {
             throw new CsvLineParseException("Le fournisseur est requis");
+        }
+        if (reference == null || reference.isBlank()) {
+            throw new CsvLineParseException("La référence est requise");
+        }
+        if (category == null || category.isBlank()) {
+            throw new CsvLineParseException("La catégorie est requise");
+        }
+        if (brand == null || brand.isBlank()) {
+            throw new CsvLineParseException("La marque est requise");
         }
 
         BigDecimal price;
@@ -130,7 +142,7 @@ public class CsvProductParser {
             throw new CsvLineParseException("Le stock doit être un nombre entier");
         }
 
-        return new CsvProductRow(name.strip(), description != null ? description.strip() : "", price, supplier.strip(), stock);
+        return new CsvProductRow(name.strip(), description != null ? description.strip() : "", price, supplier.strip(), stock, reference.strip(), category.strip(), brand.strip());
     }
 
     private String getColumn(String[] values, Map<String, Integer> columnIndex, String columnName) {

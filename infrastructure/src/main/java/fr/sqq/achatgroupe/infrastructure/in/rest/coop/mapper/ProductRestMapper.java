@@ -14,5 +14,7 @@ public interface ProductRestMapper {
     @Mapping(target = "price", expression = "java(product.price())")
     @Mapping(target = "supplier", expression = "java(product.supplier())")
     @Mapping(target = "stock", expression = "java(product.stock())")
+    @Mapping(target = "category", expression = "java(product.category())")
+    @Mapping(target = "brand", expression = "java(product.brand())")
     ProductResponse toResponse(Product product);
 }

@@ -27,7 +27,10 @@ public class CreateProductHandler implements CommandHandler<CreateProductCommand
                 command.price(),
                 command.supplier(),
                 command.stock(),
-                true
+                true,
+                command.reference(),
+                command.category(),
+                command.brand()
         );
         return productRepository.saveNew(product);
     }

@@ -137,12 +137,15 @@ public class AdminProductSteps {
                 .setTimeout(5000));
     }
 
-    @Et("je remplis le formulaire produit avec le nom {string} au prix de {string} du fournisseur {string} avec un stock de {string}")
-    public void jeRemplisLeFormulaireProduit(String name, String price, String supplier, String stock) {
+    @Et("je remplis le formulaire produit avec le nom {string} au prix de {string} du fournisseur {string} avec un stock de {string} la référence {string} la catégorie {string} et la marque {string}")
+    public void jeRemplisLeFormulaireProduit(String name, String price, String supplier, String stock, String reference, String category, String brand) {
         page().locator("#product-name").fill(name);
         page().locator("#product-price").fill(price);
         page().locator("#product-supplier").fill(supplier);
         page().locator("#product-stock").fill(stock);
+        page().locator("#product-reference").fill(reference);
+        page().locator("#product-category").fill(category);
+        page().locator("#product-brand").fill(brand);
     }
 
     @Et("je soumets le formulaire produit")

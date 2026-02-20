@@ -13,5 +13,8 @@ public record UpdateProductRequest(
         @NotNull(message = "Le prix est requis") @DecimalMin(value = "0.01", message = "Le prix doit être supérieur à 0") BigDecimal price,
         @NotBlank(message = "Le fournisseur est requis") String supplier,
         @Min(value = 0, message = "Le stock ne peut pas être négatif") int stock,
-        boolean active
+        boolean active,
+        @NotBlank(message = "La référence est requise") String reference,
+        @NotBlank(message = "La catégorie est requise") String category,
+        @NotBlank(message = "La marque est requise") String brand
 ) {}

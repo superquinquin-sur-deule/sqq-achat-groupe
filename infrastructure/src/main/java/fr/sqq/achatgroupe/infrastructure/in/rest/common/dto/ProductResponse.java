@@ -8,6 +8,8 @@ public record ProductResponse(
         String description,
         BigDecimal price,
         String supplier,
-        int stock
+        int stock,
+        String category,
+        String brand
 ) {
 }

@@ -14,8 +14,12 @@ public class Product {
     private final String supplier;
     private int stock;
     private final boolean active;
+    private final String reference;
+    private final String category;
+    private final String brand;
 
-    public Product(Long id, Long venteId, String name, String description, BigDecimal price, String supplier, int stock, boolean active) {
+    public Product(Long id, Long venteId, String name, String description, BigDecimal price, String supplier, int stock, boolean active,
+                   String reference, String category, String brand) {
         if (name == null || name.isBlank()) {
             throw new IllegalArgumentException("Product name must not be blank");
         }
@@ -28,6 +32,15 @@ public class Product {
         if (stock < 0) {
             throw new IllegalArgumentException("Product stock must not be negative");
         }
+        if (reference == null || reference.isBlank()) {
+            throw new IllegalArgumentException("Product reference must not be blank");
+        }
+        if (category == null || category.isBlank()) {
+            throw new IllegalArgumentException("Product category must not be blank");
+        }
+        if (brand == null || brand.isBlank()) {
+            throw new IllegalArgumentException("Product brand must not be blank");
+        }
         this.id = id;
         this.venteId = venteId;
         this.name = name;
@@ -36,6 +49,9 @@ public class Product {
         this.supplier = supplier;
         this.stock = stock;
         this.active = active;
+        this.reference = reference;
+        this.category = category;
+        this.brand = brand;
     }
 
     public void decrementStock(int quantity) {
@@ -83,5 +99,17 @@ public class Product {
 
     public boolean active() {
         return active;
+    }
+
+    public String reference() {
+        return reference;
+    }
+
+    public String category() {
+        return category;
+    }
+
+    public String brand() {
+        return brand;
     }
 }

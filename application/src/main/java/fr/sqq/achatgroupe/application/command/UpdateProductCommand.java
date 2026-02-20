@@ -14,6 +14,9 @@ public record UpdateProductCommand(
         BigDecimal price,
         String supplier,
         int stock,
-        boolean active
+        boolean active,
+        String reference,
+        String category,
+        String brand
 ) implements Command<Product> {
 }

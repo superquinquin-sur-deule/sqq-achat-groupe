@@ -15,7 +15,10 @@ public record ImportProductsCommand(
             String description,
             BigDecimal price,
             String supplier,
-            int stock
+            int stock,
+            String reference,
+            String category,
+            String brand
     ) {
     }
 }

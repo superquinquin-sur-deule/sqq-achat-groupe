@@ -22,6 +22,9 @@ const emit = defineEmits<{
       supplier: string
       stock: number
       active: boolean
+      reference: string
+      category: string
+      brand: string
     },
   ]
   cancel: []
@@ -45,6 +48,9 @@ const schema = toTypedSchema(
         (v) => !isNaN(Number(v)) && Number(v) >= 0 && Number.isInteger(Number(v)),
         'Le stock ne peut pas être négatif',
       ),
+    reference: z.string().min(1, 'Merci de saisir une référence'),
+    category: z.string().min(1, 'Merci de saisir une catégorie'),
+    brand: z.string().min(1, 'Merci de saisir une marque'),
   }),
 )
 
@@ -57,6 +63,9 @@ const { handleSubmit } = useForm({
         price: String(props.product.price),
         supplier: props.product.supplier,
         stock: String(props.product.stock),
+        reference: props.product.reference ?? '',
+        category: props.product.category ?? '',
+        brand: props.product.brand ?? '',
       }
     : {
         name: '',
@@ -64,6 +73,9 @@ const { handleSubmit } = useForm({
         price: '',
         supplier: '',
         stock: '0',
+        reference: '',
+        category: '',
+        brand: '',
       },
 })
 
@@ -80,6 +92,17 @@ const {
   handleBlur: supplierBlur,
 } = useField<string>('supplier')
 const { value: stock, errorMessage: stockError, handleBlur: stockBlur } = useField<string>('stock')
+const {
+  value: reference,
+  errorMessage: referenceError,
+  handleBlur: referenceBlur,
+} = useField<string>('reference')
+const {
+  value: category,
+  errorMessage: categoryError,
+  handleBlur: categoryBlur,
+} = useField<string>('category')
+const { value: brand, errorMessage: brandError, handleBlur: brandBlur } = useField<string>('brand')
 
 const firstInput = ref<InstanceType<typeof Input> | null>(null)
 
@@ -110,6 +133,9 @@ const onSubmit = handleSubmit((values) => {
     supplier: values.supplier,
     stock: Number(values.stock),
     active: props.product?.active ?? true,
+    reference: values.reference,
+    category: values.category,
+    brand: values.brand,
   })
 })
 </script>
@@ -120,16 +146,47 @@ const onSubmit = handleSubmit((values) => {
       {{ isEdit ? 'Modifier le produit' : 'Nouveau produit' }}
     </h2>
     <form class="flex flex-col gap-4" @submit.prevent="onSubmit">
-      <Input
-        id="product-name"
-        ref="firstInput"
-        v-model="name"
-        label="Nom"
-        type="text"
-        :error="nameError ?? ''"
-        required
-        @blur="nameBlur"
-      />
+      <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <Input
+          id="product-name"
+          ref="firstInput"
+          v-model="name"
+          label="Nom"
+          type="text"
+          :error="nameError ?? ''"
+          required
+          @blur="nameBlur"
+        />
+        <Input
+          id="product-reference"
+          v-model="reference"
+          label="Référence"
+          type="text"
+          :error="referenceError ?? ''"
+          required
+          @blur="referenceBlur"
+        />
+      </div>
+      <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <Input
+          id="product-category"
+          v-model="category"
+          label="Catégorie"
+          type="text"
+          :error="categoryError ?? ''"
+          required
+          @blur="categoryBlur"
+        />
+        <Input
+          id="product-brand"
+          v-model="brand"
+          label="Marque"
+          type="text"
+          :error="brandError ?? ''"
+          required
+          @blur="brandBlur"
+        />
+      </div>
       <div class="flex flex-col gap-1">
         <label for="product-description" class="text-sm font-medium text-dark">Description</label>
         <textarea

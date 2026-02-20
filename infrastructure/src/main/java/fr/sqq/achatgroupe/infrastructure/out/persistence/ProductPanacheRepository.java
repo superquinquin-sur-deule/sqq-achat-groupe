@@ -96,6 +96,9 @@ public class ProductPanacheRepository implements ProductRepository, PanacheRepos
         entity.setSupplier(product.supplier());
         entity.setStock(product.stock());
         entity.setActive(product.active());
+        entity.setReference(product.reference());
+        entity.setCategory(product.category());
+        entity.setBrand(product.brand());
     }
 
     @Override

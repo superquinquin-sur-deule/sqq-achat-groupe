@@ -1,5 +1,5 @@
-nom,description,prix,fournisseur,stock
-Farine de blé bio T65,Farine bio locale,4.50,Moulin de la Lys,50
-,Produit sans nom,3.00,Fournisseur X,10
-Miel de tilleul,Miel récolté en Flandre,pas_un_prix,Rucher des Monts,30
-Savon de Marseille,,3.20,La Savonnerie du Midi,abc
+nom,description,prix,fournisseur,stock,reference,categorie,marque
+Farine de blé bio T65,Farine bio locale,4.50,Moulin de la Lys,50,FAR-001,Epicerie,Moulin de la Lys
+,Produit sans nom,3.00,Fournisseur X,10,REF-002,Divers,Marque X
+Miel de tilleul,Miel récolté en Flandre,pas_un_prix,Rucher des Monts,30,MIE-002,Epicerie,Rucher des Monts
+Savon de Marseille,,3.20,La Savonnerie du Midi,abc,SAV-001,Hygiène,La Savonnerie du Midi

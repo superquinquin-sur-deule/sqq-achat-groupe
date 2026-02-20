@@ -121,6 +121,9 @@ async function onSubmit(data: {
   supplier: string
   stock: number
   active: boolean
+  reference: string
+  category: string
+  brand: string
 }) {
   if (!selectedVenteId.value) return
   submitting.value = true
@@ -133,6 +136,9 @@ async function onSubmit(data: {
         supplier: data.supplier,
         stock: data.stock,
         active: data.active,
+        reference: data.reference,
+        category: data.category,
+        brand: data.brand,
       }
       await updateMutation.mutateAsync({ id: editingProduct.value.id, data: updateData })
       toast.success('Produit mis à jour')
@@ -143,6 +149,9 @@ async function onSubmit(data: {
         price: data.price,
         supplier: data.supplier,
         stock: data.stock,
+        reference: data.reference,
+        category: data.category,
+        brand: data.brand,
       }
       await createMutation.mutateAsync(createData)
       toast.success('Produit créé')
@@ -184,6 +193,9 @@ async function toggleActive(product: AdminProductResponse) {
       supplier: product.supplier,
       stock: product.stock,
       active: !product.active,
+      reference: product.reference,
+      category: product.category,
+      brand: product.brand,
     }
     await updateMutation.mutateAsync({ id: product.id, data: updateData })
     toast.success(product.active ? 'Produit désactivé' : 'Produit activé')
@@ -250,7 +262,17 @@ function formatPrice(price: number): string {
 
     <AdminTable
       v-else-if="products && products.length > 0"
-      :columns="['Nom', 'Prix', 'Fournisseur', 'Stock', 'Statut', 'Actions']"
+      :columns="[
+        'Réf.',
+        'Nom',
+        'Catégorie',
+        'Marque',
+        'Prix',
+        'Fournisseur',
+        'Stock',
+        'Statut',
+        'Actions',
+      ]"
       caption="Liste des produits"
       dataTestid="product-table"
     >
@@ -260,7 +282,10 @@ function formatPrice(price: number): string {
         class="border-t border-gray-100 transition-colors hover:bg-surface"
         data-testid="product-row"
       >
+        <td class="px-4 py-3 text-dark">{{ product.reference }}</td>
         <td class="px-4 py-3 font-medium text-dark">{{ product.name }}</td>
+        <td class="px-4 py-3 text-dark">{{ product.category }}</td>
+        <td class="px-4 py-3 text-dark">{{ product.brand }}</td>
         <td class="px-4 py-3 text-dark">{{ formatPrice(product.price) }}</td>
         <td class="px-4 py-3 text-dark">{{ product.supplier }}</td>
         <td class="px-4 py-3 text-dark">{{ product.stock }}</td>

@@ -21,6 +21,9 @@ public interface AdminProductRestMapper {
     @Mapping(target = "supplier", expression = "java(product.supplier())")
     @Mapping(target = "stock", expression = "java(product.stock())")
     @Mapping(target = "active", expression = "java(product.active())")
+    @Mapping(target = "reference", expression = "java(product.reference())")
+    @Mapping(target = "category", expression = "java(product.category())")
+    @Mapping(target = "brand", expression = "java(product.brand())")
     AdminProductResponse toResponse(Product product);
 
     default CreateProductCommand toCreateCommand(CreateProductRequest request, Long venteId) {
@@ -30,7 +33,10 @@ public interface AdminProductRestMapper {
                 request.description(),
                 request.price(),
                 request.supplier(),
-                request.stock()
+                request.stock(),
+                request.reference(),
+                request.category(),
+                request.brand()
         );
     }
 
@@ -43,7 +49,10 @@ public interface AdminProductRestMapper {
                 request.price(),
                 request.supplier(),
                 request.stock(),
-                request.active()
+                request.active(),
+                request.reference(),
+                request.category(),
+                request.brand()
         );
     }
 }

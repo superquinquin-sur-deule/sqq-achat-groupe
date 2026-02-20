@@ -103,7 +103,7 @@ public class AdminProductResource {
                             "https://api.sqq.fr/errors/invalid-csv",
                             "Format de fichier invalide",
                             400,
-                            "Le fichier doit être au format CSV avec les colonnes : nom, description, prix, fournisseur, stock"))
+                            "Le fichier doit être au format CSV avec les colonnes : nom, description, prix, fournisseur, stock, reference, categorie, marque"))
                     .build();
         }
 

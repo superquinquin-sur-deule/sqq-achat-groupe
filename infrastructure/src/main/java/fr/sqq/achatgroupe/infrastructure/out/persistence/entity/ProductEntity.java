@@ -44,6 +44,15 @@ public class ProductEntity {
     @Column(name = "vente_id", nullable = false)
     private Long venteId;
 
+    @Column(name = "reference", nullable = false)
+    private String reference;
+
+    @Column(name = "category", nullable = false)
+    private String category;
+
+    @Column(name = "brand", nullable = false)
+    private String brand;
+
     public Long getId() {
         return id;
     }
@@ -102,4 +111,13 @@ public class ProductEntity {
 
     public Long getVenteId() { return venteId; }
     public void setVenteId(Long venteId) { this.venteId = venteId; }
+
+    public String getReference() { return reference; }
+    public void setReference(String reference) { this.reference = reference; }
+
+    public String getCategory() { return category; }
+    public void setCategory(String category) { this.category = category; }
+
+    public String getBrand() { return brand; }
+    public void setBrand(String brand) { this.brand = brand; }
 }
