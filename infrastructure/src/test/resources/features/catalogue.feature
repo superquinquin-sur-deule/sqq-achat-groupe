@@ -4,22 +4,25 @@ Fonctionnalité: Catalogue produits frontend
   En tant que coopérateur, je veux parcourir le catalogue des produits disponibles
   afin de découvrir les produits proposés pour l'achat groupé.
 
-  Scénario: Affichage du bandeau d'accueil et de la grille de produits
+  Scénario: Produits groupés par rayon
     Étant donné qu'une vente existe avec des produits et des créneaux
     Quand j'accède à la page d'accueil
-    Alors je vois le bandeau d'accueil jaune avec le titre de l'achat groupé
-    Et je vois une grille de cartes produit en dessous du bandeau
+    Alors les produits sont groupés par rayon avec un titre par groupe
 
   Scénario: Contenu des cartes produit
     Étant donné qu'une vente existe avec des produits et des créneaux
     Quand j'accède à la page d'accueil
     Alors chaque carte affiche le nom du produit
-    Et chaque carte affiche le fournisseur
     Et chaque carte affiche la description du produit
     Et chaque carte affiche le prix
-    Et chaque carte affiche la catégorie
     Et chaque carte affiche la marque
     Et chaque carte affiche un bouton Ajouter
+
+  Scénario: Navigation par rayon
+    Étant donné qu'une vente existe avec des produits et des créneaux
+    Quand j'accède à la page d'accueil
+    Alors je vois la barre de navigation par rayon
+    Et chaque rayon a un bouton dans la barre de navigation
 
   Scénario: Produit épuisé affiché comme indisponible
     Étant donné qu'une vente existe avec des produits et des créneaux

@@ -61,14 +61,17 @@ public class CatalogueFrontendSteps {
         PlaywrightHooks.page().navigate(venteUrl());
     }
 
-    @Alors("je vois le bandeau d'accueil jaune avec le titre de l'achat groupé")
-    public void jeVoisLeBandeauDAccueil() {
-        Locator banner = PlaywrightHooks.page().locator("[data-testid='welcome-banner']");
-        assertTrue(banner.isVisible(), "Le bandeau d'accueil doit être visible");
-        String text = banner.textContent();
-        assertNotNull(text);
-        assertTrue(text.toLowerCase().contains("achat groupé") || text.toLowerCase().contains("superquinquin"),
-                "Le bandeau doit contenir le titre de l'achat groupé");
+    @Alors("je vois la bannière SVG")
+    public void jeVoisLaBanniereSVG() {
+        Locator banner = PlaywrightHooks.page().locator("[data-testid='svg-banner']");
+        assertTrue(banner.isVisible(), "La bannière SVG doit être visible");
+    }
+
+    @Et("je vois le nom de la vente dans le header")
+    public void jeVoisLeNomDeLaVenteDansLeHeader() {
+        Locator header = PlaywrightHooks.page().locator("[data-testid='vente-header']");
+        assertTrue(header.isVisible(), "Le header de vente doit être visible");
+        assertFalse(header.textContent().isBlank(), "Le nom de la vente ne doit pas être vide");
     }
 
     @Et("je vois une grille de cartes produit en dessous du bandeau")
@@ -90,15 +93,6 @@ public class CatalogueFrontendSteps {
         }
     }
 
-    @Et("chaque carte affiche le fournisseur")
-    public void chaqueCarteAfficheLeFournisseur() {
-        Locator cards = PlaywrightHooks.page().locator("[data-testid='product-card']");
-        for (int i = 0; i < cards.count(); i++) {
-            Locator supplier = cards.nth(i).locator("[data-testid='product-supplier']");
-            assertTrue(supplier.isVisible(), "Le fournisseur doit être visible (carte " + i + ")");
-        }
-    }
-
     @Et("chaque carte affiche la description du produit")
     public void chaqueCarteAfficheLaDescription() {
         Locator cards = PlaywrightHooks.page().locator("[data-testid='product-card']");
@@ -115,16 +109,6 @@ public class CatalogueFrontendSteps {
         for (int i = 0; i < cards.count(); i++) {
             Locator price = cards.nth(i).locator("[data-testid='product-price']");
             assertTrue(price.isVisible(), "Le prix doit être visible (carte " + i + ")");
-        }
-    }
-
-    @Et("chaque carte affiche la catégorie")
-    public void chaqueCarteAfficheLaCategorie() {
-        Locator cards = PlaywrightHooks.page().locator("[data-testid='product-card']");
-        for (int i = 0; i < cards.count(); i++) {
-            Locator category = cards.nth(i).locator("[data-testid='product-category']");
-            assertTrue(category.isVisible(), "La catégorie doit être visible (carte " + i + ")");
-            assertFalse(category.textContent().isBlank(), "La catégorie ne doit pas être vide");
         }
     }
 
@@ -189,7 +173,7 @@ public class CatalogueFrontendSteps {
 
     @Alors("les cartes s'affichent en 1 colonne")
     public void lesCartesEnUneColonne() {
-        Locator grid = PlaywrightHooks.page().locator("[data-testid='product-grid']");
+        Locator grid = PlaywrightHooks.page().locator("[data-testid='product-grid'] .grid").first();
         String gridTemplateColumns = grid.evaluate(
                 "el => window.getComputedStyle(el).getPropertyValue('grid-template-columns')"
         ).toString();
@@ -199,12 +183,38 @@ public class CatalogueFrontendSteps {
 
     @Alors("les cartes s'affichent en 3 colonnes")
     public void lesCartesEnTroisColonnes() {
-        Locator grid = PlaywrightHooks.page().locator("[data-testid='product-grid']");
+        Locator grid = PlaywrightHooks.page().locator("[data-testid='product-grid'] .grid").first();
         String gridTemplateColumns = grid.evaluate(
                 "el => window.getComputedStyle(el).getPropertyValue('grid-template-columns')"
         ).toString();
         int columnCount = gridTemplateColumns.trim().split("\\s+").length;
         assertEquals(3, columnCount, "Desktop doit afficher 3 colonnes, got: " + gridTemplateColumns);
+    }
+
+    @Alors("les produits sont groupés par rayon avec un titre par groupe")
+    public void lesProduitsGroupesParRayon() {
+        Locator grid = PlaywrightHooks.page().locator("[data-testid='product-grid']");
+        assertTrue(grid.isVisible(), "La grille de produits doit être visible");
+        Locator rayonTitles = grid.locator("h2");
+        assertTrue(rayonTitles.count() > 0, "Il doit y avoir au moins un titre de rayon");
+        for (int i = 0; i < rayonTitles.count(); i++) {
+            assertFalse(rayonTitles.nth(i).textContent().isBlank(), "Le titre de rayon ne doit pas être vide");
+        }
+    }
+
+    @Alors("je vois la barre de navigation par rayon")
+    public void jeVoisLaBarreDeNavigationParRayon() {
+        Locator nav = PlaywrightHooks.page().locator("[data-testid='rayon-nav']");
+        assertTrue(nav.isVisible(), "La barre de navigation par rayon doit être visible");
+    }
+
+    @Et("chaque rayon a un bouton dans la barre de navigation")
+    public void chaqueRayonAUnBoutonDansLaBarreDeNavigation() {
+        Locator navButtons = PlaywrightHooks.page().locator("[data-testid='rayon-nav'] button");
+        Locator rayonTitles = PlaywrightHooks.page().locator("[data-testid='product-grid'] h2");
+        assertTrue(navButtons.count() > 0, "Il doit y avoir des boutons dans la navigation");
+        assertEquals(rayonTitles.count(), navButtons.count(),
+                "Le nombre de boutons doit correspondre au nombre de rayons");
     }
 
     @Alors("je vois des skeleton screens à la place des cartes")

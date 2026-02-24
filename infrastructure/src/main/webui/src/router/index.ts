@@ -6,33 +6,39 @@ const router = createRouter({
   routes: [
     {
       path: '/',
-      name: 'ventes',
-      component: () => import('@/views/VenteListView.vue'),
-    },
-    {
-      path: '/ventes/:venteId',
-      name: 'home',
-      component: () => import('@/views/HomeView.vue'),
-    },
-    {
-      path: '/ventes/:venteId/cart',
-      name: 'cart',
-      component: () => import('@/views/CartView.vue'),
-    },
-    {
-      path: '/ventes/:venteId/checkout',
-      name: 'checkout',
-      component: () => import('@/views/CheckoutView.vue'),
-    },
-    {
-      path: '/confirmation',
-      name: 'confirmation',
-      component: () => import('@/views/ConfirmationView.vue'),
-    },
-    {
-      path: '/payment-error',
-      name: 'payment-error',
-      component: () => import('@/views/PaymentErrorView.vue'),
+      component: () => import('@/views/ClientLayout.vue'),
+      children: [
+        {
+          path: '',
+          name: 'ventes',
+          component: () => import('@/views/VenteListView.vue'),
+        },
+        {
+          path: 'ventes/:venteId',
+          name: 'home',
+          component: () => import('@/views/HomeView.vue'),
+        },
+        {
+          path: 'ventes/:venteId/cart',
+          name: 'cart',
+          component: () => import('@/views/CartView.vue'),
+        },
+        {
+          path: 'ventes/:venteId/checkout',
+          name: 'checkout',
+          component: () => import('@/views/CheckoutView.vue'),
+        },
+        {
+          path: 'confirmation',
+          name: 'confirmation',
+          component: () => import('@/views/ConfirmationView.vue'),
+        },
+        {
+          path: 'payment-error',
+          name: 'payment-error',
+          component: () => import('@/views/PaymentErrorView.vue'),
+        },
+      ],
     },
     {
       path: '/admin',

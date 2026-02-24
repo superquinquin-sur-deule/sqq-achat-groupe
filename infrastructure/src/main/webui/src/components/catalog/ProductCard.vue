@@ -2,12 +2,14 @@
 import { computed } from 'vue'
 import { cva } from 'class-variance-authority'
 import type { ProductResponse } from '@/api/generated/model'
+import type { RayonColor } from '@/utils/rayon-colors'
 import Card from '@/components/ui/Card.vue'
 import Button from '@/components/ui/Button.vue'
 import { useCartStore } from '@/stores/cartStore'
 
 const props = defineProps<{
   product: ProductResponse
+  rayonColor: RayonColor
 }>()
 
 const emit = defineEmits<{
@@ -71,27 +73,45 @@ function onQuantityInput(event: Event) {
     :class="productCardVariants({ exhausted: isExhausted || undefined })"
   >
     <Card>
+      <!-- Image placeholder -->
+      <div
+        class="-mx-6 -mt-6 mb-4 flex aspect-[4/3] items-center justify-center rounded-t-xl"
+        :class="rayonColor.bg"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke-width="1"
+          stroke="currentColor"
+          class="h-12 w-12"
+          :class="rayonColor.text"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909M3.75 21h16.5A2.25 2.25 0 0 0 22.5 19.5V4.5a2.25 2.25 0 0 0-2.25-2.25H3.75A2.25 2.25 0 0 0 1.5 4.5v15a2.25 2.25 0 0 0 2.25 2.25Z"
+          />
+        </svg>
+      </div>
       <h3 class="text-xl font-semibold text-dark">{{ product.name }}</h3>
       <div class="mt-1 flex flex-wrap gap-2">
-        <span
-          data-testid="product-category"
-          class="inline-block rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary"
-          >{{ product.category }}</span
-        >
         <span
           data-testid="product-brand"
           class="inline-block rounded-full bg-brown/10 px-2 py-0.5 text-xs font-medium text-brown"
           >{{ product.brand }}</span
         >
       </div>
-      <p data-testid="product-supplier" class="mt-1 text-sm text-brown">{{ product.supplier }}</p>
       <p data-testid="product-description" class="mt-2 text-base text-dark">
         {{ product.description }}
       </p>
       <div class="mt-4 flex items-center justify-between">
-        <p data-testid="product-price" class="text-lg font-medium text-dark">
+        <span
+          data-testid="product-price"
+          class="rounded-full bg-primary px-3 py-1 text-sm font-semibold text-dark"
+        >
           {{ formattedPrice }}
-        </p>
+        </span>
         <span
           v-if="isExhausted"
           data-testid="exhausted-badge"
@@ -160,7 +180,7 @@ function onQuantityInput(event: Event) {
         v-else
         data-testid="add-button"
         variant="primary"
-        class="mt-4 w-full"
+        class="mt-4 w-full transition-transform hover:scale-[1.02] active:scale-[0.98]"
         :disabled="isExhausted"
         :aria-label="`Ajouter ${product.name} au panier`"
         @click="handleAdd"

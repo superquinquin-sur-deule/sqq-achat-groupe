@@ -1,14 +1,8 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import { useRoute } from 'vue-router'
-import Header from '@/components/layout/Header.vue'
 import Toast from '@/components/ui/Toast.vue'
 import { useToast } from '@/composables/useToast'
 
-const route = useRoute()
 const { toasts, remove } = useToast()
-
-const isAdmin = computed(() => route.path.startsWith('/admin'))
 </script>
 
 <template>
@@ -18,7 +12,6 @@ const isAdmin = computed(() => route.path.startsWith('/admin'))
   >
     Aller au contenu principal
   </a>
-  <Header v-if="!isAdmin" />
   <main id="main-content" class="min-h-screen bg-surface">
     <router-view />
   </main>
