@@ -74,8 +74,7 @@ function onQuantityInput(event: Event) {
   >
     <Card>
       <div
-        class="-mx-6 -mt-6 mb-4 flex aspect-[4/3] items-center justify-center overflow-hidden rounded-t-xl"
-        :class="rayonColor.bg"
+        class="-mx-6 -mt-6 mb-4 flex aspect-[4/3] items-center justify-center overflow-hidden rounded-t-xl bg-white"
       >
         <img
           v-if="product.imageUrl"
