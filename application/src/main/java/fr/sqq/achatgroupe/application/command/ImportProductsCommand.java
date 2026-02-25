@@ -13,7 +13,8 @@ public record ImportProductsCommand(
     public record CsvProductRow(
             String name,
             String description,
-            BigDecimal price,
+            BigDecimal prixHt,
+            BigDecimal tauxTva,
             String supplier,
             int stock,
             String reference,

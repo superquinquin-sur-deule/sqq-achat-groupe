@@ -53,7 +53,7 @@ public class CreateOrderHandler implements CommandHandler<CreateOrderCommand, Or
             product.decrementStock(itemCmd.quantity());
             productRepository.save(product);
 
-            orderItems.add(OrderItem.create(itemCmd.productId(), itemCmd.quantity(), product.price()));
+            orderItems.add(OrderItem.create(itemCmd.productId(), itemCmd.quantity(), product.prixTtc()));
         }
 
         timeSlotRepository.save(timeSlot);

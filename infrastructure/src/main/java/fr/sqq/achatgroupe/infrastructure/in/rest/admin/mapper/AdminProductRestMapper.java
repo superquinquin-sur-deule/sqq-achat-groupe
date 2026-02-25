@@ -17,7 +17,9 @@ public interface AdminProductRestMapper {
     @Mapping(target = "venteId", expression = "java(product.venteId())")
     @Mapping(target = "name", expression = "java(product.name())")
     @Mapping(target = "description", expression = "java(product.description())")
-    @Mapping(target = "price", expression = "java(product.price())")
+    @Mapping(target = "prixHt", expression = "java(product.prixHt())")
+    @Mapping(target = "tauxTva", expression = "java(product.tauxTva())")
+    @Mapping(target = "prixTtc", expression = "java(product.prixTtc())")
     @Mapping(target = "supplier", expression = "java(product.supplier())")
     @Mapping(target = "stock", expression = "java(product.stock())")
     @Mapping(target = "active", expression = "java(product.active())")
@@ -32,7 +34,8 @@ public interface AdminProductRestMapper {
                 venteId,
                 request.name(),
                 request.description(),
-                request.price(),
+                request.prixHt(),
+                request.tauxTva(),
                 request.supplier(),
                 request.stock(),
                 request.reference(),
@@ -47,7 +50,8 @@ public interface AdminProductRestMapper {
                 new ProductId(id),
                 request.name(),
                 request.description(),
-                request.price(),
+                request.prixHt(),
+                request.tauxTva(),
                 request.supplier(),
                 request.stock(),
                 request.active(),

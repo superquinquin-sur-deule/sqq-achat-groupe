@@ -12,6 +12,8 @@ import io.cucumber.java.fr.Étantdonnéque;
 import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;
 
+import java.util.Map;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 @QuarkusTest
@@ -137,15 +139,17 @@ public class AdminProductSteps {
                 .setTimeout(5000));
     }
 
-    @Et("je remplis le formulaire produit avec le nom {string} au prix de {string} du fournisseur {string} avec un stock de {string} la référence {string} la catégorie {string} et la marque {string}")
-    public void jeRemplisLeFormulaireProduit(String name, String price, String supplier, String stock, String reference, String category, String brand) {
-        page().locator("#product-name").fill(name);
-        page().locator("#product-price").fill(price);
-        page().locator("#product-supplier").fill(supplier);
-        page().locator("#product-stock").fill(stock);
-        page().locator("#product-reference").fill(reference);
-        page().locator("#product-category").fill(category);
-        page().locator("#product-brand").fill(brand);
+    @Et("je remplis le formulaire produit avec les valeurs")
+    public void jeRemplisLeFormulaireProduit(io.cucumber.datatable.DataTable dataTable) {
+        Map<String, String> values = dataTable.asMap(String.class, String.class);
+        page().locator("#product-name").fill(values.get("nom"));
+        page().locator("#product-prix-ht").fill(values.get("prix HT"));
+        page().locator("#product-taux-tva").fill(values.get("TVA"));
+        page().locator("#product-supplier").fill(values.get("fournisseur"));
+        page().locator("#product-stock").fill(values.get("stock"));
+        page().locator("#product-reference").fill(values.get("référence"));
+        page().locator("#product-category").fill(values.get("catégorie"));
+        page().locator("#product-brand").fill(values.get("marque"));
     }
 
     @Et("je soumets le formulaire produit")

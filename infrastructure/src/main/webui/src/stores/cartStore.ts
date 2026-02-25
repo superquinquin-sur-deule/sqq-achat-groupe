@@ -32,7 +32,7 @@ export const useCartStore = defineStore(
         items.value.push({
           productId: product.id,
           name: product.name,
-          price: product.price,
+          price: product.prixTtc,
           supplier: product.supplier,
           quantity: 1,
         })

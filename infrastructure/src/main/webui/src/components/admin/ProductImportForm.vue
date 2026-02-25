@@ -129,7 +129,7 @@ defineExpose({ setResult })
           <span class="font-medium text-primary underline">Parcourir</span>
         </p>
         <p class="text-sm text-brown/60">
-          Format attendu : nom, description, prix, fournisseur, stock, reference, categorie, marque
+          Format attendu : nom, description, prix_ht, taux_tva, fournisseur, stock, reference, categorie, marque
         </p>
       </template>
       <template v-else>

@@ -32,7 +32,8 @@ public class UpdateProductHandler implements CommandHandler<UpdateProductCommand
         if (orderRepository.existsNonCancelledByVenteId(command.venteId())) {
             boolean onlyActiveChanged = Objects.equals(existing.name(), command.name())
                     && Objects.equals(existing.description(), command.description())
-                    && existing.price().compareTo(command.price()) == 0
+                    && existing.prixHt().compareTo(command.prixHt()) == 0
+                    && existing.tauxTva().compareTo(command.tauxTva()) == 0
                     && Objects.equals(existing.supplier(), command.supplier())
                     && existing.stock() == command.stock()
                     && Objects.equals(existing.reference(), command.reference())
@@ -48,7 +49,8 @@ public class UpdateProductHandler implements CommandHandler<UpdateProductCommand
                 existing.venteId(),
                 command.name(),
                 command.description(),
-                command.price(),
+                command.prixHt(),
+                command.tauxTva(),
                 command.supplier(),
                 command.stock(),
                 command.active(),

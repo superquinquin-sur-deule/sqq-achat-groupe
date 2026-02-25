@@ -3,6 +3,7 @@ package fr.sqq.achatgroupe.domain.model.catalog;
 import fr.sqq.achatgroupe.domain.exception.InsufficientStockException;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 public class Product {
 
@@ -10,7 +11,8 @@ public class Product {
     private final Long venteId;
     private final String name;
     private final String description;
-    private final BigDecimal price;
+    private final BigDecimal prixHt;
+    private final BigDecimal tauxTva;
     private final String supplier;
     private int stock;
     private final boolean active;
@@ -19,13 +21,16 @@ public class Product {
     private final String brand;
     private final boolean hasImage;
 
-    public Product(Long id, Long venteId, String name, String description, BigDecimal price, String supplier, int stock, boolean active,
+    public Product(Long id, Long venteId, String name, String description, BigDecimal prixHt, BigDecimal tauxTva, String supplier, int stock, boolean active,
                    String reference, String category, String brand, boolean hasImage) {
         if (name == null || name.isBlank()) {
             throw new IllegalArgumentException("Product name must not be blank");
         }
-        if (price == null || price.compareTo(BigDecimal.ZERO) <= 0) {
+        if (prixHt == null || prixHt.compareTo(BigDecimal.ZERO) <= 0) {
             throw new IllegalArgumentException("Product price must be positive");
+        }
+        if (tauxTva == null || tauxTva.compareTo(BigDecimal.ZERO) < 0) {
+            throw new IllegalArgumentException("Product VAT rate must not be negative");
         }
         if (supplier == null || supplier.isBlank()) {
             throw new IllegalArgumentException("Product supplier must not be blank");
@@ -46,7 +51,8 @@ public class Product {
         this.venteId = venteId;
         this.name = name;
         this.description = description;
-        this.price = price;
+        this.prixHt = prixHt;
+        this.tauxTva = tauxTva;
         this.supplier = supplier;
         this.stock = stock;
         this.active = active;
@@ -71,6 +77,11 @@ public class Product {
         return stock > 0;
     }
 
+    public BigDecimal prixTtc() {
+        return prixHt.multiply(BigDecimal.ONE.add(tauxTva.divide(BigDecimal.valueOf(100))))
+                .setScale(2, RoundingMode.HALF_UP);
+    }
+
     public Long id() {
         return id;
     }
@@ -87,8 +98,12 @@ public class Product {
         return description;
     }
 
-    public BigDecimal price() {
-        return price;
+    public BigDecimal prixHt() {
+        return prixHt;
+    }
+
+    public BigDecimal tauxTva() {
+        return tauxTva;
     }
 
     public String supplier() {

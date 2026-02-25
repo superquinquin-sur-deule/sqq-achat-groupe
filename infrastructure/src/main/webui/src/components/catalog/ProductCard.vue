@@ -26,7 +26,7 @@ const isInCart = computed(() => quantity.value > 0)
 
 const formattedPrice = computed(() =>
   new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(
-    props.product.price,
+    props.product.prixTtc,
   ),
 )
 

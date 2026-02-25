@@ -55,19 +55,19 @@ public class VenteSteps {
         // 2. Create products via admin endpoint
         List<String> products = List.of(
                 """
-                {"name": "Tomates bio", "description": "Tomates grappe biologiques cultivées localement", "price": 3.50, "supplier": "Ferme du Soleil", "stock": 25, "reference": "TOM-001", "category": "Légumes", "brand": "Ferme du Soleil"}
+                {"name": "Tomates bio", "description": "Tomates grappe biologiques cultivées localement", "prixHt": 3.32, "tauxTva": 5.50, "supplier": "Ferme du Soleil", "stock": 25, "reference": "TOM-001", "category": "Légumes", "brand": "Ferme du Soleil"}
                 """,
                 """
-                {"name": "Pain de campagne", "description": "Pain artisanal au levain naturel, 500g", "price": 4.20, "supplier": "Boulangerie Martin", "stock": 15, "reference": "PAI-001", "category": "Boulangerie", "brand": "Boulangerie Martin"}
+                {"name": "Pain de campagne", "description": "Pain artisanal au levain naturel, 500g", "prixHt": 3.98, "tauxTva": 5.50, "supplier": "Boulangerie Martin", "stock": 15, "reference": "PAI-001", "category": "Boulangerie", "brand": "Boulangerie Martin"}
                 """,
                 """
-                {"name": "Miel de fleurs", "description": "Miel toutes fleurs récolté en Île-de-France, 250g", "price": 8.90, "supplier": "Rucher des Lilas", "stock": 10, "reference": "MIE-001", "category": "Épicerie", "brand": "Rucher des Lilas"}
+                {"name": "Miel de fleurs", "description": "Miel toutes fleurs récolté en Île-de-France, 250g", "prixHt": 8.44, "tauxTva": 5.50, "supplier": "Rucher des Lilas", "stock": 10, "reference": "MIE-001", "category": "Épicerie", "brand": "Rucher des Lilas"}
                 """,
                 """
-                {"name": "Pommes Gala", "description": "Pommes Gala croquantes du verger, 1kg", "price": 2.80, "supplier": "Verger Dupont", "stock": 0, "reference": "POM-001", "category": "Fruits", "brand": "Verger Dupont"}
+                {"name": "Pommes Gala", "description": "Pommes Gala croquantes du verger, 1kg", "prixHt": 2.65, "tauxTva": 5.50, "supplier": "Verger Dupont", "stock": 0, "reference": "POM-001", "category": "Fruits", "brand": "Verger Dupont"}
                 """,
                 """
-                {"name": "Fromage de chèvre", "description": "Fromage frais de chèvre fermier, 200g", "price": 5.60, "supplier": "Chèvrerie du Val", "stock": 8, "reference": "FRO-001", "category": "Produits laitiers", "brand": "Chèvrerie du Val"}
+                {"name": "Fromage de chèvre", "description": "Fromage frais de chèvre fermier, 200g", "prixHt": 5.31, "tauxTva": 5.50, "supplier": "Chèvrerie du Val", "stock": 8, "reference": "FRO-001", "category": "Produits laitiers", "brand": "Chèvrerie du Val"}
                 """
         );
 

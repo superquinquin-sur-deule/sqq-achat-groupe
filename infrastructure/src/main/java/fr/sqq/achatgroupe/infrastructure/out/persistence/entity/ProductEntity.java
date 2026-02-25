@@ -29,8 +29,11 @@ public class ProductEntity {
     @Column(name = "description")
     private String description;
 
-    @Column(name = "price", nullable = false, precision = 10, scale = 2)
-    private BigDecimal price;
+    @Column(name = "prix_ht", nullable = false, precision = 10, scale = 2)
+    private BigDecimal prixHt;
+
+    @Column(name = "taux_tva", nullable = false, precision = 5, scale = 2)
+    private BigDecimal tauxTva;
 
     @Column(name = "supplier", nullable = false)
     private String supplier;
@@ -80,12 +83,20 @@ public class ProductEntity {
         this.description = description;
     }
 
-    public BigDecimal getPrice() {
-        return price;
+    public BigDecimal getPrixHt() {
+        return prixHt;
     }
 
-    public void setPrice(BigDecimal price) {
-        this.price = price;
+    public void setPrixHt(BigDecimal prixHt) {
+        this.prixHt = prixHt;
+    }
+
+    public BigDecimal getTauxTva() {
+        return tauxTva;
+    }
+
+    public void setTauxTva(BigDecimal tauxTva) {
+        this.tauxTva = tauxTva;
     }
 
     public String getSupplier() {

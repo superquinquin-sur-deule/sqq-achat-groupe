@@ -2,7 +2,7 @@
 import { useForm, useField } from 'vee-validate'
 import { toTypedSchema } from '@vee-validate/zod'
 import { z } from 'zod'
-import { nextTick, onMounted, ref } from 'vue'
+import { computed, nextTick, onMounted, ref } from 'vue'
 import { cva } from 'class-variance-authority'
 import Input from '@/components/ui/Input.vue'
 import Button from '@/components/ui/Button.vue'
@@ -18,7 +18,8 @@ const emit = defineEmits<{
     data: {
       name: string
       description: string
-      price: number
+      prixHt: number
+      tauxTva: number
       supplier: string
       stock: number
       active: boolean
@@ -37,10 +38,17 @@ const schema = toTypedSchema(
   z.object({
     name: z.string().min(1, 'Merci de saisir un nom de produit'),
     description: z.string().optional().default(''),
-    price: z
+    prixHt: z
       .string()
-      .min(1, 'Merci de saisir un prix')
-      .refine((v) => !isNaN(Number(v)) && Number(v) > 0, 'Le prix doit être supérieur à 0'),
+      .min(1, 'Merci de saisir un prix HT')
+      .refine((v) => !isNaN(Number(v)) && Number(v) > 0, 'Le prix HT doit être supérieur à 0'),
+    tauxTva: z
+      .string()
+      .min(1, 'Merci de saisir un taux de TVA')
+      .refine(
+        (v) => !isNaN(Number(v)) && Number(v) >= 0,
+        'Le taux de TVA ne peut pas être négatif',
+      ),
     supplier: z.string().min(1, 'Merci de saisir un fournisseur'),
     stock: z
       .string()
@@ -61,7 +69,8 @@ const { handleSubmit } = useForm({
     ? {
         name: props.product.name,
         description: props.product.description ?? '',
-        price: String(props.product.price),
+        prixHt: String(props.product.prixHt),
+        tauxTva: String(props.product.tauxTva),
         supplier: props.product.supplier,
         stock: String(props.product.stock),
         reference: props.product.reference ?? '',
@@ -71,7 +80,8 @@ const { handleSubmit } = useForm({
     : {
         name: '',
         description: '',
-        price: '',
+        prixHt: '',
+        tauxTva: '5.50',
         supplier: '',
         stock: '0',
         reference: '',
@@ -86,7 +96,16 @@ const {
   errorMessage: descriptionError,
   handleBlur: descriptionBlur,
 } = useField<string>('description')
-const { value: price, errorMessage: priceError, handleBlur: priceBlur } = useField<string>('price')
+const {
+  value: prixHt,
+  errorMessage: prixHtError,
+  handleBlur: prixHtBlur,
+} = useField<string>('prixHt')
+const {
+  value: tauxTva,
+  errorMessage: tauxTvaError,
+  handleBlur: tauxTvaBlur,
+} = useField<string>('tauxTva')
 const {
   value: supplier,
   errorMessage: supplierError,
@@ -108,6 +127,13 @@ const { value: brand, errorMessage: brandError, handleBlur: brandBlur } = useFie
 const imageFile = ref<File | undefined>(undefined)
 const imagePreview = ref<string | undefined>(props.product?.imageUrl ?? undefined)
 const firstInput = ref<InstanceType<typeof Input> | null>(null)
+
+const prixTtc = computed(() => {
+  const ht = Number(prixHt.value)
+  const tva = Number(tauxTva.value)
+  if (isNaN(ht) || isNaN(tva) || ht <= 0) return null
+  return (ht * (1 + tva / 100)).toFixed(2)
+})
 
 const textareaVariants = cva(
   'min-h-[44px] rounded-lg border px-3 py-2 text-dark transition-colors focus:outline-2 focus:outline-offset-2 focus:outline-dark',
@@ -141,7 +167,8 @@ const onSubmit = handleSubmit((values) => {
   emit('submit', {
     name: values.name,
     description: values.description ?? '',
-    price: Number(values.price),
+    prixHt: Number(values.prixHt),
+    tauxTva: Number(values.tauxTva),
     supplier: values.supplier,
     stock: Number(values.stock),
     active: props.product?.active ?? true,
@@ -246,27 +273,37 @@ const onSubmit = handleSubmit((values) => {
           />
         </div>
       </div>
-      <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+      <div class="grid grid-cols-1 gap-4 sm:grid-cols-4">
         <Input
-          id="product-price"
-          v-model="price"
-          label="Prix (€)"
+          id="product-prix-ht"
+          v-model="prixHt"
+          label="Prix HT (€)"
           type="number"
           step="0.01"
           min="0.01"
-          :error="priceError ?? ''"
+          :error="prixHtError ?? ''"
           required
-          @blur="priceBlur"
+          @blur="prixHtBlur"
         />
         <Input
-          id="product-supplier"
-          v-model="supplier"
-          label="Fournisseur"
-          type="text"
-          :error="supplierError ?? ''"
+          id="product-taux-tva"
+          v-model="tauxTva"
+          label="TVA (%)"
+          type="number"
+          step="0.01"
+          min="0"
+          :error="tauxTvaError ?? ''"
           required
-          @blur="supplierBlur"
+          @blur="tauxTvaBlur"
         />
+        <div class="flex flex-col gap-1">
+          <label class="text-sm font-medium text-dark">Prix TTC (€)</label>
+          <div
+            class="flex min-h-[44px] items-center rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-dark"
+          >
+            {{ prixTtc ?? '—' }}
+          </div>
+        </div>
         <Input
           id="product-stock"
           v-model="stock"
@@ -277,6 +314,17 @@ const onSubmit = handleSubmit((values) => {
           :error="stockError ?? ''"
           required
           @blur="stockBlur"
+        />
+      </div>
+      <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <Input
+          id="product-supplier"
+          v-model="supplier"
+          label="Fournisseur"
+          type="text"
+          :error="supplierError ?? ''"
+          required
+          @blur="supplierBlur"
         />
       </div>
       <div class="mt-2 flex gap-2">

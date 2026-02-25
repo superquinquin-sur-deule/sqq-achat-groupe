@@ -18,8 +18,8 @@ import java.util.Set;
 @ApplicationScoped
 public class CsvProductParser {
 
-    private static final Set<String> REQUIRED_COLUMNS = Set.of("nom", "prix", "fournisseur", "stock", "reference", "categorie", "marque");
-    private static final Set<String> ALL_COLUMNS = Set.of("nom", "description", "prix", "fournisseur", "stock", "reference", "categorie", "marque");
+    private static final Set<String> REQUIRED_COLUMNS = Set.of("nom", "prix_ht", "taux_tva", "fournisseur", "stock", "reference", "categorie", "marque");
+    private static final Set<String> ALL_COLUMNS = Set.of("nom", "description", "prix_ht", "taux_tva", "fournisseur", "stock", "reference", "categorie", "marque");
 
     public CsvParseResult parse(InputStream inputStream) {
         List<CsvProductRow> rows = new ArrayList<>();
@@ -36,13 +36,13 @@ public class CsvProductParser {
 
             if (columnIndex == null) {
                 return CsvParseResult.failure(
-                        "Le fichier doit être au format CSV avec les colonnes : nom, description, prix, fournisseur, stock, reference, categorie, marque");
+                        "Le fichier doit être au format CSV avec les colonnes : nom, description, prix_ht, taux_tva, fournisseur, stock, reference, categorie, marque");
             }
 
             for (String missing : REQUIRED_COLUMNS) {
                 if (!columnIndex.containsKey(missing)) {
                     return CsvParseResult.failure(
-                            "Le fichier doit être au format CSV avec les colonnes : nom, description, prix, fournisseur, stock, reference, categorie, marque");
+                            "Le fichier doit être au format CSV avec les colonnes : nom, description, prix_ht, taux_tva, fournisseur, stock, reference, categorie, marque");
                 }
             }
 
@@ -97,7 +97,8 @@ public class CsvProductParser {
 
         String name = getColumn(values, columnIndex, "nom");
         String description = getColumn(values, columnIndex, "description");
-        String priceStr = getColumn(values, columnIndex, "prix");
+        String prixHtStr = getColumn(values, columnIndex, "prix_ht");
+        String tauxTvaStr = getColumn(values, columnIndex, "taux_tva");
         String supplier = getColumn(values, columnIndex, "fournisseur");
         String stockStr = getColumn(values, columnIndex, "stock");
         String reference = getColumn(values, columnIndex, "reference");
@@ -120,15 +121,26 @@ public class CsvProductParser {
             throw new CsvLineParseException("La marque est requise");
         }
 
-        BigDecimal price;
+        BigDecimal prixHt;
         try {
-            String normalizedPrice = priceStr != null ? priceStr.strip().replace(',', '.') : "";
-            if (normalizedPrice.isEmpty()) {
-                throw new CsvLineParseException("Le prix est requis");
+            String normalizedPrixHt = prixHtStr != null ? prixHtStr.strip().replace(',', '.') : "";
+            if (normalizedPrixHt.isEmpty()) {
+                throw new CsvLineParseException("Le prix HT est requis");
             }
-            price = new BigDecimal(normalizedPrice);
+            prixHt = new BigDecimal(normalizedPrixHt);
         } catch (NumberFormatException e) {
-            throw new CsvLineParseException("Le prix n'est pas un nombre valide");
+            throw new CsvLineParseException("Le prix HT n'est pas un nombre valide");
+        }
+
+        BigDecimal tauxTva;
+        try {
+            String normalizedTauxTva = tauxTvaStr != null ? tauxTvaStr.strip().replace(',', '.') : "";
+            if (normalizedTauxTva.isEmpty()) {
+                throw new CsvLineParseException("Le taux de TVA est requis");
+            }
+            tauxTva = new BigDecimal(normalizedTauxTva);
+        } catch (NumberFormatException e) {
+            throw new CsvLineParseException("Le taux de TVA n'est pas un nombre valide");
         }
 
         int stock;
@@ -142,7 +154,7 @@ public class CsvProductParser {
             throw new CsvLineParseException("Le stock doit être un nombre entier");
         }
 
-        return new CsvProductRow(name.strip(), description != null ? description.strip() : "", price, supplier.strip(), stock, reference.strip(), category.strip(), brand.strip());
+        return new CsvProductRow(name.strip(), description != null ? description.strip() : "", prixHt, tauxTva, supplier.strip(), stock, reference.strip(), category.strip(), brand.strip());
     }
 
     private String getColumn(String[] values, Map<String, Integer> columnIndex, String columnName) {

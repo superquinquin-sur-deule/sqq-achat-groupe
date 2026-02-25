@@ -119,7 +119,8 @@ function closeForm() {
 async function onSubmit(data: {
   name: string
   description: string
-  price: number
+  prixHt: number
+  tauxTva: number
   supplier: string
   stock: number
   active: boolean
@@ -136,7 +137,8 @@ async function onSubmit(data: {
       const updateData: UpdateProductRequest = {
         name: data.name,
         description: data.description,
-        price: data.price,
+        prixHt: data.prixHt,
+        tauxTva: data.tauxTva,
         supplier: data.supplier,
         stock: data.stock,
         active: data.active,
@@ -150,7 +152,8 @@ async function onSubmit(data: {
       const createData: CreateProductRequest = {
         name: data.name,
         description: data.description,
-        price: data.price,
+        prixHt: data.prixHt,
+        tauxTva: data.tauxTva,
         supplier: data.supplier,
         stock: data.stock,
         reference: data.reference,
@@ -197,7 +200,8 @@ async function toggleActive(product: AdminProductResponse) {
     const updateData: UpdateProductRequest = {
       name: product.name,
       description: product.description,
-      price: product.price,
+      prixHt: product.prixHt,
+      tauxTva: product.tauxTva,
       supplier: product.supplier,
       stock: product.stock,
       active: !product.active,
@@ -275,7 +279,9 @@ function formatPrice(price: number): string {
         'Nom',
         'Catégorie',
         'Marque',
-        'Prix',
+        'Prix HT',
+        'TVA',
+        'Prix TTC',
         'Fournisseur',
         'Stock',
         'Statut',
@@ -294,7 +300,9 @@ function formatPrice(price: number): string {
         <td class="px-4 py-3 font-medium text-dark">{{ product.name }}</td>
         <td class="px-4 py-3 text-dark">{{ product.category }}</td>
         <td class="px-4 py-3 text-dark">{{ product.brand }}</td>
-        <td class="px-4 py-3 text-dark">{{ formatPrice(product.price) }}</td>
+        <td class="px-4 py-3 text-dark">{{ formatPrice(product.prixHt) }}</td>
+        <td class="px-4 py-3 text-dark">{{ product.tauxTva }} %</td>
+        <td class="px-4 py-3 font-medium text-dark">{{ formatPrice(product.prixTtc) }}</td>
         <td class="px-4 py-3 text-dark">{{ product.supplier }}</td>
         <td class="px-4 py-3 text-dark">{{ product.stock }}</td>
         <td class="px-4 py-3">
