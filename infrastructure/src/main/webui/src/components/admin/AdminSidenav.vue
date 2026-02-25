@@ -65,7 +65,7 @@ const navLinkVariants = cva(
 )
 
 const sidebarVariants = cva(
-  'fixed inset-y-0 left-0 z-50 flex w-64 flex-col bg-dark print:hidden transition-transform duration-200 ease-in-out md:translate-x-0',
+  'fixed inset-y-0 left-0 z-50 flex w-60 flex-col bg-dark print:hidden transition-transform duration-200 ease-in-out md:translate-x-0',
   {
     variants: {
       open: {

@@ -54,7 +54,7 @@ watch(ventes, (data) => {
     </div>
 
     <!-- Main content -->
-    <main class="mx-auto max-w-7xl px-4 py-6 md:pl-64 print:pl-0 md:px-6">
+    <main class="px-4 py-6 md:pl-64 print:pl-0 md:px-6">
       <div v-if="loading" class="py-12 text-center text-brown">Chargement...</div>
       <RouterView v-else />
     </main>
