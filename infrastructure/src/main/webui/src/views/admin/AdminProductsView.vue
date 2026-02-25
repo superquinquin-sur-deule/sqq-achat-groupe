@@ -15,6 +15,7 @@ import {
   useUpdateProductMutation,
   useDeleteProductMutation,
   useImportProductsMutation,
+  useUploadProductImageMutation,
 } from '@/composables/api/useAdminProductsApi'
 import { useVenteHasOrdersQuery } from '@/composables/api/useAdminVentesApi'
 import AdminTable from '@/components/admin/AdminTable.vue'
@@ -42,6 +43,7 @@ const createMutation = useCreateProductMutation(selectedVenteId)
 const updateMutation = useUpdateProductMutation(selectedVenteId)
 const deleteMutation = useDeleteProductMutation(selectedVenteId)
 const importMutation = useImportProductsMutation(selectedVenteId)
+const uploadImageMutation = useUploadProductImageMutation(selectedVenteId)
 
 const { data: hasOrdersData } = useVenteHasOrdersQuery(selectedVenteId)
 const hasOrders = computed(() => hasOrdersData.value === true)
@@ -124,10 +126,12 @@ async function onSubmit(data: {
   reference: string
   category: string
   brand: string
+  imageFile?: File
 }) {
   if (!selectedVenteId.value) return
   submitting.value = true
   try {
+    let productId: number | undefined
     if (editingProduct.value) {
       const updateData: UpdateProductRequest = {
         name: data.name,
@@ -141,7 +145,7 @@ async function onSubmit(data: {
         brand: data.brand,
       }
       await updateMutation.mutateAsync({ id: editingProduct.value.id, data: updateData })
-      toast.success('Produit mis à jour')
+      productId = editingProduct.value.id
     } else {
       const createData: CreateProductRequest = {
         name: data.name,
@@ -153,9 +157,13 @@ async function onSubmit(data: {
         category: data.category,
         brand: data.brand,
       }
-      await createMutation.mutateAsync(createData)
-      toast.success('Produit créé')
+      const result = await createMutation.mutateAsync(createData)
+      productId = (result.data as { data: { id: number } }).data.id
     }
+    if (data.imageFile && productId) {
+      await uploadImageMutation.mutateAsync({ productId, file: data.imageFile })
+    }
+    toast.success(editingProduct.value ? 'Produit mis à jour' : 'Produit créé')
     closeForm()
   } catch {
     toast.error('Erreur lors de la sauvegarde du produit')

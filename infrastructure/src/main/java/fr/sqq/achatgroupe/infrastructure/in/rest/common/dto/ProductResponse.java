@@ -10,6 +10,7 @@ public record ProductResponse(
         String supplier,
         int stock,
         String category,
-        String brand
+        String brand,
+        String imageUrl
 ) {
 }

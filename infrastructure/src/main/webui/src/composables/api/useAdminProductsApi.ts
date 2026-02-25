@@ -7,6 +7,7 @@ import {
   putApiAdminVentesVenteIdProductsId,
   deleteApiAdminVentesVenteIdProductsId,
   postApiAdminVentesVenteIdProductsImport,
+  postApiAdminVentesVenteIdProductsIdImage,
 } from '@/api/generated/admin-products/admin-products'
 import type { CreateProductRequest, UpdateProductRequest } from '@/api/generated/model'
 
@@ -68,6 +69,17 @@ export function useDeleteProductMutation(venteId: MaybeRefOrGetter<number | null
       if (vid !== null) {
         queryClient.invalidateQueries({ queryKey: ['admin', 'products'] })
       }
+    },
+  })
+}
+
+export function useUploadProductImageMutation(venteId: MaybeRefOrGetter<number | null>) {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ productId, file }: { productId: number; file: File }) =>
+      postApiAdminVentesVenteIdProductsIdImage(toValue(venteId)!, productId, { image: file }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'products'] })
     },
   })
 }

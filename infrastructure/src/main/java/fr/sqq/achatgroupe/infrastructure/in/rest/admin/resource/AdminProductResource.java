@@ -3,6 +3,7 @@ package fr.sqq.achatgroupe.infrastructure.in.rest.admin.resource;
 import fr.sqq.achatgroupe.application.command.DeleteProductCommand;
 import fr.sqq.achatgroupe.application.command.ImportProductsCommand;
 import fr.sqq.achatgroupe.application.command.ImportResult;
+import fr.sqq.achatgroupe.application.command.UploadProductImageCommand;
 import fr.sqq.achatgroupe.application.query.CursorPage;
 import fr.sqq.achatgroupe.application.query.CursorPageRequest;
 import fr.sqq.achatgroupe.application.query.ListAllProductsQuery;
@@ -151,5 +152,55 @@ public class AdminProductResource {
     @Path("/{id}")
     public void deleteProduct(@PathParam("venteId") Long venteId, @PathParam("id") Long id) {
         mediator.send(new DeleteProductCommand(venteId, new ProductId(id)));
+    }
+
+    @POST
+    @Path("/{id}/image")
+    @Consumes(MediaType.MULTIPART_FORM_DATA)
+    @APIResponse(responseCode = "200", description = "Image uploaded")
+    @APIResponse(responseCode = "400", description = "Invalid image")
+    public Response uploadImage(
+            @PathParam("venteId") Long venteId,
+            @PathParam("id") Long id,
+            @FormParam("image") FileUpload image
+    ) throws IOException {
+        if (image == null || image.fileName() == null) {
+            return Response.status(400)
+                    .type(MediaType.valueOf("application/problem+json"))
+                    .entity(new ProblemDetailResponse(
+                            "https://api.sqq.fr/errors/invalid-image",
+                            "Image invalide",
+                            400,
+                            "Aucun fichier fourni"))
+                    .build();
+        }
+
+        String contentType = image.contentType();
+        if (contentType == null || (!contentType.equals("image/jpeg") && !contentType.equals("image/png") && !contentType.equals("image/webp"))) {
+            return Response.status(400)
+                    .type(MediaType.valueOf("application/problem+json"))
+                    .entity(new ProblemDetailResponse(
+                            "https://api.sqq.fr/errors/invalid-image",
+                            "Format d'image invalide",
+                            400,
+                            "Les formats acceptés sont : JPEG, PNG, WebP"))
+                    .build();
+        }
+
+        if (image.size() > 2 * 1024 * 1024) {
+            return Response.status(400)
+                    .type(MediaType.valueOf("application/problem+json"))
+                    .entity(new ProblemDetailResponse(
+                            "https://api.sqq.fr/errors/invalid-image",
+                            "Image trop volumineuse",
+                            400,
+                            "La taille maximale est de 2 Mo"))
+                    .build();
+        }
+
+        byte[] imageData = Files.readAllBytes(image.filePath());
+        var command = new UploadProductImageCommand(venteId, new ProductId(id), imageData, contentType);
+        Product product = mediator.send(command);
+        return Response.ok(new DataResponse<>(mapper.toResponse(product))).build();
     }
 }

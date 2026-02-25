@@ -24,6 +24,7 @@ public interface AdminProductRestMapper {
     @Mapping(target = "reference", expression = "java(product.reference())")
     @Mapping(target = "category", expression = "java(product.category())")
     @Mapping(target = "brand", expression = "java(product.brand())")
+    @Mapping(target = "imageUrl", expression = "java(product.hasImage() ? \"/api/product-images/\" + product.id() : null)")
     AdminProductResponse toResponse(Product product);
 
     default CreateProductCommand toCreateCommand(CreateProductRequest request, Long venteId) {

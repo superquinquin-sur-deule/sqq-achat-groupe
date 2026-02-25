@@ -53,6 +53,9 @@ public class ProductEntity {
     @Column(name = "brand", nullable = false)
     private String brand;
 
+    @Column(name = "has_image", nullable = false)
+    private boolean hasImage;
+
     public Long getId() {
         return id;
     }
@@ -120,4 +123,7 @@ public class ProductEntity {
 
     public String getBrand() { return brand; }
     public void setBrand(String brand) { this.brand = brand; }
+
+    public boolean isHasImage() { return hasImage; }
+    public void setHasImage(boolean hasImage) { this.hasImage = hasImage; }
 }

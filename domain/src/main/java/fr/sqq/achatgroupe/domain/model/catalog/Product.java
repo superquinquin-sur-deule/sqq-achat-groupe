@@ -17,9 +17,10 @@ public class Product {
     private final String reference;
     private final String category;
     private final String brand;
+    private final boolean hasImage;
 
     public Product(Long id, Long venteId, String name, String description, BigDecimal price, String supplier, int stock, boolean active,
-                   String reference, String category, String brand) {
+                   String reference, String category, String brand, boolean hasImage) {
         if (name == null || name.isBlank()) {
             throw new IllegalArgumentException("Product name must not be blank");
         }
@@ -52,6 +53,7 @@ public class Product {
         this.reference = reference;
         this.category = category;
         this.brand = brand;
+        this.hasImage = hasImage;
     }
 
     public void decrementStock(int quantity) {
@@ -111,5 +113,9 @@ public class Product {
 
     public String brand() {
         return brand;
+    }
+
+    public boolean hasImage() {
+        return hasImage;
     }
 }

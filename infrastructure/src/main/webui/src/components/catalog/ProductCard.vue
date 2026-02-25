@@ -73,12 +73,18 @@ function onQuantityInput(event: Event) {
     :class="productCardVariants({ exhausted: isExhausted || undefined })"
   >
     <Card>
-      <!-- Image placeholder -->
       <div
-        class="-mx-6 -mt-6 mb-4 flex aspect-[4/3] items-center justify-center rounded-t-xl"
+        class="-mx-6 -mt-6 mb-4 flex aspect-[4/3] items-center justify-center overflow-hidden rounded-t-xl"
         :class="rayonColor.bg"
       >
+        <img
+          v-if="product.imageUrl"
+          :src="product.imageUrl"
+          :alt="product.name"
+          class="h-full w-full object-cover"
+        />
         <svg
+          v-else
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
           viewBox="0 0 24 24"

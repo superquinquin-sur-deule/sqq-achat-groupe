@@ -21,5 +21,6 @@ public interface ProductPersistenceMapper {
     @Mapping(target = "reference", expression = "java(domain.reference())")
     @Mapping(target = "category", expression = "java(domain.category())")
     @Mapping(target = "brand", expression = "java(domain.brand())")
+    @Mapping(target = "hasImage", expression = "java(domain.hasImage())")
     ProductEntity toEntity(Product domain);
 }

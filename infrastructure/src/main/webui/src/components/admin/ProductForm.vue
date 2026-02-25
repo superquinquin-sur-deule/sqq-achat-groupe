@@ -25,6 +25,7 @@ const emit = defineEmits<{
       reference: string
       category: string
       brand: string
+      imageFile?: File
     },
   ]
   cancel: []
@@ -104,6 +105,8 @@ const {
 } = useField<string>('category')
 const { value: brand, errorMessage: brandError, handleBlur: brandBlur } = useField<string>('brand')
 
+const imageFile = ref<File | undefined>(undefined)
+const imagePreview = ref<string | undefined>(props.product?.imageUrl ?? undefined)
 const firstInput = ref<InstanceType<typeof Input> | null>(null)
 
 const textareaVariants = cva(
@@ -118,6 +121,15 @@ const textareaVariants = cva(
     defaultVariants: { error: false },
   },
 )
+
+function onImageChange(event: Event) {
+  const input = event.target as HTMLInputElement
+  const file = input.files?.[0]
+  if (file) {
+    imageFile.value = file
+    imagePreview.value = URL.createObjectURL(file)
+  }
+}
 
 onMounted(async () => {
   await nextTick()
@@ -136,6 +148,7 @@ const onSubmit = handleSubmit((values) => {
     reference: values.reference,
     category: values.category,
     brand: values.brand,
+    imageFile: imageFile.value,
   })
 })
 </script>
@@ -206,6 +219,32 @@ const onSubmit = handleSubmit((values) => {
         >
           {{ descriptionError }}
         </p>
+      </div>
+      <div class="flex flex-col gap-1">
+        <label for="product-image" class="text-sm font-medium text-dark">Image du produit</label>
+        <div class="flex items-center gap-4">
+          <img
+            v-if="imagePreview"
+            :src="imagePreview"
+            alt="Aperçu"
+            class="h-20 w-20 rounded-lg border border-gray-200 object-cover"
+          />
+          <div
+            v-else
+            class="flex h-20 w-20 items-center justify-center rounded-lg border border-dashed border-gray-300 bg-gray-50"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1" stroke="currentColor" class="h-8 w-8 text-gray-400">
+              <path stroke-linecap="round" stroke-linejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909M3.75 21h16.5A2.25 2.25 0 0 0 22.5 19.5V4.5a2.25 2.25 0 0 0-2.25-2.25H3.75A2.25 2.25 0 0 0 1.5 4.5v15a2.25 2.25 0 0 0 2.25 2.25Z" />
+            </svg>
+          </div>
+          <input
+            id="product-image"
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            class="text-sm text-dark file:mr-3 file:rounded-lg file:border-0 file:bg-primary file:px-3 file:py-2 file:text-sm file:font-medium file:text-dark hover:file:bg-primary/80"
+            @change="onImageChange"
+          />
+        </div>
       </div>
       <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <Input

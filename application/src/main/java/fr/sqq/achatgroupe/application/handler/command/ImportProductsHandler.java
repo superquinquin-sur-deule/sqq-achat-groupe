@@ -41,7 +41,8 @@ public class ImportProductsHandler implements CommandHandler<ImportProductsComma
                         true,
                         row.reference(),
                         row.category(),
-                        row.brand()
+                        row.brand(),
+                        false
                 );
                 productRepository.saveNew(product);
                 imported++;

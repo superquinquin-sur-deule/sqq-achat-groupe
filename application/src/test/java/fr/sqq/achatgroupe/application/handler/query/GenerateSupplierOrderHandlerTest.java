@@ -36,9 +36,9 @@ class GenerateSupplierOrderHandlerTest {
     void should_aggregate_quantities_by_product_and_sort_by_supplier_then_name() {
         Long venteId = 1L;
 
-        Product tomatoes = new Product(10L, venteId, "Tomates", "Bio", new BigDecimal("3.50"), "Ferme A", 100, true, "TOM-001", "Legumes", "Ferme A");
-        Product carrots = new Product(20L, venteId, "Carottes", "Bio", new BigDecimal("2.00"), "Ferme A", 100, true, "CAR-001", "Legumes", "Ferme A");
-        Product cheese = new Product(30L, venteId, "Fromage", "Comté", new BigDecimal("8.00"), "Ferme B", 50, true, "FRO-001", "Fromage", "Ferme B");
+        Product tomatoes = new Product(10L, venteId, "Tomates", "Bio", new BigDecimal("3.50"), "Ferme A", 100, true, "TOM-001", "Legumes", "Ferme A", false);
+        Product carrots = new Product(20L, venteId, "Carottes", "Bio", new BigDecimal("2.00"), "Ferme A", 100, true, "CAR-001", "Legumes", "Ferme A", false);
+        Product cheese = new Product(30L, venteId, "Fromage", "Comté", new BigDecimal("8.00"), "Ferme B", 50, true, "FRO-001", "Fromage", "Ferme B", false);
 
         Order order1 = Order.create(venteId, OrderNumber.generate(),
                 new CustomerInfo("Alice", "Dupont", "alice@test.com", "0601020304"), 1L,

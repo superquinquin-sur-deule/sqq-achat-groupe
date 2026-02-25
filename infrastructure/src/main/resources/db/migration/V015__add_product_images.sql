@@ -1,0 +1,7 @@
+ALTER TABLE products ADD COLUMN has_image BOOLEAN NOT NULL DEFAULT FALSE;
+
+CREATE TABLE product_images (
+    product_id BIGINT NOT NULL PRIMARY KEY REFERENCES products(id) ON DELETE CASCADE,
+    data BYTEA NOT NULL,
+    content_type VARCHAR(50) NOT NULL
+);

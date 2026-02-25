@@ -13,5 +13,6 @@ public record AdminProductResponse(
         boolean active,
         String reference,
         String category,
-        String brand
+        String brand,
+        String imageUrl
 ) {}
