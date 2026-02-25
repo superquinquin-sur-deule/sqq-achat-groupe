@@ -20,6 +20,7 @@ public class Product {
     private final String category;
     private final String brand;
     private final boolean hasImage;
+    private String stripeProductId;
 
     public Product(Long id, Long venteId, String name, String description, BigDecimal prixHt, BigDecimal tauxTva, String supplier, int stock, boolean active,
                    String reference, String category, String brand, boolean hasImage) {
@@ -132,5 +133,13 @@ public class Product {
 
     public boolean hasImage() {
         return hasImage;
+    }
+
+    public String stripeProductId() {
+        return stripeProductId;
+    }
+
+    public void assignStripeProductId(String stripeProductId) {
+        this.stripeProductId = stripeProductId;
     }
 }

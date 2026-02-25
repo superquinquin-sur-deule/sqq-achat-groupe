@@ -1,6 +1,7 @@
 package fr.sqq.achatgroupe.application.handler.command;
 
 import fr.sqq.achatgroupe.application.command.CreateProductCommand;
+import fr.sqq.achatgroupe.application.port.out.PaymentCatalogGateway;
 import fr.sqq.achatgroupe.application.port.out.ProductRepository;
 import fr.sqq.achatgroupe.domain.model.catalog.Product;
 import fr.sqq.mediator.CommandHandler;
@@ -11,9 +12,11 @@ import jakarta.transaction.Transactional;
 public class CreateProductHandler implements CommandHandler<CreateProductCommand, Product> {
 
     private final ProductRepository productRepository;
+    private final PaymentCatalogGateway paymentCatalogGateway;
 
-    public CreateProductHandler(ProductRepository productRepository) {
+    public CreateProductHandler(ProductRepository productRepository, PaymentCatalogGateway paymentCatalogGateway) {
         this.productRepository = productRepository;
+        this.paymentCatalogGateway = paymentCatalogGateway;
     }
 
     @Override
@@ -34,6 +37,12 @@ public class CreateProductHandler implements CommandHandler<CreateProductCommand
                 command.brand(),
                 false
         );
-        return productRepository.saveNew(product);
+        Product saved = productRepository.saveNew(product);
+        String stripeProductId = paymentCatalogGateway.registerProduct(
+                saved.id(), saved.name(), saved.description(),
+                saved.prixHt(), saved.tauxTva(), saved.prixTtc(), saved.reference());
+        saved.assignStripeProductId(stripeProductId);
+        productRepository.save(saved);
+        return saved;
     }
 }

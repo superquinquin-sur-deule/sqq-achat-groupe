@@ -101,6 +101,7 @@ public class ProductPanacheRepository implements ProductRepository, PanacheRepos
         entity.setCategory(product.category());
         entity.setBrand(product.brand());
         entity.setHasImage(product.hasImage());
+        entity.setStripeProductId(product.stripeProductId());
     }
 
     @Override

@@ -59,6 +59,9 @@ public class ProductEntity {
     @Column(name = "has_image", nullable = false)
     private boolean hasImage;
 
+    @Column(name = "stripe_product_id")
+    private String stripeProductId;
+
     public Long getId() {
         return id;
     }
@@ -137,4 +140,7 @@ public class ProductEntity {
 
     public boolean isHasImage() { return hasImage; }
     public void setHasImage(boolean hasImage) { this.hasImage = hasImage; }
+
+    public String getStripeProductId() { return stripeProductId; }
+    public void setStripeProductId(String stripeProductId) { this.stripeProductId = stripeProductId; }
 }

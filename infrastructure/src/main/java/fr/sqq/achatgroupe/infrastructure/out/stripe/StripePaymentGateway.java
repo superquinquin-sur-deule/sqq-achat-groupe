@@ -10,10 +10,15 @@ import com.stripe.param.RefundCreateParams;
 import com.stripe.param.checkout.SessionCreateParams;
 import fr.sqq.achatgroupe.domain.exception.PaymentSessionCreationException;
 import fr.sqq.achatgroupe.domain.exception.PaymentWebhookException;
+import fr.sqq.achatgroupe.domain.model.catalog.Product;
+import fr.sqq.achatgroupe.domain.model.catalog.ProductId;
 import fr.sqq.achatgroupe.domain.model.order.Order;
+import fr.sqq.achatgroupe.domain.model.order.OrderItem;
 import fr.sqq.achatgroupe.application.port.out.PaymentGateway;
+import fr.sqq.achatgroupe.application.port.out.ProductRepository;
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.logging.Logger;
 
@@ -30,6 +35,9 @@ public class StripePaymentGateway implements PaymentGateway {
     @ConfigProperty(name = "stripe.webhook-secret")
     String webhookSecret;
 
+    @Inject
+    ProductRepository productRepository;
+
     @PostConstruct
     void init() {
         Stripe.apiKey = apiKey;
@@ -37,28 +45,40 @@ public class StripePaymentGateway implements PaymentGateway {
 
     @Override
     public PaymentSessionResult createCheckoutSession(Order order, String successUrl, String cancelUrl) {
-        long amountInCents = order.totalAmount().movePointRight(2).longValueExact();
-
-        SessionCreateParams params = SessionCreateParams.builder()
+        SessionCreateParams.Builder paramsBuilder = SessionCreateParams.builder()
                 .setMode(SessionCreateParams.Mode.PAYMENT)
                 .setSuccessUrl(successUrl)
                 .setCancelUrl(cancelUrl)
-                .addLineItem(
-                        SessionCreateParams.LineItem.builder()
-                                .setPriceData(
-                                        SessionCreateParams.LineItem.PriceData.builder()
-                                                .setCurrency("eur")
-                                                .setUnitAmount(amountInCents)
-                                                .setProductData(
-                                                        SessionCreateParams.LineItem.PriceData.ProductData.builder()
-                                                                .setName("Commande " + order.orderNumber().value())
-                                                                .build())
-                                                .build())
-                                .setQuantity(1L)
-                                .build())
                 .putMetadata("order_id", order.id().toString())
-                .setCustomerEmail(order.customer().email())
-                .build();
+                .setCustomerEmail(order.customer().email());
+
+        for (OrderItem item : order.items()) {
+            SessionCreateParams.LineItem.PriceData.Builder priceDataBuilder =
+                    SessionCreateParams.LineItem.PriceData.builder()
+                            .setCurrency("eur")
+                            .setUnitAmount(item.unitPrice().movePointRight(2).longValueExact());
+
+            String stripeProductId = productRepository.findById(new ProductId(item.productId()))
+                    .map(Product::stripeProductId)
+                    .orElse(null);
+
+            if (stripeProductId != null) {
+                priceDataBuilder.setProduct(stripeProductId);
+            } else {
+                priceDataBuilder.setProductData(
+                        SessionCreateParams.LineItem.PriceData.ProductData.builder()
+                                .setName("Produit #" + item.productId())
+                                .build());
+            }
+
+            paramsBuilder.addLineItem(
+                    SessionCreateParams.LineItem.builder()
+                            .setPriceData(priceDataBuilder.build())
+                            .setQuantity((long) item.quantity())
+                            .build());
+        }
+
+        SessionCreateParams params = paramsBuilder.build();
 
         try {
             Session session = Session.create(params);
