@@ -10,7 +10,10 @@ import org.jboss.logging.Logger;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.IdentityHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -21,6 +24,7 @@ public class QuarkusMediator implements Mediator {
 
     private final Map<Class<?>, CommandHandler<?, ?>> commandHandlers = new IdentityHashMap<>();
     private final Map<Class<?>, QueryHandler<?, ?>> queryHandlers = new IdentityHashMap<>();
+    private final List<PipelineBehavior> pipelineBehaviors = new ArrayList<>();
 
     @SuppressWarnings("unchecked")
     void onStartup(@Observes StartupEvent event, BeanManager beanManager) {
@@ -39,6 +43,10 @@ public class QuarkusMediator implements Mediator {
                     }
                     commandHandlers.put(commandType, handler);
                 }
+            } else if (PipelineBehavior.class.isAssignableFrom(beanClass)) {
+                PipelineBehavior behavior = (PipelineBehavior) beanManager.getReference(
+                        bean, beanClass, beanManager.createCreationalContext(bean));
+                pipelineBehaviors.add(behavior);
             } else if (QueryHandler.class.isAssignableFrom(beanClass)) {
                 Class<?> queryType = resolveTypeArgFromClass(beanClass, QueryHandler.class);
                 if (queryType != null) {
@@ -52,8 +60,10 @@ public class QuarkusMediator implements Mediator {
             }
         }
 
-        LOG.infof("Mediator: registered %d command handlers, %d query handlers",
-                commandHandlers.size(), queryHandlers.size());
+        pipelineBehaviors.sort(Comparator.comparingInt(PipelineBehavior::order));
+
+        LOG.infof("Mediator: registered %d command handlers, %d query handlers, %d pipeline behaviors",
+                commandHandlers.size(), queryHandlers.size(), pipelineBehaviors.size());
     }
 
     @Override
@@ -64,7 +74,14 @@ public class QuarkusMediator implements Mediator {
         if (handler == null) {
             throw new MediatorException("No CommandHandler registered for " + command.getClass().getName());
         }
-        return handler.handle(command);
+
+        PipelineBehavior.Next<R> pipeline = () -> handler.handle(command);
+        for (int i = pipelineBehaviors.size() - 1; i >= 0; i--) {
+            PipelineBehavior behavior = pipelineBehaviors.get(i);
+            PipelineBehavior.Next<R> next = pipeline;
+            pipeline = () -> behavior.handle(command, next);
+        }
+        return pipeline.invoke();
     }
 
     @Override
