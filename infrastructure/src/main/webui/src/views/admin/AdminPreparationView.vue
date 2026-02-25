@@ -55,10 +55,26 @@ const todayFormatted = computed(() => {
 })
 
 function groupItemsBySupplier(
-  items: { productName: string; supplier: string; quantity: number }[],
+  items: { productName: string; supplier: string; quantity: number; cancelledQuantity: number }[],
 ) {
   const groups: Record<string, typeof items> = {}
   for (const item of items) {
+    if (item.quantity <= 0) continue
+    const supplier = item.supplier
+    if (!groups[supplier]) {
+      groups[supplier] = []
+    }
+    groups[supplier]!.push(item)
+  }
+  return groups
+}
+
+function getCancelledItems(
+  items: { productName: string; supplier: string; quantity: number; cancelledQuantity: number }[],
+) {
+  const groups: Record<string, typeof items> = {}
+  for (const item of items) {
+    if (item.cancelledQuantity <= 0) continue
     const supplier = item.supplier
     if (!groups[supplier]) {
       groups[supplier] = []
@@ -199,6 +215,33 @@ function handlePrint() {
                 </template>
               </tbody>
             </table>
+
+            <!-- Produits manquants -->
+            <div
+              v-if="Object.keys(getCancelledItems(order.items)).length > 0"
+              class="mt-3 rounded border border-red-200 bg-red-50 p-3 print:border-gray-400 print:bg-white"
+              data-testid="preparation-card-missing"
+            >
+              <h4 class="mb-2 text-sm font-bold text-red-800 print:text-black">
+                Produits manquants
+              </h4>
+              <template v-for="(group, supplier) in getCancelledItems(order.items)" :key="supplier">
+                <p class="text-xs font-bold text-red-700 print:text-black">{{ supplier }}</p>
+                <ul class="mb-1 ml-4 list-disc">
+                  <li
+                    v-for="item in group"
+                    :key="item.productName"
+                    class="text-xs text-red-700 print:text-black"
+                    data-testid="preparation-missing-item"
+                  >
+                    {{ item.productName }} x{{ item.cancelledQuantity }}
+                  </li>
+                </ul>
+              </template>
+              <p class="mt-2 text-xs italic text-red-600 print:text-black">
+                Un remboursement sera émis pour le montant de ces produits.
+              </p>
+            </div>
           </div>
         </div>
       </template>

@@ -5,9 +5,12 @@ import com.microsoft.playwright.Page;
 import com.microsoft.playwright.Route;
 import com.microsoft.playwright.options.WaitForSelectorState;
 import fr.sqq.achatgroupe.acceptance.support.TestContext;
+import fr.sqq.achatgroupe.application.command.ApplyShortageAdjustmentsCommand;
+import fr.sqq.mediator.Mediator;
 import io.cucumber.java.fr.Alors;
 import io.cucumber.java.fr.Et;
 import io.cucumber.java.fr.Quand;
+import io.cucumber.java.fr.Étantdonnéque;
 import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;
 
@@ -18,6 +21,9 @@ public class BackofficePreparationSteps {
 
     @Inject
     TestContext testContext;
+
+    @Inject
+    Mediator mediator;
 
     private String selectedSlotText;
 
@@ -163,5 +169,27 @@ public class BackofficePreparationSteps {
         Locator empty = page().locator("[data-testid='preparation-empty']");
         assertTrue(empty.isVisible(), "L'état vide doit être visible");
         assertTrue(empty.textContent().contains(message), "Le message doit contenir '" + message + "'");
+    }
+
+    @Étantdonnéque("les ajustements de rupture sont appliqués")
+    public void lesAjustementsDeRuptureSontAppliques() {
+        mediator.send(new ApplyShortageAdjustmentsCommand(testContext.venteId()));
+    }
+
+    @Alors("je vois les produits manquants sur les fiches de préparation")
+    public void jeVoisLesProduitsManquantsSurLesFichesDePreparation() {
+        Locator missingSection = page().locator("[data-testid='preparation-card-missing']");
+        assertTrue(missingSection.count() >= 1,
+                "Il doit y avoir au moins une section 'Produits manquants', trouvé: " + missingSection.count());
+
+        Locator missingItems = page().locator("[data-testid='preparation-missing-item']");
+        assertTrue(missingItems.count() >= 1,
+                "Il doit y avoir au moins un produit manquant listé, trouvé: " + missingItems.count());
+
+        String missingText = missingSection.first().textContent();
+        assertTrue(missingText.contains("Produits manquants"),
+                "La section doit contenir le titre 'Produits manquants'");
+        assertTrue(missingText.contains("Un remboursement sera émis"),
+                "La section doit contenir le message de remboursement");
     }
 }

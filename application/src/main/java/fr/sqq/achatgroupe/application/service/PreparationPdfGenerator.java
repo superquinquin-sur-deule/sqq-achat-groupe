@@ -101,8 +101,11 @@ public class PreparationPdfGenerator {
             cs.lineTo(tableX + contentWidth, y);
             cs.stroke();
 
-            // Table rows grouped by supplier
-            Map<String, List<PreparationItem>> itemsBySupplier = order.items().stream()
+            // Table rows grouped by supplier — only items with effective quantity > 0
+            List<PreparationItem> activeItems = order.items().stream()
+                    .filter(item -> item.quantity() > 0)
+                    .toList();
+            Map<String, List<PreparationItem>> itemsBySupplier = activeItems.stream()
                     .collect(Collectors.groupingBy(PreparationItem::supplier, LinkedHashMap::new, Collectors.toList()));
 
             for (Map.Entry<String, List<PreparationItem>> entry : itemsBySupplier.entrySet()) {
@@ -144,6 +147,34 @@ public class PreparationPdfGenerator {
                     cs.lineTo(tableX + contentWidth, y);
                     cs.stroke();
                 }
+            }
+
+            // Missing products section
+            List<PreparationItem> cancelledItems = order.items().stream()
+                    .filter(item -> item.cancelledQuantity() > 0)
+                    .toList();
+
+            if (!cancelledItems.isEmpty()) {
+                PDType1Font fontOblique = new PDType1Font(Standard14Fonts.FontName.HELVETICA_OBLIQUE);
+
+                y -= LINE_HEIGHT * 1.5f;
+                y = drawText(cs, "Produits manquants", fontBold, TEXT_FONT_SIZE, MARGIN, y);
+                y -= LINE_HEIGHT * 0.3f;
+
+                Map<String, List<PreparationItem>> cancelledBySupplier = cancelledItems.stream()
+                        .collect(Collectors.groupingBy(PreparationItem::supplier, LinkedHashMap::new, Collectors.toList()));
+
+                for (Map.Entry<String, List<PreparationItem>> entry : cancelledBySupplier.entrySet()) {
+                    y = drawText(cs, entry.getKey(), fontBold, TABLE_FONT_SIZE, MARGIN + 5, y);
+                    for (PreparationItem item : entry.getValue()) {
+                        y = drawText(cs, "  " + item.productName() + " x" + item.cancelledQuantity(),
+                                fontRegular, TABLE_FONT_SIZE, MARGIN + 10, y);
+                    }
+                }
+
+                y -= LINE_HEIGHT * 0.3f;
+                drawText(cs, "Un remboursement sera émis pour le montant de ces produits.",
+                        fontOblique, TABLE_FONT_SIZE, MARGIN, y);
             }
         }
     }

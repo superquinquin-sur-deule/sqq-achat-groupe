@@ -31,6 +31,12 @@ Fonctionnalité: Listes de préparation
     Quand je navigue vers la page listes de préparation
     Alors je vois le bouton imprimer des listes de préparation
 
+  Scénario: Produits manquants affichés après rupture de stock
+    Étant donné toutes les réceptions sont enregistrées avec une rupture sur le premier produit
+    Et les ajustements de rupture sont appliqués
+    Quand je navigue vers la page listes de préparation
+    Alors je vois les produits manquants sur les fiches de préparation
+
   @backoffice-preparation-empty
   Scénario: Aucune commande — état vide
     Étant donné une vente sans commande existe
