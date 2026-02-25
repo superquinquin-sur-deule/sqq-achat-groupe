@@ -6,12 +6,24 @@ Fonctionnalité: Liste des commandes back-office
 
   Contexte:
     Étant donné qu'une vente existe avec des produits et des créneaux
-    Et qu'il existe des commandes payées pour cette vente
+    Et les commandes suivantes existent
+      | prénom | nom    | email            | téléphone  | créneau | produits | statut |
+      | Marie  | Dupont | marie@exemple.fr | 0612345678 | 0       | 0:2      | PAID   |
+      | Jean   | Martin | jean@exemple.fr  | 0698765432 | 1       | 0:1      | PAID   |
 
   Scénario: Affichage de la sidenav d'administration unifiée avec sélecteur de vente
     Quand je navigue vers la page backoffice commandes
     Alors je vois la sidenav d'administration
-    Et la sidenav contient les sections Administration et Back-office avec tous les liens
+    Et la sidenav contient les liens suivants
+      | sidenav-dashboard      |
+      | sidenav-products       |
+      | sidenav-timeslots      |
+      | sidenav-ventes         |
+      | sidenav-vente-selector |
+      | sidenav-orders         |
+      | sidenav-supplier       |
+      | sidenav-preparation    |
+      | sidenav-distribution   |
 
   Scénario: Affichage de la liste des commandes
     Quand je navigue vers la page backoffice commandes

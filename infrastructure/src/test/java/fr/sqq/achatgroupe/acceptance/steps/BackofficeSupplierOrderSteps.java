@@ -6,22 +6,11 @@ import com.microsoft.playwright.Page;
 import com.microsoft.playwright.Route;
 import com.microsoft.playwright.options.WaitForSelectorState;
 import fr.sqq.achatgroupe.acceptance.support.TestContext;
-import fr.sqq.achatgroupe.application.command.CreateOrderCommand;
-import fr.sqq.achatgroupe.application.command.CreateOrderCommand.OrderItemCommand;
-import fr.sqq.achatgroupe.application.port.out.OrderRepository;
-import fr.sqq.achatgroupe.domain.model.order.Order;
-import fr.sqq.mediator.Mediator;
 import io.cucumber.java.fr.Alors;
 import io.cucumber.java.fr.Et;
 import io.cucumber.java.fr.Quand;
-import io.cucumber.java.fr.Étantdonnéque;
 import io.quarkus.test.junit.QuarkusTest;
-import io.restassured.RestAssured;
-import io.restassured.http.ContentType;
 import jakarta.inject.Inject;
-import jakarta.transaction.Transactional;
-
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -31,43 +20,10 @@ public class BackofficeSupplierOrderSteps {
     @Inject
     TestContext testContext;
 
-    @Inject
-    Mediator mediator;
-
-    @Inject
-    OrderRepository orderRepository;
-
-    private Long emptyVenteId;
     private Download lastDownload;
 
     private Page page() {
         return PlaywrightHooks.page();
-    }
-
-    @Étantdonnéque("il existe des commandes payées pour le bon fournisseur")
-    @Transactional
-    public void ilExisteDesCommandesPayeesPourLeBonFournisseur() {
-        Long venteId = testContext.venteId();
-        Long product1Id = testContext.productIds().get(0);
-        Long product2Id = testContext.productIds().get(1);
-        Long product3Id = testContext.productIds().get(2);
-        Long timeSlotId = testContext.timeSlotIds().get(0);
-
-        // Commande 1 : 3x produit1 + 2x produit2
-        Order order1 = mediator.send(new CreateOrderCommand(
-                venteId, "Alice", "Durand", "alice@test.fr", "0601020304", timeSlotId,
-                List.of(new OrderItemCommand(product1Id, 3), new OrderItemCommand(product2Id, 2))
-        ));
-        order1.markAsPaid();
-        orderRepository.save(order1);
-
-        // Commande 2 : 1x produit1 + 4x produit3
-        Order order2 = mediator.send(new CreateOrderCommand(
-                venteId, "Bob", "Martin", "bob@test.fr", "0605060708", timeSlotId,
-                List.of(new OrderItemCommand(product1Id, 1), new OrderItemCommand(product3Id, 4))
-        ));
-        order2.markAsPaid();
-        orderRepository.save(order2);
     }
 
     @Quand("je navigue vers la page bon fournisseur")
@@ -145,32 +101,10 @@ public class BackofficeSupplierOrderSteps {
         assertTrue(filename.endsWith(".xlsx"), "Le fichier doit se terminer par '.xlsx'");
     }
 
-    @Étantdonnéque("une vente sans commande pour le bon fournisseur")
-    public void uneVenteSansCommandePourLeBonFournisseur() {
-        var response = RestAssured.given()
-                .contentType(ContentType.JSON)
-                .body("""
-                        {
-                            "name": "Vente Vide %d",
-                            "description": "Vente sans commande",
-                            "startDate": "%s",
-                            "endDate": "%s"
-                        }
-                        """.formatted(System.nanoTime(),
-                        java.time.Instant.now().minus(1, java.time.temporal.ChronoUnit.DAYS),
-                        java.time.Instant.now().plus(60, java.time.temporal.ChronoUnit.DAYS)))
-                .when()
-                .post("/api/admin/ventes")
-                .then()
-                .statusCode(201)
-                .extract()
-                .jsonPath();
-
-        emptyVenteId = response.getLong("data.id");
-    }
-
     @Quand("je navigue vers la page bon fournisseur sans commande")
     public void jeNavigueVersLaPageBonFournisseurSansCommande() {
+        Long emptyVenteId = testContext.emptyVenteId();
+
         page().route("**/api/admin/me", route -> route.fulfill(new Route.FulfillOptions()
                 .setStatus(200)
                 .setContentType("application/json")

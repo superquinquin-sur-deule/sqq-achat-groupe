@@ -6,7 +6,10 @@ Fonctionnalité: Bon de commande fournisseur
 
   Contexte:
     Étant donné qu'une vente existe avec des produits et des créneaux
-    Et qu'il existe des commandes payées pour le bon fournisseur
+    Et les commandes suivantes existent
+      | prénom | nom    | email         | téléphone  | créneau | produits | statut |
+      | Alice  | Durand | alice@test.fr | 0601020304 | 0       | 0:3,1:2  | PAID   |
+      | Bob    | Martin | bob@test.fr   | 0605060708 | 0       | 0:1,2:4  | PAID   |
 
   Scénario: Affichage du bon fournisseur agrégé groupé par fournisseur
     Quand je navigue vers la page bon fournisseur
@@ -25,6 +28,6 @@ Fonctionnalité: Bon de commande fournisseur
 
   @backoffice-supplier-order-empty
   Scénario: Aucune commande — état vide
-    Étant donné une vente sans commande pour le bon fournisseur
+    Étant donné une vente sans commande existe
     Quand je navigue vers la page bon fournisseur sans commande
     Alors je vois le message vide bon fournisseur "Aucune commande pour le moment"

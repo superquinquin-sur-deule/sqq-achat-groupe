@@ -5,22 +5,11 @@ import com.microsoft.playwright.Page;
 import com.microsoft.playwright.Route;
 import com.microsoft.playwright.options.WaitForSelectorState;
 import fr.sqq.achatgroupe.acceptance.support.TestContext;
-import fr.sqq.achatgroupe.application.command.CreateOrderCommand;
-import fr.sqq.achatgroupe.application.command.CreateOrderCommand.OrderItemCommand;
-import fr.sqq.achatgroupe.application.port.out.OrderRepository;
-import fr.sqq.achatgroupe.domain.model.order.Order;
-import fr.sqq.mediator.Mediator;
 import io.cucumber.java.fr.Alors;
 import io.cucumber.java.fr.Et;
 import io.cucumber.java.fr.Quand;
-import io.cucumber.java.fr.Étantdonnéque;
 import io.quarkus.test.junit.QuarkusTest;
-import io.restassured.RestAssured;
-import io.restassured.http.ContentType;
 import jakarta.inject.Inject;
-import jakarta.transaction.Transactional;
-
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -30,52 +19,10 @@ public class BackofficePreparationSteps {
     @Inject
     TestContext testContext;
 
-    @Inject
-    Mediator mediator;
-
-    @Inject
-    OrderRepository orderRepository;
-
-    private Long emptyVenteId;
     private String selectedSlotText;
 
     private Page page() {
         return PlaywrightHooks.page();
-    }
-
-    @Étantdonnéque("il existe des commandes payées réparties sur plusieurs créneaux")
-    @Transactional
-    public void ilExisteDesCommandesPayeesRepartiesSurPlusieursCreneaux() {
-        Long venteId = testContext.venteId();
-        Long product1Id = testContext.productIds().get(0);
-        Long product2Id = testContext.productIds().get(1);
-        Long product3Id = testContext.productIds().get(2);
-        Long timeSlot1Id = testContext.timeSlotIds().get(0);
-        Long timeSlot2Id = testContext.timeSlotIds().get(1);
-
-        // Commande 1 : créneau 1 — Alice
-        Order order1 = mediator.send(new CreateOrderCommand(
-                venteId, "Alice", "Durand", "alice@test.fr", "0601020304", timeSlot1Id,
-                List.of(new OrderItemCommand(product1Id, 3), new OrderItemCommand(product2Id, 2))
-        ));
-        order1.markAsPaid();
-        orderRepository.save(order1);
-
-        // Commande 2 : créneau 1 — Bob
-        Order order2 = mediator.send(new CreateOrderCommand(
-                venteId, "Bob", "Martin", "bob@test.fr", "0605060708", timeSlot1Id,
-                List.of(new OrderItemCommand(product1Id, 1), new OrderItemCommand(product3Id, 4))
-        ));
-        order2.markAsPaid();
-        orderRepository.save(order2);
-
-        // Commande 3 : créneau 2 — Claire
-        Order order3 = mediator.send(new CreateOrderCommand(
-                venteId, "Claire", "Petit", "claire@test.fr", "0609101112", timeSlot2Id,
-                List.of(new OrderItemCommand(product2Id, 1), new OrderItemCommand(product3Id, 2))
-        ));
-        order3.markAsPaid();
-        orderRepository.save(order3);
     }
 
     @Quand("je navigue vers la page listes de préparation")
@@ -190,32 +137,10 @@ public class BackofficePreparationSteps {
         assertTrue(btn.textContent().contains("Imprimer"), "Le bouton doit contenir 'Imprimer'");
     }
 
-    @Étantdonnéque("une vente sans commande pour la préparation")
-    public void uneVenteSansCommandePourLaPreparation() {
-        var response = RestAssured.given()
-                .contentType(ContentType.JSON)
-                .body("""
-                        {
-                            "name": "Vente Vide Prep %d",
-                            "description": "Vente sans commande pour préparation",
-                            "startDate": "%s",
-                            "endDate": "%s"
-                        }
-                        """.formatted(System.nanoTime(),
-                        java.time.Instant.now().minus(1, java.time.temporal.ChronoUnit.DAYS),
-                        java.time.Instant.now().plus(60, java.time.temporal.ChronoUnit.DAYS)))
-                .when()
-                .post("/api/admin/ventes")
-                .then()
-                .statusCode(201)
-                .extract()
-                .jsonPath();
-
-        emptyVenteId = response.getLong("data.id");
-    }
-
     @Quand("je navigue vers la page listes de préparation sans commande")
     public void jeNavigueVersLaPageListesDePreparationSansCommande() {
+        Long emptyVenteId = testContext.emptyVenteId();
+
         page().route("**/api/admin/me", route -> route.fulfill(new Route.FulfillOptions()
                 .setStatus(200)
                 .setContentType("application/json")

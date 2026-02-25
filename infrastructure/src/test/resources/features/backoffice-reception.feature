@@ -6,7 +6,11 @@ Fonctionnalité: Réception des fournisseurs et ajustements
 
   Contexte:
     Étant donné qu'une vente existe avec des produits et des créneaux
-    Et qu'il existe des commandes payées réparties sur plusieurs créneaux
+    Et les commandes suivantes existent
+      | prénom | nom    | email            | téléphone  | créneau | produits | statut |
+      | Alice  | Durand | alice@test.fr    | 0601020304 | 0       | 0:3,1:2  | PAID   |
+      | Bob    | Martin | bob@test.fr      | 0605060708 | 0       | 0:1,2:4  | PAID   |
+      | Claire | Petit  | claire@test.fr   | 0609101112 | 1       | 1:1,2:2  | PAID   |
 
   Scénario: Afficher le statut des réceptions pour une vente
     Quand je navigue vers la page réception

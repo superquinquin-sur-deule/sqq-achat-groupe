@@ -6,7 +6,12 @@ Fonctionnalité: Distribution et suivi des retraits
 
   Contexte:
     Étant donné qu'une vente existe avec des produits et des créneaux
-    Et qu'il existe des commandes payées réparties sur plusieurs créneaux pour la distribution
+    Et les commandes suivantes existent
+      | prénom | nom    | email            | téléphone  | créneau | produits | statut    |
+      | Alice  | Durand | alice@test.fr    | 0601020304 | 0       | 0:3,1:2  | PAID      |
+      | Bob    | Martin | bob@test.fr      | 0605060708 | 0       | 0:1,2:4  | PAID      |
+      | Claire | Petit  | claire@test.fr   | 0609101112 | 1       | 1:1,2:2  | PAID      |
+      | Diana  | Lopez  | diana@test.fr    | 0610111213 | 1       | 0:2      | PICKED_UP |
 
   Scénario: Affichage de la page distribution avec filtres par créneau
     Quand je navigue vers la page distribution
@@ -41,6 +46,6 @@ Fonctionnalité: Distribution et suivi des retraits
 
   @backoffice-distribution-empty
   Scénario: Aucune commande — état vide
-    Étant donné une vente sans commande pour la distribution
+    Étant donné une vente sans commande existe
     Quand je navigue vers la page distribution sans commande
     Alors je vois le message vide distribution "Aucune commande pour le moment"

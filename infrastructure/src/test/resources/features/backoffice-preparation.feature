@@ -6,7 +6,11 @@ Fonctionnalité: Listes de préparation
 
   Contexte:
     Étant donné qu'une vente existe avec des produits et des créneaux
-    Et qu'il existe des commandes payées réparties sur plusieurs créneaux
+    Et les commandes suivantes existent
+      | prénom | nom    | email            | téléphone  | créneau | produits | statut |
+      | Alice  | Durand | alice@test.fr    | 0601020304 | 0       | 0:3,1:2  | PAID   |
+      | Bob    | Martin | bob@test.fr      | 0605060708 | 0       | 0:1,2:4  | PAID   |
+      | Claire | Petit  | claire@test.fr   | 0609101112 | 1       | 1:1,2:2  | PAID   |
 
   Scénario: Affichage des fiches de préparation groupées par créneau
     Quand je navigue vers la page listes de préparation
@@ -29,6 +33,6 @@ Fonctionnalité: Listes de préparation
 
   @backoffice-preparation-empty
   Scénario: Aucune commande — état vide
-    Étant donné une vente sans commande pour la préparation
+    Étant donné une vente sans commande existe
     Quand je navigue vers la page listes de préparation sans commande
     Alors je vois le message vide préparation "Aucune commande pour le moment"

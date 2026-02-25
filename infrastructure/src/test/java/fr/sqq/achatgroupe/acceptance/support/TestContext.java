@@ -8,6 +8,7 @@ import java.util.List;
 public class TestContext {
 
     private Long venteId;
+    private Long emptyVenteId;
     private List<Long> productIds;
     private List<Long> timeSlotIds;
 
@@ -17,6 +18,14 @@ public class TestContext {
 
     public void setVenteId(Long venteId) {
         this.venteId = venteId;
+    }
+
+    public Long emptyVenteId() {
+        return emptyVenteId;
+    }
+
+    public void setEmptyVenteId(Long emptyVenteId) {
+        this.emptyVenteId = emptyVenteId;
     }
 
     public List<Long> productIds() {
@@ -37,6 +46,7 @@ public class TestContext {
 
     public void reset() {
         venteId = null;
+        emptyVenteId = null;
         productIds = null;
         timeSlotIds = null;
     }

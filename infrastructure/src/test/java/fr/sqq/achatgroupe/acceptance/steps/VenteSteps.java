@@ -24,6 +24,32 @@ public class VenteSteps {
         createVente();
     }
 
+    @Étantdonnéque("une vente sans commande existe")
+    public void uneVenteSansCommandeExiste() {
+        Instant startDate = Instant.now().minus(1, ChronoUnit.DAYS);
+        Instant endDate = Instant.now().plus(60, ChronoUnit.DAYS);
+
+        Long emptyVenteId = RestAssured.given()
+                .contentType(ContentType.JSON)
+                .body("""
+                        {
+                            "name": "Vente Vide %d",
+                            "description": "Vente sans commande",
+                            "startDate": "%s",
+                            "endDate": "%s"
+                        }
+                        """.formatted(System.nanoTime(), startDate, endDate))
+                .when()
+                .post("/api/admin/ventes")
+                .then()
+                .statusCode(201)
+                .extract()
+                .jsonPath()
+                .getLong("data.id");
+
+        testContext.setEmptyVenteId(emptyVenteId);
+    }
+
     private void createVente() {
         LocalDate futureDate = LocalDate.now().plusDays(30);
         Instant startDate = Instant.now().minus(1, ChronoUnit.DAYS);

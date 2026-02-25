@@ -5,20 +5,12 @@ import com.microsoft.playwright.Page;
 import com.microsoft.playwright.Route;
 import com.microsoft.playwright.options.WaitForSelectorState;
 import fr.sqq.achatgroupe.acceptance.support.TestContext;
-import fr.sqq.achatgroupe.application.command.CreateOrderCommand;
-import fr.sqq.achatgroupe.application.command.CreateOrderCommand.OrderItemCommand;
-import fr.sqq.achatgroupe.application.port.out.OrderRepository;
-import fr.sqq.achatgroupe.domain.model.order.Order;
-import fr.sqq.mediator.Mediator;
+import io.cucumber.datatable.DataTable;
 import io.cucumber.java.fr.Alors;
 import io.cucumber.java.fr.Et;
 import io.cucumber.java.fr.Quand;
-import io.cucumber.java.fr.Étantdonnéque;
 import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;
-import jakarta.transaction.Transactional;
-
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -28,40 +20,10 @@ public class BackofficeOrderSteps {
     @Inject
     TestContext testContext;
 
-    @Inject
-    Mediator mediator;
-
-    @Inject
-    OrderRepository orderRepository;
-
     private String selectedSlotLabel;
 
     private Page page() {
         return PlaywrightHooks.page();
-    }
-
-    @Étantdonnéque("il existe des commandes payées pour cette vente")
-    @Transactional
-    public void ilExisteDesCommandesPayeesPourCetteVente() {
-        Long venteId = testContext.venteId();
-        Long productId = testContext.productIds().get(0);
-        Long timeSlotId1 = testContext.timeSlotIds().get(0);
-        Long timeSlotId2 = testContext.timeSlotIds().get(1);
-
-        // Créer deux commandes PAID sur des créneaux différents
-        Order order1 = mediator.send(new CreateOrderCommand(
-                venteId, "Marie", "Dupont", "marie@exemple.fr", "0612345678", timeSlotId1,
-                List.of(new OrderItemCommand(productId, 2))
-        ));
-        order1.markAsPaid();
-        orderRepository.save(order1);
-
-        Order order2 = mediator.send(new CreateOrderCommand(
-                venteId, "Jean", "Martin", "jean@exemple.fr", "0698765432", timeSlotId2,
-                List.of(new OrderItemCommand(productId, 1))
-        ));
-        order2.markAsPaid();
-        orderRepository.save(order2);
     }
 
     @Quand("je navigue vers la page backoffice commandes")
@@ -90,20 +52,13 @@ public class BackofficeOrderSteps {
         assertTrue(sidenav.isVisible(), "La sidenav d'administration doit être visible");
     }
 
-    @Et("la sidenav contient les sections Administration et Back-office avec tous les liens")
-    public void laSidenavContientLesSectionsAvecTousLesLiens() {
+    @Et("la sidenav contient les liens suivants")
+    public void laSidenavContientLesLiens(DataTable dataTable) {
         Locator sidenav = page().locator("[data-testid='admin-sidenav']");
-        // Administration links
-        assertTrue(sidenav.locator("[data-testid='sidenav-dashboard']").isVisible(), "Le lien Dashboard doit être visible");
-        assertTrue(sidenav.locator("[data-testid='sidenav-products']").isVisible(), "Le lien Produits doit être visible");
-        assertTrue(sidenav.locator("[data-testid='sidenav-timeslots']").isVisible(), "Le lien Créneaux doit être visible");
-        assertTrue(sidenav.locator("[data-testid='sidenav-ventes']").isVisible(), "Le lien Ventes doit être visible");
-        assertTrue(sidenav.locator("[data-testid='sidenav-vente-selector']").isVisible(), "Le sélecteur de vente doit être visible");
-        // Back-office links
-        assertTrue(sidenav.locator("[data-testid='sidenav-orders']").isVisible(), "Le lien Commandes doit être visible");
-        assertTrue(sidenav.locator("[data-testid='sidenav-supplier']").isVisible(), "Le lien Bon fournisseur doit être visible");
-        assertTrue(sidenav.locator("[data-testid='sidenav-preparation']").isVisible(), "Le lien Préparation doit être visible");
-        assertTrue(sidenav.locator("[data-testid='sidenav-distribution']").isVisible(), "Le lien Distribution doit être visible");
+        for (String testId : dataTable.asList()) {
+            assertTrue(sidenav.locator("[data-testid='" + testId + "']").isVisible(),
+                    "Le lien " + testId + " doit être visible");
+        }
     }
 
     @Alors("je vois le tableau des commandes backoffice")
