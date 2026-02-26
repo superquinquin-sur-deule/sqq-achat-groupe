@@ -57,14 +57,6 @@ function handleAddToCart(product: ProductResponse) {
     </div>
     <template v-else>
       <HeroBanner :vente="vente ?? null" :time-slots="timeSlots ?? []" :time-slots-loading="timeSlotsLoading" />
-<!--      <div class="px-4 pt-6 md:px-6">-->
-<!--        <h1-->
-<!--          data-testid="vente-header"-->
-<!--          class="inline-block bg-primary px-4 py-2 text-2xl font-extrabold tracking-tight text-dark md:text-3xl lg:text-4xl"-->
-<!--        >-->
-<!--          Les produits-->
-<!--        </h1>-->
-<!--      </div>-->
       <RayonNav
         v-if="!loading && groupedRayons.length > 0"
         :rayons="groupedRayons.map((r) => r.name)"
