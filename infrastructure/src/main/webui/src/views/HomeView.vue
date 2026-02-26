@@ -8,7 +8,7 @@ import { useVenteProductsQuery } from '@/composables/api/useProductsApi'
 import { useVenteTimeslotsQuery } from '@/composables/api/useTimeslotsApi'
 import type { ProductResponse } from '@/api/generated/model'
 import { getRayonColor } from '@/utils/rayon-colors'
-import TimeSlotBanner from '@/components/catalog/TimeSlotBanner.vue'
+import HeroBanner from '@/components/catalog/HeroBanner.vue'
 import RayonNav from '@/components/catalog/RayonNav.vue'
 import ProductGrid from '@/components/catalog/ProductGrid.vue'
 
@@ -56,18 +56,15 @@ function handleAddToCart(product: ProductResponse) {
       <p class="text-brown">Revenez plus tard lorsque la période de commande sera activée.</p>
     </div>
     <template v-else>
-      <div class="bg-primary px-4 py-6 md:px-6 md:py-10">
-        <div class="mx-auto max-w-4xl text-center">
-          <h1
-            data-testid="vente-header"
-            class="mt-4 text-2xl font-extrabold tracking-tight text-dark md:mt-6 md:text-3xl lg:text-4xl"
-          >
-            {{ vente?.name }}
-          </h1>
-          <p v-if="vente?.description" class="mt-2 text-lg text-brown">{{ vente.description }}</p>
-        </div>
-      </div>
-      <TimeSlotBanner :time-slots="timeSlots ?? []" :is-loading="timeSlotsLoading" />
+      <HeroBanner :vente="vente ?? null" :time-slots="timeSlots ?? []" :time-slots-loading="timeSlotsLoading" />
+<!--      <div class="px-4 pt-6 md:px-6">-->
+<!--        <h1-->
+<!--          data-testid="vente-header"-->
+<!--          class="inline-block bg-primary px-4 py-2 text-2xl font-extrabold tracking-tight text-dark md:text-3xl lg:text-4xl"-->
+<!--        >-->
+<!--          Les produits-->
+<!--        </h1>-->
+<!--      </div>-->
       <RayonNav
         v-if="!loading && groupedRayons.length > 0"
         :rayons="groupedRayons.map((r) => r.name)"

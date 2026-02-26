@@ -161,14 +161,16 @@ public class CatalogueFrontendSteps {
         }
     }
 
-    @Alors("je vois les créneaux de retrait disponibles")
-    public void jeVoisLesCreneauxDeRetraitDisponibles() {
-        Locator banner = PlaywrightHooks.page().locator("[data-testid='timeslot-banner']");
-        assertTrue(banner.isVisible(), "Le bandeau des créneaux de retrait doit être visible");
-        String text = banner.textContent();
+    @Alors("je vois le hero banner avec les informations de la vente")
+    public void jeVoisLeHeroBannerAvecLesInformationsDeLaVente() {
+        Locator heroBanner = PlaywrightHooks.page().locator("[data-testid='hero-banner']");
+        assertTrue(heroBanner.isVisible(), "Le hero banner doit être visible");
+        Locator infoCard = PlaywrightHooks.page().locator("[data-testid='vente-info-card']");
+        assertTrue(infoCard.isVisible(), "La carte d'information de la vente doit être visible");
+        String text = infoCard.textContent().toLowerCase();
         assertNotNull(text);
-        assertTrue(text.contains("Créneaux de retrait"), "Le bandeau doit contenir le titre 'Créneaux de retrait'");
-        assertTrue(text.contains("10h00"), "Le bandeau doit afficher un horaire de créneau");
+        assertTrue(text.contains("commande du"), "La carte doit contenir 'commande du'");
+        assertTrue(text.contains("récupère-la"), "La carte doit contenir 'récupère-la'");
     }
 
     @Alors("les cartes s'affichent en 1 colonne")

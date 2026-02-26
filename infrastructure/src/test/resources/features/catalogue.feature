@@ -41,10 +41,10 @@ Fonctionnalité: Catalogue produits frontend
     Quand j'accède à la page d'accueil en mode desktop
     Alors les cartes s'affichent en 3 colonnes
 
-  Scénario: Affichage des créneaux de retrait sur la page d'accueil
+  Scénario: Affichage du hero banner avec les informations de la vente
     Étant donné qu'une vente existe avec des produits et des créneaux
     Quand j'accède à la page d'accueil
-    Alors je vois les créneaux de retrait disponibles
+    Alors je vois le hero banner avec les informations de la vente
 
   Scénario: Skeleton screens pendant le chargement
     Étant donné qu'une vente existe avec des produits et des créneaux
