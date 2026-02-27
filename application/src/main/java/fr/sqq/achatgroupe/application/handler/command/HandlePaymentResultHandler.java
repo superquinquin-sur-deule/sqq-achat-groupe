@@ -50,7 +50,7 @@ public class HandlePaymentResultHandler implements CommandHandler<HandlePaymentR
         Order order = orderRepository.findOrderById(result.orderId())
                 .orElseThrow(() -> new OrderNotFoundException(result.orderId()));
 
-        Payment payment = paymentRepository.findByOrderId(order.id())
+        Payment payment = paymentRepository.findByOrderIdForUpdate(order.id())
                 .orElseThrow(() -> new PaymentWebhookException(
                         "Paiement introuvable pour la commande " + order.id()));
 

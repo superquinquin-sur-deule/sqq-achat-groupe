@@ -121,7 +121,7 @@ public class ApplyShortageAdjustmentsHandler implements CommandHandler<ApplyShor
         for (Order order : shuffled) {
             if (order.hasAdjustments()) {
                 if (order.isFullyCancelled()) {
-                    order.cancel();
+                    order.cancelDueToShortage();
                 }
                 orderRepository.save(order);
             }

@@ -64,8 +64,18 @@ public class Order {
     }
 
     public void cancel() {
-        if (this.status == OrderStatus.PICKED_UP) {
-            throw new IllegalStateException("Impossible d'annuler une commande déjà retirée");
+        if (this.status == OrderStatus.PAID || this.status == OrderStatus.PICKED_UP) {
+            throw new IllegalStateException("Impossible d'annuler une commande en statut " + this.status);
+        }
+        this.status = OrderStatus.CANCELLED;
+    }
+
+    public void cancelDueToShortage() {
+        if (this.status != OrderStatus.PAID) {
+            throw new IllegalStateException("Seule une commande payée peut être annulée pour rupture");
+        }
+        if (!isFullyCancelled()) {
+            throw new IllegalStateException("Seule une commande entièrement annulée peut être marquée annulée");
         }
         this.status = OrderStatus.CANCELLED;
     }

@@ -8,6 +8,7 @@ import fr.sqq.achatgroupe.application.query.CursorPage;
 import fr.sqq.achatgroupe.application.query.CursorPageRequest;
 import fr.sqq.achatgroupe.infrastructure.out.persistence.cursor.CursorCodec;
 import fr.sqq.achatgroupe.infrastructure.out.persistence.entity.OrderEntity;
+import fr.sqq.achatgroupe.infrastructure.out.persistence.entity.OrderItemEntity;
 import fr.sqq.achatgroupe.infrastructure.out.persistence.mapper.OrderPersistenceMapper;
 import io.quarkus.hibernate.orm.panache.PanacheRepositoryBase;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -29,9 +30,22 @@ public class OrderPanacheRepository implements OrderRepository, PanacheRepositor
 
     @Override
     public Order save(Order order) {
-        OrderEntity entity = mapper.toEntity(order);
-        entity = getEntityManager().merge(entity);
-        return mapper.toDomain(entity);
+        OrderEntity existing = findById(order.id());
+        if (existing == null) {
+            OrderEntity entity = mapper.toEntity(order);
+            persist(entity);
+            return mapper.toDomain(entity);
+        }
+
+        existing.setStatus(order.status().name());
+        for (OrderItemEntity itemEntity : existing.getItems()) {
+            order.items().stream()
+                    .filter(i -> i.id() != null && i.id().equals(itemEntity.getId()))
+                    .findFirst()
+                    .ifPresent(domainItem -> itemEntity.setCancelledQuantity(domainItem.cancelledQuantity()));
+        }
+
+        return mapper.toDomain(existing);
     }
 
     @Override
