@@ -51,9 +51,8 @@ jobs:
           IMAGE_BASE="ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}"
           if [[ "${GITHUB_EVENT_NAME}" == "push" && "${GITHUB_REF_TYPE}" == "branch" && "${GITHUB_REF_NAME}" == "main" ]]; then
             VERSION=$(mvn -q -DforceStdout help:evaluate -Dexpression=project.version)
-            SHA=$(git rev-parse --short HEAD)
             # For main branch (pre-release / SNAPSHOT builds): push latest, SNAPSHOT version and SHA
-            echo "tags=${IMAGE_BASE}:latest,${IMAGE_BASE}:${VERSION},${IMAGE_BASE}:${SHA}" >> "$GITHUB_OUTPUT"
+            echo "tags=${IMAGE_BASE}:latest,${IMAGE_BASE}:${VERSION}" >> "$GITHUB_OUTPUT"
           elif [[ "${GITHUB_REF_TYPE}" == "tag" ]]; then
             # For release tags pushed by release-please (e.g., v1.2.3), push only the release tag
             TAG_NO_V="${GITHUB_REF_NAME#v}"
