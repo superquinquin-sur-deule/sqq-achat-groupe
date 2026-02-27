@@ -95,7 +95,7 @@ public class AdminReceptionResource {
         List<RefundPreviewResponse.RefundOrderItem> orders = result.orders().stream()
                 .map(o -> new RefundPreviewResponse.RefundOrderItem(
                         o.orderId(), o.orderNumber(), o.customerName(),
-                        o.originalAmount(), o.adjustedAmount(), o.refundAmount(), o.refundStatus()))
+                        o.originalAmount().amount(), o.adjustedAmount().amount(), o.refundAmount().amount(), o.refundStatus()))
                 .toList();
 
         return new DataResponse<>(new RefundPreviewResponse(orders));
@@ -107,6 +107,6 @@ public class AdminReceptionResource {
         RefundSummary summary = mediator.send(new ProcessRefundsCommand(venteId));
         return new DataResponse<>(new ProcessRefundsResponse(
                 summary.totalProcessed(), summary.totalSucceeded(),
-                summary.totalFailed(), summary.totalAmountRefunded()));
+                summary.totalFailed(), summary.totalAmountRefunded().amount()));
     }
 }

@@ -79,7 +79,7 @@ public class OrderResource {
                             .map(Product::name)
                             .orElse("Produit #" + item.productId());
                     return new OrderDetailResponse.OrderItemInfo(
-                            productName, item.quantity(), item.unitPrice());
+                            productName, item.quantity(), item.unitPrice().amount());
                 })
                 .toList();
 
@@ -91,7 +91,7 @@ public class OrderResource {
                 order.id(),
                 order.orderNumber().value(),
                 order.status().name(),
-                order.totalAmount(),
+                order.totalAmount().amount(),
                 order.customer().firstName(),
                 order.customer().lastName(),
                 order.customer().email(),

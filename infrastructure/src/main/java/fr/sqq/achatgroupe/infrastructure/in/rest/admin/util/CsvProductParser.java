@@ -1,6 +1,7 @@
 package fr.sqq.achatgroupe.infrastructure.in.rest.admin.util;
 
 import fr.sqq.achatgroupe.application.command.ImportProductsCommand.CsvProductRow;
+import fr.sqq.achatgroupe.domain.model.shared.Money;
 import jakarta.enterprise.context.ApplicationScoped;
 
 import java.io.BufferedReader;
@@ -154,7 +155,7 @@ public class CsvProductParser {
             throw new CsvLineParseException("Le stock doit être un nombre entier");
         }
 
-        return new CsvProductRow(name.strip(), description != null ? description.strip() : "", prixHt, tauxTva, supplier.strip(), stock, reference.strip(), category.strip(), brand.strip());
+        return new CsvProductRow(name.strip(), description != null ? description.strip() : "", Money.eur(prixHt), tauxTva, supplier.strip(), stock, reference.strip(), category.strip(), brand.strip());
     }
 
     private String getColumn(String[] values, Map<String, Integer> columnIndex, String columnName) {

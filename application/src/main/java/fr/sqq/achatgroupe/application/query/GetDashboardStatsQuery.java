@@ -1,17 +1,17 @@
 package fr.sqq.achatgroupe.application.query;
 
+import fr.sqq.achatgroupe.domain.model.shared.Money;
 import fr.sqq.mediator.Query;
 
-import java.math.BigDecimal;
 import java.util.List;
 
 public record GetDashboardStatsQuery(Long venteId) implements Query<GetDashboardStatsQuery.DashboardStats> {
 
     public record DashboardStats(
             long totalOrders,
-            BigDecimal totalAmount,
+            Money totalAmount,
             double pickupRate,
-            BigDecimal averageBasket,
+            Money averageBasket,
             List<SlotOrderCount> slotDistribution,
             List<TopProductStat> topProducts
     ) {

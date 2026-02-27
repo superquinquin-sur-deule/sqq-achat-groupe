@@ -29,7 +29,7 @@ public interface OrderRestMapper {
     @Mapping(target = "id", expression = "java(order.id())")
     @Mapping(target = "orderNumber", expression = "java(order.orderNumber().value())")
     @Mapping(target = "status", expression = "java(order.status().name())")
-    @Mapping(target = "totalAmount", expression = "java(order.totalAmount())")
+    @Mapping(target = "totalAmount", expression = "java(order.totalAmount().amount())")
     @Mapping(target = "createdAt", expression = "java(order.createdAt())")
     OrderResponse toResponse(Order order);
 }

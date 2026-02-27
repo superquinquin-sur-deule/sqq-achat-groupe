@@ -34,9 +34,9 @@ public interface AdminDashboardRestMapper {
 
         return new DashboardStatsResponse(
                 stats.totalOrders(),
-                stats.totalAmount(),
+                stats.totalAmount().amount(),
                 stats.pickupRate(),
-                stats.averageBasket(),
+                stats.averageBasket().amount(),
                 distribution,
                 topProducts
         );

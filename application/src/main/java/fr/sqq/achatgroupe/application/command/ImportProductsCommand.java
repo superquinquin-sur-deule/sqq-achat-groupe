@@ -1,5 +1,6 @@
 package fr.sqq.achatgroupe.application.command;
 
+import fr.sqq.achatgroupe.domain.model.shared.Money;
 import fr.sqq.mediator.Command;
 
 import java.math.BigDecimal;
@@ -13,7 +14,7 @@ public record ImportProductsCommand(
     public record CsvProductRow(
             String name,
             String description,
-            BigDecimal prixHt,
+            Money prixHt,
             BigDecimal tauxTva,
             String supplier,
             int stock,

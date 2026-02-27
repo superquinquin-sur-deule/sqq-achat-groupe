@@ -4,7 +4,8 @@ import fr.sqq.achatgroupe.application.query.CursorPage;
 import fr.sqq.achatgroupe.application.query.CursorPageRequest;
 import fr.sqq.achatgroupe.domain.model.order.Order;
 
-import java.math.BigDecimal;
+import fr.sqq.achatgroupe.domain.model.shared.Money;
+
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
@@ -22,7 +23,7 @@ public interface OrderRepository {
 
     long countPaidByVenteId(Long venteId);
 
-    BigDecimal sumTotalPaidByVenteId(Long venteId);
+    Money sumTotalPaidByVenteId(Long venteId);
 
     long countPickedUpByVenteId(Long venteId);
 

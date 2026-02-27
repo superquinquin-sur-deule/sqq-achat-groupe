@@ -7,6 +7,7 @@ import fr.sqq.achatgroupe.application.query.GetDashboardStatsQuery.DashboardStat
 import fr.sqq.achatgroupe.application.query.GetDashboardStatsQuery.SlotOrderCount;
 import fr.sqq.achatgroupe.application.query.GetDashboardStatsQuery.TopProductStat;
 import fr.sqq.achatgroupe.domain.model.catalog.Product;
+import fr.sqq.achatgroupe.domain.model.shared.Money;
 import fr.sqq.mediator.QueryHandler;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
@@ -33,12 +34,12 @@ public class GetDashboardStatsHandler implements QueryHandler<GetDashboardStatsQ
     public DashboardStats handle(GetDashboardStatsQuery query) {
         Long venteId = query.venteId();
         long totalOrders = orderRepository.countPaidByVenteId(venteId);
-        BigDecimal totalAmount = orderRepository.sumTotalPaidByVenteId(venteId);
+        Money totalAmount = orderRepository.sumTotalPaidByVenteId(venteId);
         long pickedUpCount = orderRepository.countPickedUpByVenteId(venteId);
 
-        BigDecimal averageBasket = totalOrders > 0
-                ? totalAmount.divide(BigDecimal.valueOf(totalOrders), 2, RoundingMode.HALF_UP)
-                : BigDecimal.ZERO;
+        Money averageBasket = totalOrders > 0
+                ? Money.eur(totalAmount.amount().divide(BigDecimal.valueOf(totalOrders), 2, RoundingMode.HALF_UP))
+                : Money.ZERO;
 
         double pickupRate = totalOrders > 0
                 ? (double) pickedUpCount / totalOrders * 100

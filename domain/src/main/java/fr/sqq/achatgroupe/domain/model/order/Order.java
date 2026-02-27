@@ -1,8 +1,8 @@
 package fr.sqq.achatgroupe.domain.model.order;
 
 import fr.sqq.achatgroupe.domain.exception.OrderAlreadyPaidException;
+import fr.sqq.achatgroupe.domain.model.shared.Money;
 
-import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
@@ -16,11 +16,11 @@ public class Order {
     private final Long timeSlotId;
     private final List<OrderItem> items;
     private OrderStatus status;
-    private final BigDecimal totalAmount;
+    private final Money totalAmount;
     private final Instant createdAt;
 
     public Order(UUID id, Long venteId, OrderNumber orderNumber, CustomerInfo customer, Long timeSlotId,
-                 List<OrderItem> items, OrderStatus status, BigDecimal totalAmount, Instant createdAt) {
+                 List<OrderItem> items, OrderStatus status, Money totalAmount, Instant createdAt) {
         if (orderNumber == null) throw new IllegalArgumentException("Order number must not be null");
         if (customer == null) throw new IllegalArgumentException("Customer must not be null");
         if (timeSlotId == null) throw new IllegalArgumentException("Time slot ID must not be null");
@@ -43,9 +43,9 @@ public class Order {
         if (items == null || items.isEmpty()) {
             throw new IllegalArgumentException("La commande doit contenir au moins un article");
         }
-        BigDecimal total = items.stream()
+        Money total = items.stream()
                 .map(OrderItem::subtotal)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+                .reduce(Money.ZERO, Money::add);
         return new Order(UUID.randomUUID(), venteId, number, customer, timeSlotId, items, OrderStatus.PENDING, total, Instant.now());
     }
 
@@ -80,13 +80,13 @@ public class Order {
         this.status = OrderStatus.CANCELLED;
     }
 
-    public BigDecimal effectiveTotalAmount() {
+    public Money effectiveTotalAmount() {
         return items.stream()
                 .map(OrderItem::effectiveSubtotal)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+                .reduce(Money.ZERO, Money::add);
     }
 
-    public BigDecimal refundAmount() {
+    public Money refundAmount() {
         return totalAmount.subtract(effectiveTotalAmount());
     }
 
@@ -105,6 +105,6 @@ public class Order {
     public Long timeSlotId() { return timeSlotId; }
     public List<OrderItem> items() { return items; }
     public OrderStatus status() { return status; }
-    public BigDecimal totalAmount() { return totalAmount; }
+    public Money totalAmount() { return totalAmount; }
     public Instant createdAt() { return createdAt; }
 }

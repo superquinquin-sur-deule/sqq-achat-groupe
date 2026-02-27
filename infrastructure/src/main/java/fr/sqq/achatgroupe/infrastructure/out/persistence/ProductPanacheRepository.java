@@ -92,7 +92,7 @@ public class ProductPanacheRepository implements ProductRepository, PanacheRepos
         ProductEntity entity = findById(product.id());
         entity.setName(product.name());
         entity.setDescription(product.description());
-        entity.setPrixHt(product.prixHt());
+        entity.setPrixHt(product.prixHt().amount());
         entity.setTauxTva(product.tauxTva());
         entity.setSupplier(product.supplier());
         entity.setStock(product.stock());

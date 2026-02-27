@@ -1,19 +1,19 @@
 package fr.sqq.achatgroupe.domain.model.order;
 
-import java.math.BigDecimal;
+import fr.sqq.achatgroupe.domain.model.shared.Money;
 
 public class OrderItem {
 
     private final Long id;
     private final Long productId;
     private final int quantity;
-    private final BigDecimal unitPrice;
+    private final Money unitPrice;
     private int cancelledQuantity;
 
-    public OrderItem(Long id, Long productId, int quantity, BigDecimal unitPrice, int cancelledQuantity) {
+    public OrderItem(Long id, Long productId, int quantity, Money unitPrice, int cancelledQuantity) {
         if (productId == null) throw new IllegalArgumentException("Product id must not be null");
         if (quantity <= 0) throw new IllegalArgumentException("Quantity must be positive");
-        if (unitPrice == null || unitPrice.compareTo(BigDecimal.ZERO) <= 0) {
+        if (unitPrice == null || !unitPrice.isPositive()) {
             throw new IllegalArgumentException("Unit price must be positive");
         }
         if (cancelledQuantity < 0 || cancelledQuantity > quantity) {
@@ -26,7 +26,7 @@ public class OrderItem {
         this.cancelledQuantity = cancelledQuantity;
     }
 
-    public static OrderItem create(Long productId, int quantity, BigDecimal unitPrice) {
+    public static OrderItem create(Long productId, int quantity, Money unitPrice) {
         return new OrderItem(null, productId, quantity, unitPrice, 0);
     }
 
@@ -42,8 +42,8 @@ public class OrderItem {
         return quantity - cancelledQuantity;
     }
 
-    public BigDecimal effectiveSubtotal() {
-        return unitPrice.multiply(BigDecimal.valueOf(effectiveQuantity()));
+    public Money effectiveSubtotal() {
+        return unitPrice.multiply(effectiveQuantity());
     }
 
     public void resetCancellation() {
@@ -54,13 +54,13 @@ public class OrderItem {
         return cancelledQuantity == quantity;
     }
 
-    public BigDecimal subtotal() {
-        return unitPrice.multiply(BigDecimal.valueOf(quantity));
+    public Money subtotal() {
+        return unitPrice.multiply(quantity);
     }
 
     public Long id() { return id; }
     public Long productId() { return productId; }
     public int quantity() { return quantity; }
-    public BigDecimal unitPrice() { return unitPrice; }
+    public Money unitPrice() { return unitPrice; }
     public int cancelledQuantity() { return cancelledQuantity; }
 }

@@ -51,7 +51,7 @@ public class ImportProductsHandler implements CommandHandler<ImportProductsComma
                 Product saved = productRepository.saveNew(product);
                 String stripeProductId = paymentCatalogGateway.registerProduct(
                         saved.id(), saved.name(), saved.description(),
-                        saved.prixHt(), saved.tauxTva(), saved.prixTtc(), saved.reference());
+                        saved.prixHt().amount(), saved.tauxTva(), saved.prixTtc().amount(), saved.reference());
                 saved.assignStripeProductId(stripeProductId);
                 productRepository.save(saved);
                 imported++;

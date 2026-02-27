@@ -1,6 +1,7 @@
 package fr.sqq.achatgroupe.domain.model.payment;
 
-import java.math.BigDecimal;
+import fr.sqq.achatgroupe.domain.model.shared.Money;
+
 import java.time.Instant;
 import java.util.UUID;
 
@@ -8,13 +9,13 @@ public class Refund {
 
     private final Long id;
     private final UUID orderId;
-    private final BigDecimal amount;
+    private final Money amount;
     private String stripeRefundId;
     private RefundStatus status;
     private final Instant createdAt;
     private Instant updatedAt;
 
-    public Refund(Long id, UUID orderId, BigDecimal amount, String stripeRefundId,
+    public Refund(Long id, UUID orderId, Money amount, String stripeRefundId,
                   RefundStatus status, Instant createdAt, Instant updatedAt) {
         if (orderId == null) throw new IllegalArgumentException("Order ID must not be null");
         if (amount == null) throw new IllegalArgumentException("Amount must not be null");
@@ -28,7 +29,7 @@ public class Refund {
         this.updatedAt = updatedAt;
     }
 
-    public static Refund create(UUID orderId, BigDecimal amount) {
+    public static Refund create(UUID orderId, Money amount) {
         Instant now = Instant.now();
         return new Refund(null, orderId, amount, null, RefundStatus.PENDING, now, now);
     }
@@ -46,7 +47,7 @@ public class Refund {
 
     public Long id() { return id; }
     public UUID orderId() { return orderId; }
-    public BigDecimal amount() { return amount; }
+    public Money amount() { return amount; }
     public String stripeRefundId() { return stripeRefundId; }
     public RefundStatus status() { return status; }
     public Instant createdAt() { return createdAt; }

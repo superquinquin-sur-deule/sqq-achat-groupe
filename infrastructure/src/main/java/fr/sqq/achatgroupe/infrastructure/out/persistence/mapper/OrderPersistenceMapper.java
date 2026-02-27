@@ -5,6 +5,7 @@ import fr.sqq.achatgroupe.domain.model.order.Order;
 import fr.sqq.achatgroupe.domain.model.order.OrderItem;
 import fr.sqq.achatgroupe.domain.model.order.OrderNumber;
 import fr.sqq.achatgroupe.domain.model.order.OrderStatus;
+import fr.sqq.achatgroupe.domain.model.shared.Money;
 import fr.sqq.achatgroupe.infrastructure.out.persistence.entity.OrderEntity;
 import fr.sqq.achatgroupe.infrastructure.out.persistence.entity.OrderItemEntity;
 import org.mapstruct.Mapper;
@@ -27,14 +28,14 @@ public interface OrderPersistenceMapper {
                 entity.getTimeSlotId(),
                 items,
                 OrderStatus.valueOf(entity.getStatus()),
-                entity.getTotalAmount(),
+                Money.eur(entity.getTotalAmount()),
                 entity.getCreatedAt()
         );
     }
 
     default OrderItem toDomain(OrderItemEntity entity) {
         return new OrderItem(entity.getId(), entity.getProductId(), entity.getQuantity(),
-                entity.getUnitPrice(), entity.getCancelledQuantity());
+                Money.eur(entity.getUnitPrice()), entity.getCancelledQuantity());
     }
 
     default OrderEntity toEntity(Order domain) {
@@ -48,7 +49,7 @@ public interface OrderPersistenceMapper {
         entity.setCustomerPhone(domain.customer().phone());
         entity.setTimeSlotId(domain.timeSlotId());
         entity.setStatus(domain.status().name());
-        entity.setTotalAmount(domain.totalAmount());
+        entity.setTotalAmount(domain.totalAmount().amount());
         entity.setCreatedAt(domain.createdAt());
 
         List<OrderItemEntity> itemEntities = domain.items().stream()
@@ -65,7 +66,7 @@ public interface OrderPersistenceMapper {
         entity.setOrder(orderEntity);
         entity.setProductId(domain.productId());
         entity.setQuantity(domain.quantity());
-        entity.setUnitPrice(domain.unitPrice());
+        entity.setUnitPrice(domain.unitPrice().amount());
         entity.setCancelledQuantity(domain.cancelledQuantity());
         return entity;
     }

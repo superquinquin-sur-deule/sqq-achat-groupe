@@ -56,7 +56,7 @@ public class StripePaymentGateway implements PaymentGateway {
             SessionCreateParams.LineItem.PriceData.Builder priceDataBuilder =
                     SessionCreateParams.LineItem.PriceData.builder()
                             .setCurrency("eur")
-                            .setUnitAmount(item.unitPrice().movePointRight(2).longValueExact());
+                            .setUnitAmount(item.unitPrice().toCents());
 
             String stripeProductId = productRepository.findById(new ProductId(item.productId()))
                     .map(Product::stripeProductId)

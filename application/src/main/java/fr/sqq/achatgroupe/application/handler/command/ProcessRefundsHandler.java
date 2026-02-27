@@ -10,12 +10,12 @@ import fr.sqq.achatgroupe.application.port.out.RefundRepository;
 import fr.sqq.achatgroupe.domain.model.order.Order;
 import fr.sqq.achatgroupe.domain.model.payment.Payment;
 import fr.sqq.achatgroupe.domain.model.payment.Refund;
+import fr.sqq.achatgroupe.domain.model.shared.Money;
 import fr.sqq.mediator.CommandHandler;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 import org.jboss.logging.Logger;
 
-import java.math.BigDecimal;
 import java.util.List;
 
 @ApplicationScoped
@@ -43,13 +43,13 @@ public class ProcessRefundsHandler implements CommandHandler<ProcessRefundsComma
     public RefundSummary handle(ProcessRefundsCommand command) {
         List<Order> paidOrders = orderRepository.findPaidByVenteId(command.venteId());
         List<Order> ordersToRefund = paidOrders.stream()
-                .filter(o -> o.refundAmount().compareTo(BigDecimal.ZERO) > 0)
+                .filter(o -> o.refundAmount().isPositive())
                 .toList();
 
         int totalProcessed = 0;
         int totalSucceeded = 0;
         int totalFailed = 0;
-        BigDecimal totalAmountRefunded = BigDecimal.ZERO;
+        Money totalAmountRefunded = Money.ZERO;
 
         for (Order order : ordersToRefund) {
             if (refundRepository.findByOrderId(order.id()).isPresent()) {
@@ -62,12 +62,11 @@ public class ProcessRefundsHandler implements CommandHandler<ProcessRefundsComma
                 continue;
             }
 
-            BigDecimal refundAmount = order.refundAmount();
+            Money refundAmount = order.refundAmount();
             Refund refund = Refund.create(order.id(), refundAmount);
 
             try {
-                long amountInCents = refundAmount.movePointRight(2).longValueExact();
-                RefundResult result = paymentGateway.createRefund(payment.stripePaymentId(), amountInCents);
+                RefundResult result = paymentGateway.createRefund(payment.stripePaymentId(), refundAmount.toCents());
 
                 if (result.succeeded()) {
                     refund.markAsSucceeded(result.stripeRefundId());

@@ -14,6 +14,8 @@ import io.quarkus.hibernate.orm.panache.PanacheRepositoryBase;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
+import fr.sqq.achatgroupe.domain.model.shared.Money;
+
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -73,12 +75,12 @@ public class OrderPanacheRepository implements OrderRepository, PanacheRepositor
     }
 
     @Override
-    public BigDecimal sumTotalPaidByVenteId(Long venteId) {
+    public Money sumTotalPaidByVenteId(Long venteId) {
         BigDecimal result = getEntityManager()
                 .createQuery("SELECT COALESCE(SUM(o.totalAmount), 0) FROM OrderEntity o WHERE o.venteId = ?1 AND o.status IN ('PAID', 'PICKED_UP')", BigDecimal.class)
                 .setParameter(1, venteId)
                 .getSingleResult();
-        return result != null ? result : BigDecimal.ZERO;
+        return Money.eur(result != null ? result : BigDecimal.ZERO);
     }
 
     @Override

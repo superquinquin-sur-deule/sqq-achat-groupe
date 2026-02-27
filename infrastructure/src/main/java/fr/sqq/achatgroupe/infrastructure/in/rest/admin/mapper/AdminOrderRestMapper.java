@@ -29,7 +29,7 @@ public interface AdminOrderRestMapper {
                 order.customer().lastName(),
                 order.customer().email(),
                 timeSlotLabel,
-                order.totalAmount(),
+                order.totalAmount().amount(),
                 order.status().name(),
                 order.createdAt()
         );
@@ -61,7 +61,7 @@ public interface AdminOrderRestMapper {
                 order.customer().phone(),
                 timeSlotInfo,
                 items,
-                order.totalAmount(),
+                order.totalAmount().amount(),
                 order.createdAt()
         );
     }
@@ -72,8 +72,8 @@ public interface AdminOrderRestMapper {
         return new AdminOrderDetailResponse.OrderItemInfo(
                 productName,
                 item.quantity(),
-                item.unitPrice(),
-                item.subtotal()
+                item.unitPrice().amount(),
+                item.subtotal().amount()
         );
     }
 }

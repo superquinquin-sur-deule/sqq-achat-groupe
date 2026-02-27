@@ -2,6 +2,7 @@ package fr.sqq.achatgroupe.infrastructure.out.persistence.mapper;
 
 import fr.sqq.achatgroupe.domain.model.payment.Refund;
 import fr.sqq.achatgroupe.domain.model.payment.RefundStatus;
+import fr.sqq.achatgroupe.domain.model.shared.Money;
 import fr.sqq.achatgroupe.infrastructure.out.persistence.entity.RefundEntity;
 import org.mapstruct.Mapper;
 
@@ -12,7 +13,7 @@ public interface RefundPersistenceMapper {
         return new Refund(
                 entity.getId(),
                 entity.getOrderId(),
-                entity.getAmount(),
+                Money.eur(entity.getAmount()),
                 entity.getStripeRefundId(),
                 RefundStatus.valueOf(entity.getStatus()),
                 entity.getCreatedAt(),
@@ -24,7 +25,7 @@ public interface RefundPersistenceMapper {
         var entity = new RefundEntity();
         entity.setId(domain.id());
         entity.setOrderId(domain.orderId());
-        entity.setAmount(domain.amount());
+        entity.setAmount(domain.amount().amount());
         entity.setStripeRefundId(domain.stripeRefundId());
         entity.setStatus(domain.status().name());
         entity.setCreatedAt(domain.createdAt());

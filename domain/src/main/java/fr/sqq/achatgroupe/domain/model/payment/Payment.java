@@ -1,6 +1,7 @@
 package fr.sqq.achatgroupe.domain.model.payment;
 
-import java.math.BigDecimal;
+import fr.sqq.achatgroupe.domain.model.shared.Money;
+
 import java.time.Instant;
 import java.util.UUID;
 
@@ -8,7 +9,7 @@ public class Payment {
 
     private final Long id;
     private final UUID orderId;
-    private final BigDecimal amount;
+    private final Money amount;
     private String stripePaymentId;
     private PaymentStatus status;
     private int attempts;
@@ -16,7 +17,7 @@ public class Payment {
     private Instant updatedAt;
     private int version;
 
-    public Payment(Long id, UUID orderId, BigDecimal amount, String stripePaymentId,
+    public Payment(Long id, UUID orderId, Money amount, String stripePaymentId,
                    PaymentStatus status, int attempts, Instant createdAt, Instant updatedAt, int version) {
         if (orderId == null) throw new IllegalArgumentException("Order ID must not be null");
         if (amount == null) throw new IllegalArgumentException("Amount must not be null");
@@ -32,7 +33,7 @@ public class Payment {
         this.version = version;
     }
 
-    public static Payment create(UUID orderId, BigDecimal amount) {
+    public static Payment create(UUID orderId, Money amount) {
         Instant now = Instant.now();
         return new Payment(null, orderId, amount, null, PaymentStatus.PENDING, 0, now, now, 0);
     }
@@ -62,7 +63,7 @@ public class Payment {
 
     public Long id() { return id; }
     public UUID orderId() { return orderId; }
-    public BigDecimal amount() { return amount; }
+    public Money amount() { return amount; }
     public String stripePaymentId() { return stripePaymentId; }
     public PaymentStatus status() { return status; }
     public int attempts() { return attempts; }

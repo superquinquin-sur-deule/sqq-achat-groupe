@@ -1,9 +1,9 @@
 package fr.sqq.achatgroupe.domain.model.catalog;
 
 import fr.sqq.achatgroupe.domain.exception.InsufficientStockException;
+import fr.sqq.achatgroupe.domain.model.shared.Money;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 
 public class Product {
 
@@ -11,7 +11,7 @@ public class Product {
     private final Long venteId;
     private final String name;
     private final String description;
-    private final BigDecimal prixHt;
+    private final Money prixHt;
     private final BigDecimal tauxTva;
     private final String supplier;
     private int stock;
@@ -22,12 +22,12 @@ public class Product {
     private final boolean hasImage;
     private String stripeProductId;
 
-    public Product(Long id, Long venteId, String name, String description, BigDecimal prixHt, BigDecimal tauxTva, String supplier, int stock, boolean active,
+    public Product(Long id, Long venteId, String name, String description, Money prixHt, BigDecimal tauxTva, String supplier, int stock, boolean active,
                    String reference, String category, String brand, boolean hasImage) {
         if (name == null || name.isBlank()) {
             throw new IllegalArgumentException("Product name must not be blank");
         }
-        if (prixHt == null || prixHt.compareTo(BigDecimal.ZERO) <= 0) {
+        if (prixHt == null || !prixHt.isPositive()) {
             throw new IllegalArgumentException("Product price must be positive");
         }
         if (tauxTva == null || tauxTva.compareTo(BigDecimal.ZERO) < 0) {
@@ -78,9 +78,8 @@ public class Product {
         return stock > 0;
     }
 
-    public BigDecimal prixTtc() {
-        return prixHt.multiply(BigDecimal.ONE.add(tauxTva.divide(BigDecimal.valueOf(100))))
-                .setScale(2, RoundingMode.HALF_UP);
+    public Money prixTtc() {
+        return prixHt.multiply(BigDecimal.ONE.add(tauxTva.divide(BigDecimal.valueOf(100))));
     }
 
     public Long id() {
@@ -99,7 +98,7 @@ public class Product {
         return description;
     }
 
-    public BigDecimal prixHt() {
+    public Money prixHt() {
         return prixHt;
     }
 

@@ -4,6 +4,7 @@ import fr.sqq.achatgroupe.application.command.CreateProductCommand;
 import fr.sqq.achatgroupe.application.command.UpdateProductCommand;
 import fr.sqq.achatgroupe.domain.model.catalog.Product;
 import fr.sqq.achatgroupe.domain.model.catalog.ProductId;
+import fr.sqq.achatgroupe.domain.model.shared.Money;
 import fr.sqq.achatgroupe.infrastructure.in.rest.admin.dto.AdminProductResponse;
 import fr.sqq.achatgroupe.infrastructure.in.rest.common.dto.CreateProductRequest;
 import fr.sqq.achatgroupe.infrastructure.in.rest.common.dto.UpdateProductRequest;
@@ -17,9 +18,9 @@ public interface AdminProductRestMapper {
     @Mapping(target = "venteId", expression = "java(product.venteId())")
     @Mapping(target = "name", expression = "java(product.name())")
     @Mapping(target = "description", expression = "java(product.description())")
-    @Mapping(target = "prixHt", expression = "java(product.prixHt())")
+    @Mapping(target = "prixHt", expression = "java(product.prixHt().amount())")
     @Mapping(target = "tauxTva", expression = "java(product.tauxTva())")
-    @Mapping(target = "prixTtc", expression = "java(product.prixTtc())")
+    @Mapping(target = "prixTtc", expression = "java(product.prixTtc().amount())")
     @Mapping(target = "supplier", expression = "java(product.supplier())")
     @Mapping(target = "stock", expression = "java(product.stock())")
     @Mapping(target = "active", expression = "java(product.active())")
@@ -34,7 +35,7 @@ public interface AdminProductRestMapper {
                 venteId,
                 request.name(),
                 request.description(),
-                request.prixHt(),
+                Money.eur(request.prixHt()),
                 request.tauxTva(),
                 request.supplier(),
                 request.stock(),
@@ -50,7 +51,7 @@ public interface AdminProductRestMapper {
                 new ProductId(id),
                 request.name(),
                 request.description(),
-                request.prixHt(),
+                Money.eur(request.prixHt()),
                 request.tauxTva(),
                 request.supplier(),
                 request.stock(),

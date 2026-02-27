@@ -11,7 +11,6 @@ import fr.sqq.mediator.QueryHandler;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -33,7 +32,7 @@ public class GetRefundPreviewHandler implements QueryHandler<GetRefundPreviewQue
     public RefundPreviewResult handle(GetRefundPreviewQuery query) {
         List<Order> paidOrders = orderRepository.findPaidByVenteId(query.venteId());
         List<Order> adjustedOrders = paidOrders.stream()
-                .filter(o -> o.refundAmount().compareTo(BigDecimal.ZERO) > 0)
+                .filter(o -> o.refundAmount().isPositive())
                 .toList();
 
         Map<UUID, Refund> refundsByOrderId = refundRepository.findAllByVenteId(query.venteId()).stream()
