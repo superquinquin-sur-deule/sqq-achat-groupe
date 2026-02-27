@@ -19,6 +19,7 @@ export class ApiError extends Error {
 export const customFetch = async <T>(url: string, init: RequestInit): Promise<T> => {
   const requestHeaders: Record<string, string> = {
     Accept: 'application/json',
+    'X-Requested-With': 'XMLHttpRequest',
   }
 
   if (init.headers) {
