@@ -56,9 +56,14 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add pom.xml */pom.xml infrastructure/src/main/webui/package.json
-          git commit -m "chore: release ${{ steps.version.outputs.new_version }}"
+          git commit -m "chore: release ${{ steps.version.outputs.new_version }} [skip ci]"
           git tag ${{ steps.version.outputs.new_tag }}
           git push origin main --tags
+
+      - name: Trigger CI
+        run: gh workflow run ci.yaml --ref ${{ steps.version.outputs.new_tag }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
