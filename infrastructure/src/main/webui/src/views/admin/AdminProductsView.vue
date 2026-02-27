@@ -127,6 +127,7 @@ async function onSubmit(data: {
   reference: string
   category: string
   brand: string
+  colisage?: number
   imageFile?: File
 }) {
   if (!selectedVenteId.value) return
@@ -145,6 +146,7 @@ async function onSubmit(data: {
         reference: data.reference,
         category: data.category,
         brand: data.brand,
+        colisage: data.colisage,
       }
       await updateMutation.mutateAsync({ id: editingProduct.value.id, data: updateData })
       productId = editingProduct.value.id
@@ -159,6 +161,7 @@ async function onSubmit(data: {
         reference: data.reference,
         category: data.category,
         brand: data.brand,
+        colisage: data.colisage,
       }
       const result = await createMutation.mutateAsync(createData)
       productId = (result.data as { data: { id: number } }).data.id
@@ -208,6 +211,7 @@ async function toggleActive(product: AdminProductResponse) {
       reference: product.reference,
       category: product.category,
       brand: product.brand,
+      colisage: product.colisage,
     }
     await updateMutation.mutateAsync({ id: product.id, data: updateData })
     toast.success(product.active ? 'Produit désactivé' : 'Produit activé')
@@ -284,6 +288,7 @@ function formatPrice(price: number): string {
         'Prix TTC',
         'Fournisseur',
         'Stock',
+        'Colisage',
         'Statut',
         'Actions',
       ]"
@@ -305,6 +310,7 @@ function formatPrice(price: number): string {
         <td class="px-4 py-3 font-medium text-dark">{{ formatPrice(product.prixTtc) }}</td>
         <td class="px-4 py-3 text-dark">{{ product.supplier }}</td>
         <td class="px-4 py-3 text-dark">{{ product.stock }}</td>
+        <td class="px-4 py-3 text-dark">{{ product.colisage ?? '—' }}</td>
         <td class="px-4 py-3">
           <span
             :class="[

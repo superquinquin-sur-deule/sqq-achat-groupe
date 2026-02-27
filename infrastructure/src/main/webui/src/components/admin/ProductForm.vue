@@ -26,6 +26,7 @@ const emit = defineEmits<{
       reference: string
       category: string
       brand: string
+      colisage?: number
       imageFile?: File
     },
   ]
@@ -60,6 +61,14 @@ const schema = toTypedSchema(
     reference: z.string().min(1, 'Merci de saisir une référence'),
     category: z.string().min(1, 'Merci de saisir une catégorie'),
     brand: z.string().min(1, 'Merci de saisir une marque'),
+    colisage: z
+      .string()
+      .optional()
+      .default('')
+      .refine(
+        (v) => v === '' || (!isNaN(Number(v)) && Number(v) >= 1 && Number.isInteger(Number(v))),
+        'Le colisage doit être un entier supérieur ou égal à 1',
+      ),
   }),
 )
 
@@ -76,6 +85,7 @@ const { handleSubmit } = useForm({
         reference: props.product.reference ?? '',
         category: props.product.category ?? '',
         brand: props.product.brand ?? '',
+        colisage: props.product.colisage != null ? String(props.product.colisage) : '',
       }
     : {
         name: '',
@@ -87,6 +97,7 @@ const { handleSubmit } = useForm({
         reference: '',
         category: '',
         brand: '',
+        colisage: '',
       },
 })
 
@@ -123,6 +134,11 @@ const {
   handleBlur: categoryBlur,
 } = useField<string>('category')
 const { value: brand, errorMessage: brandError, handleBlur: brandBlur } = useField<string>('brand')
+const {
+  value: colisage,
+  errorMessage: colisageError,
+  handleBlur: colisageBlur,
+} = useField<string>('colisage')
 
 const imageFile = ref<File | undefined>(undefined)
 const imagePreview = ref<string | undefined>(props.product?.imageUrl ?? undefined)
@@ -175,6 +191,7 @@ const onSubmit = handleSubmit((values) => {
     reference: values.reference,
     category: values.category,
     brand: values.brand,
+    colisage: values.colisage ? Number(values.colisage) : undefined,
     imageFile: imageFile.value,
   })
 })
@@ -336,6 +353,16 @@ const onSubmit = handleSubmit((values) => {
           :error="supplierError ?? ''"
           required
           @blur="supplierBlur"
+        />
+        <Input
+          id="product-colisage"
+          v-model="colisage"
+          label="Colisage"
+          type="number"
+          min="1"
+          step="1"
+          :error="colisageError ?? ''"
+          @blur="colisageBlur"
         />
       </div>
       <div class="mt-2 flex gap-2">

@@ -46,7 +46,7 @@ class ApplyShortageAdjustmentsHandlerTest {
 
     @Test
     void should_be_idempotent_when_called_twice() {
-        Product productA = new Product(PRODUCT_A, VENTE_ID, "Tomates", "Bio", Money.eur(new BigDecimal("3.50")), BigDecimal.ZERO, "Ferme A", 100, true, "TOM-001", "Legumes", "Ferme A", false);
+        Product productA = new Product(PRODUCT_A, VENTE_ID, "Tomates", "Bio", Money.eur(new BigDecimal("3.50")), BigDecimal.ZERO, "Ferme A", 100, true, "TOM-001", "Legumes", "Ferme A", null, false);
 
         // Order with 4x Product A
         Order order = Order.create(VENTE_ID, OrderNumber.generate(),
@@ -78,7 +78,7 @@ class ApplyShortageAdjustmentsHandlerTest {
 
     @Test
     void should_not_save_orders_when_already_adjusted() {
-        Product productA = new Product(PRODUCT_A, VENTE_ID, "Tomates", "Bio", Money.eur(new BigDecimal("3.50")), BigDecimal.ZERO, "Ferme A", 100, true, "TOM-001", "Legumes", "Ferme A", false);
+        Product productA = new Product(PRODUCT_A, VENTE_ID, "Tomates", "Bio", Money.eur(new BigDecimal("3.50")), BigDecimal.ZERO, "Ferme A", 100, true, "TOM-001", "Legumes", "Ferme A", null, false);
 
         // Order already adjusted: 4 ordered, 1 cancelled
         OrderItem adjustedItem = new OrderItem(1L, PRODUCT_A, 4, Money.eur(new BigDecimal("3.50")), 1);
@@ -102,7 +102,7 @@ class ApplyShortageAdjustmentsHandlerTest {
 
     @Test
     void should_apply_partial_remaining_shortage() {
-        Product productA = new Product(PRODUCT_A, VENTE_ID, "Tomates", "Bio", Money.eur(new BigDecimal("3.50")), BigDecimal.ZERO, "Ferme A", 100, true, "TOM-001", "Legumes", "Ferme A", false);
+        Product productA = new Product(PRODUCT_A, VENTE_ID, "Tomates", "Bio", Money.eur(new BigDecimal("3.50")), BigDecimal.ZERO, "Ferme A", 100, true, "TOM-001", "Legumes", "Ferme A", null, false);
 
         // Two orders with Product A
         Order order1 = Order.create(VENTE_ID, OrderNumber.generate(),

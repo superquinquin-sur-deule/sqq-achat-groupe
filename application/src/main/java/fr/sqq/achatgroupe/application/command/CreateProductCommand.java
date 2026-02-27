@@ -16,6 +16,7 @@ public record CreateProductCommand(
         int stock,
         String reference,
         String category,
-        String brand
+        String brand,
+        Integer colisage
 ) implements Command<Product> {
 }

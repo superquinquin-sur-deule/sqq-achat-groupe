@@ -19,8 +19,8 @@ import java.util.Set;
 @ApplicationScoped
 public class CsvProductParser {
 
-    private static final Set<String> REQUIRED_COLUMNS = Set.of("nom", "prix_ht", "taux_tva", "fournisseur", "stock", "reference", "categorie", "marque");
-    private static final Set<String> ALL_COLUMNS = Set.of("nom", "description", "prix_ht", "taux_tva", "fournisseur", "stock", "reference", "categorie", "marque");
+    private static final Set<String> REQUIRED_COLUMNS = Set.of("nom", "prix vente ht", "tva", "fournisseur", "stock", "reference fournisseur", "categorie", "marque");
+    private static final Set<String> ALL_COLUMNS = Set.of("nom", "description", "prix vente ht", "tva", "fournisseur", "stock", "reference fournisseur", "categorie", "marque", "colisage");
 
     public CsvParseResult parse(InputStream inputStream) {
         List<CsvProductRow> rows = new ArrayList<>();
@@ -37,13 +37,13 @@ public class CsvProductParser {
 
             if (columnIndex == null) {
                 return CsvParseResult.failure(
-                        "Le fichier doit être au format CSV avec les colonnes : nom, description, prix_ht, taux_tva, fournisseur, stock, reference, categorie, marque");
+                        "Le fichier doit être au format CSV avec les colonnes : nom, description, prix vente ht, tva, fournisseur, stock, reference fournisseur, categorie, marque");
             }
 
             for (String missing : REQUIRED_COLUMNS) {
                 if (!columnIndex.containsKey(missing)) {
                     return CsvParseResult.failure(
-                            "Le fichier doit être au format CSV avec les colonnes : nom, description, prix_ht, taux_tva, fournisseur, stock, reference, categorie, marque");
+                            "Le fichier doit être au format CSV avec les colonnes : nom, description, prix vente ht, tva, fournisseur, stock, reference fournisseur, categorie, marque");
                 }
             }
 
@@ -98,13 +98,14 @@ public class CsvProductParser {
 
         String name = getColumn(values, columnIndex, "nom");
         String description = getColumn(values, columnIndex, "description");
-        String prixHtStr = getColumn(values, columnIndex, "prix_ht");
-        String tauxTvaStr = getColumn(values, columnIndex, "taux_tva");
+        String prixHtStr = getColumn(values, columnIndex, "prix vente ht");
+        String tauxTvaStr = getColumn(values, columnIndex, "tva");
         String supplier = getColumn(values, columnIndex, "fournisseur");
         String stockStr = getColumn(values, columnIndex, "stock");
-        String reference = getColumn(values, columnIndex, "reference");
+        String reference = getColumn(values, columnIndex, "reference fournisseur");
         String category = getColumn(values, columnIndex, "categorie");
         String brand = getColumn(values, columnIndex, "marque");
+        String colisageStr = getColumn(values, columnIndex, "colisage");
 
         if (name == null || name.isBlank()) {
             throw new CsvLineParseException("Le nom est requis");
@@ -155,7 +156,19 @@ public class CsvProductParser {
             throw new CsvLineParseException("Le stock doit être un nombre entier");
         }
 
-        return new CsvProductRow(name.strip(), description != null ? description.strip() : "", Money.eur(prixHt), tauxTva, supplier.strip(), stock, reference.strip(), category.strip(), brand.strip());
+        Integer colisage = null;
+        if (colisageStr != null && !colisageStr.strip().isEmpty()) {
+            try {
+                colisage = Integer.parseInt(colisageStr.strip());
+                if (colisage <= 0) {
+                    throw new CsvLineParseException("Le colisage doit être supérieur à 0");
+                }
+            } catch (NumberFormatException e) {
+                throw new CsvLineParseException("Le colisage doit être un nombre entier");
+            }
+        }
+
+        return new CsvProductRow(name.strip(), description != null ? description.strip() : "", Money.eur(prixHt), tauxTva, supplier.strip(), stock, reference.strip(), category.strip(), brand.strip(), colisage);
     }
 
     private String getColumn(String[] values, Map<String, Integer> columnIndex, String columnName) {

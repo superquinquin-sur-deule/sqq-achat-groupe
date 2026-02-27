@@ -16,5 +16,6 @@ public record AdminProductResponse(
         String reference,
         String category,
         String brand,
+        Integer colisage,
         String imageUrl
 ) {}

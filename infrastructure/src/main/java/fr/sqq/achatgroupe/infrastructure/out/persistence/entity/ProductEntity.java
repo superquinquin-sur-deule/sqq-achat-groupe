@@ -59,6 +59,9 @@ public class ProductEntity {
     @Column(name = "has_image", nullable = false)
     private boolean hasImage;
 
+    @Column(name = "colisage")
+    private Integer colisage;
+
     @Column(name = "stripe_product_id")
     private String stripeProductId;
 
@@ -140,6 +143,9 @@ public class ProductEntity {
 
     public boolean isHasImage() { return hasImage; }
     public void setHasImage(boolean hasImage) { this.hasImage = hasImage; }
+
+    public Integer getColisage() { return colisage; }
+    public void setColisage(Integer colisage) { this.colisage = colisage; }
 
     public String getStripeProductId() { return stripeProductId; }
     public void setStripeProductId(String stripeProductId) { this.stripeProductId = stripeProductId; }

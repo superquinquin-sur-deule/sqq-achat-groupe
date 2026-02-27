@@ -22,6 +22,7 @@ public interface ProductPersistenceMapper {
                 entity.getReference(),
                 entity.getCategory(),
                 entity.getBrand(),
+                entity.getColisage(),
                 entity.isHasImage()
         );
         product.assignStripeProductId(entity.getStripeProductId());
@@ -42,6 +43,7 @@ public interface ProductPersistenceMapper {
         entity.setReference(domain.reference());
         entity.setCategory(domain.category());
         entity.setBrand(domain.brand());
+        entity.setColisage(domain.colisage());
         entity.setHasImage(domain.hasImage());
         entity.setStripeProductId(domain.stripeProductId());
         return entity;

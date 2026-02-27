@@ -27,6 +27,7 @@ public interface AdminProductRestMapper {
     @Mapping(target = "reference", expression = "java(product.reference())")
     @Mapping(target = "category", expression = "java(product.category())")
     @Mapping(target = "brand", expression = "java(product.brand())")
+    @Mapping(target = "colisage", expression = "java(product.colisage())")
     @Mapping(target = "imageUrl", expression = "java(product.hasImage() ? \"/api/product-images/\" + product.id() : null)")
     AdminProductResponse toResponse(Product product);
 
@@ -41,7 +42,8 @@ public interface AdminProductRestMapper {
                 request.stock(),
                 request.reference(),
                 request.category(),
-                request.brand()
+                request.brand(),
+                request.colisage()
         );
     }
 
@@ -58,7 +60,8 @@ public interface AdminProductRestMapper {
                 request.active(),
                 request.reference(),
                 request.category(),
-                request.brand()
+                request.brand(),
+                request.colisage()
         );
     }
 }

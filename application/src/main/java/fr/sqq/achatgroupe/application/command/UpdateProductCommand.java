@@ -19,6 +19,7 @@ public record UpdateProductCommand(
         boolean active,
         String reference,
         String category,
-        String brand
+        String brand,
+        Integer colisage
 ) implements Command<Product> {
 }

@@ -38,7 +38,8 @@ public class UpdateProductHandler implements CommandHandler<UpdateProductCommand
                     && existing.stock() == command.stock()
                     && Objects.equals(existing.reference(), command.reference())
                     && Objects.equals(existing.category(), command.category())
-                    && Objects.equals(existing.brand(), command.brand());
+                    && Objects.equals(existing.brand(), command.brand())
+                    && Objects.equals(existing.colisage(), command.colisage());
             if (!onlyActiveChanged) {
                 throw new ProductModificationForbiddenException();
             }
@@ -57,6 +58,7 @@ public class UpdateProductHandler implements CommandHandler<UpdateProductCommand
                 command.reference(),
                 command.category(),
                 command.brand(),
+                command.colisage(),
                 existing.hasImage()
         );
         productRepository.save(updated);
