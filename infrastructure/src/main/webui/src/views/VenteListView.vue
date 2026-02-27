@@ -1,10 +1,17 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, watch, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useVentesQuery } from '@/composables/api/useVentesApi'
 
 const router = useRouter()
 const { data: ventes, isLoading: loading, isError } = useVentesQuery()
+
+watch(ventes, (v) => {
+  if (v?.length === 1) {
+    router.replace({ name: 'home', params: { venteId: v[0]!.id } })
+  }
+})
+
 const now = ref(Date.now())
 
 let timer: ReturnType<typeof setInterval> | null = null
