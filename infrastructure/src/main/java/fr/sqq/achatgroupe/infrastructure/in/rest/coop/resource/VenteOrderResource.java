@@ -6,6 +6,8 @@ import fr.sqq.achatgroupe.infrastructure.in.rest.common.dto.CreateOrderRequest;
 import fr.sqq.achatgroupe.infrastructure.in.rest.common.dto.DataResponse;
 import fr.sqq.achatgroupe.infrastructure.in.rest.common.dto.OrderResponse;
 import fr.sqq.mediator.Mediator;
+import jakarta.persistence.OptimisticLockException;
+import jakarta.transaction.RollbackException;
 import jakarta.validation.Valid;
 import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.POST;
@@ -13,6 +15,7 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
+import org.eclipse.microprofile.faulttolerance.Retry;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import org.jboss.resteasy.reactive.RestResponse;
 
@@ -31,6 +34,7 @@ public class VenteOrderResource {
     }
 
     @POST
+    @Retry(maxRetries = 2, retryOn = {OptimisticLockException.class, RollbackException.class})
     public RestResponse<DataResponse<OrderResponse>> createOrder(@PathParam("venteId") Long venteId, @Valid CreateOrderRequest request) {
         var command = mapper.toCommand(venteId, request);
         Order order = mediator.send(command);
