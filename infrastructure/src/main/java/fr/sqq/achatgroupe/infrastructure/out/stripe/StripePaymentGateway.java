@@ -6,26 +6,29 @@ import com.stripe.exception.StripeException;
 import com.stripe.model.Event;
 import com.stripe.model.checkout.Session;
 import com.stripe.net.Webhook;
+import com.stripe.param.ProductCreateParams;
 import com.stripe.param.RefundCreateParams;
 import com.stripe.param.checkout.SessionCreateParams;
+import fr.sqq.achatgroupe.application.port.out.PaymentCatalogGateway;
+import fr.sqq.achatgroupe.application.port.out.PaymentGateway;
+import fr.sqq.achatgroupe.application.port.out.ProductRepository;
 import fr.sqq.achatgroupe.domain.exception.PaymentSessionCreationException;
 import fr.sqq.achatgroupe.domain.exception.PaymentWebhookException;
 import fr.sqq.achatgroupe.domain.model.catalog.Product;
 import fr.sqq.achatgroupe.domain.model.catalog.ProductId;
 import fr.sqq.achatgroupe.domain.model.order.Order;
 import fr.sqq.achatgroupe.domain.model.order.OrderItem;
-import fr.sqq.achatgroupe.application.port.out.PaymentGateway;
-import fr.sqq.achatgroupe.application.port.out.ProductRepository;
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.logging.Logger;
 
+import java.math.BigDecimal;
 import java.util.UUID;
 
 @ApplicationScoped
-public class StripePaymentGateway implements PaymentGateway {
+public class StripePaymentGateway implements PaymentGateway, PaymentCatalogGateway {
 
     private static final Logger LOG = Logger.getLogger(StripePaymentGateway.class);
 
@@ -147,6 +150,36 @@ public class StripePaymentGateway implements PaymentGateway {
             return new PaymentWebhookResult(UUID.fromString(orderId), stripePaymentId, status);
         } catch (IllegalArgumentException e) {
             throw new PaymentWebhookException("Metadata order_id invalide : " + orderId);
+        }
+    }
+
+    @Override
+    public String registerProduct(Long productId, String name, String description,
+                                  BigDecimal prixHt, BigDecimal tauxTva, BigDecimal prixTtc, String reference) {
+        long prixTtcInCents = prixTtc.movePointRight(2).longValueExact();
+
+        ProductCreateParams params = ProductCreateParams.builder()
+                .setName(name)
+                .setDefaultPriceData(
+                        ProductCreateParams.DefaultPriceData.builder()
+                                .setCurrency("eur")
+                                .setTaxBehavior(ProductCreateParams.DefaultPriceData.TaxBehavior.INCLUSIVE)
+                                .setUnitAmount(prixTtcInCents)
+                                .build())
+                .putMetadata("product_id", String.valueOf(productId))
+                .putMetadata("reference", reference)
+                .putMetadata("prix_ht", prixHt.toPlainString())
+                .putMetadata("taux_tva", tauxTva.toPlainString())
+                .putMetadata("tax_percent", tauxTva.toPlainString())
+                .build();
+
+        try {
+            com.stripe.model.Product stripeProduct = com.stripe.model.Product.create(params);
+            LOG.infof("Produit Stripe créé : %s pour produit local %d", stripeProduct.getId(), productId);
+            return stripeProduct.getId();
+        } catch (StripeException e) {
+            LOG.errorf(e, "Erreur Stripe lors de la création du produit %d", productId);
+            throw new RuntimeException("Impossible de créer le produit Stripe pour le produit " + productId, e);
         }
     }
 }
