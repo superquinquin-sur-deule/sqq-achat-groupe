@@ -49,3 +49,5 @@ nb-configuration.xml
 .bmad
 .bmad-output
 CLAUDE.md
+
+infrastructure/src/main/resources/application-dev.properties
