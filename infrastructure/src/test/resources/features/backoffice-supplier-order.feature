@@ -14,6 +14,7 @@ Fonctionnalité: Bon de commande fournisseur
   Scénario: Affichage du bon fournisseur agrégé groupé par fournisseur
     Quand je navigue vers la page bon fournisseur
     Alors je vois le titre bon fournisseur "Bon de commande fournisseur"
+    Et je vois les colonnes du bon fournisseur "Référence,Produit,Marque,Quantité totale,Colisage,Nb colis"
     Et je vois les produits groupés par fournisseur avec les quantités totales
 
   Scénario: Les boutons Imprimer et Exporter Excel sont visibles

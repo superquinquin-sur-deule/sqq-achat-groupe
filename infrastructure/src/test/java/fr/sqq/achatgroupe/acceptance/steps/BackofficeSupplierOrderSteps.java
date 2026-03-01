@@ -53,6 +53,17 @@ public class BackofficeSupplierOrderSteps {
         assertTrue(titleEl.textContent().contains(title), "Le titre doit contenir '" + title + "'");
     }
 
+    @Et("je vois les colonnes du bon fournisseur {string}")
+    public void jeVoisLesColonnesDuBonFournisseur(String colonnes) {
+        String[] expectedColumns = colonnes.split(",");
+        Locator ths = page().locator("[data-testid='supplier-order-table'] thead th");
+        assertEquals(expectedColumns.length, ths.count(), "Le nombre de colonnes doit correspondre");
+        for (int i = 0; i < expectedColumns.length; i++) {
+            assertTrue(ths.nth(i).textContent().contains(expectedColumns[i].trim()),
+                    "La colonne " + i + " doit contenir '" + expectedColumns[i].trim() + "'");
+        }
+    }
+
     @Et("je vois les produits groupés par fournisseur avec les quantités totales")
     public void jeVoisLesProduitsGroupesParFournisseurAvecQuantites() {
         Locator table = page().locator("[data-testid='supplier-order-table']");

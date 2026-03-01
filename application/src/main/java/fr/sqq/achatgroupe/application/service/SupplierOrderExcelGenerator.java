@@ -30,22 +30,30 @@ public class SupplierOrderExcelGenerator {
                 String sheetName = sanitizeSheetName(entry.getKey());
                 Sheet sheet = workbook.createSheet(sheetName);
 
-                sheet.setColumnWidth(0, 40 * 256);
-                sheet.setColumnWidth(1, 12 * 256);
+                sheet.setColumnWidth(0, 15 * 256);
+                sheet.setColumnWidth(1, 40 * 256);
+                sheet.setColumnWidth(2, 20 * 256);
+                sheet.setColumnWidth(3, 12 * 256);
+                sheet.setColumnWidth(4, 12 * 256);
+                sheet.setColumnWidth(5, 12 * 256);
 
                 Row header = sheet.createRow(0);
-                Cell h0 = header.createCell(0);
-                h0.setCellValue("Produit");
-                h0.setCellStyle(headerStyle);
-                Cell h1 = header.createCell(1);
-                h1.setCellValue("Quantité");
-                h1.setCellStyle(headerStyle);
+                String[] headers = {"Référence", "Produit", "Marque", "Quantité", "Colisage", "Nb colis"};
+                for (int i = 0; i < headers.length; i++) {
+                    Cell cell = header.createCell(i);
+                    cell.setCellValue(headers[i]);
+                    cell.setCellStyle(headerStyle);
+                }
 
                 int rowIdx = 1;
                 for (SupplierOrderLine line : entry.getValue()) {
                     Row row = sheet.createRow(rowIdx++);
-                    row.createCell(0).setCellValue(line.productName());
-                    row.createCell(1).setCellValue(line.totalQuantity());
+                    row.createCell(0).setCellValue(line.reference());
+                    row.createCell(1).setCellValue(line.productName());
+                    row.createCell(2).setCellValue(line.brand());
+                    row.createCell(3).setCellValue(line.totalQuantity());
+                    row.createCell(4).setCellValue(line.colisage() != null ? String.valueOf(line.colisage()) : "—");
+                    row.createCell(5).setCellValue(line.nombreColis() != null ? String.valueOf(line.nombreColis()) : "—");
                 }
             }
 

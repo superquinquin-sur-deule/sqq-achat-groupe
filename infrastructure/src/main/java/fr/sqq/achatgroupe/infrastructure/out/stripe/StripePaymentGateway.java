@@ -18,20 +18,18 @@ import fr.sqq.achatgroupe.domain.model.catalog.Product;
 import fr.sqq.achatgroupe.domain.model.catalog.ProductId;
 import fr.sqq.achatgroupe.domain.model.order.Order;
 import fr.sqq.achatgroupe.domain.model.order.OrderItem;
+import io.quarkus.logging.Log;
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
-import org.jboss.logging.Logger;
 
 import java.math.BigDecimal;
 import java.util.UUID;
 
 @ApplicationScoped
 public class StripePaymentGateway implements PaymentGateway, PaymentCatalogGateway {
-
-    private static final Logger LOG = Logger.getLogger(StripePaymentGateway.class);
-
+    
     @ConfigProperty(name = "stripe.api-key")
     String apiKey;
 
@@ -85,10 +83,10 @@ public class StripePaymentGateway implements PaymentGateway, PaymentCatalogGatew
 
         try {
             Session session = Session.create(params);
-            LOG.infof("Stripe Checkout Session créée pour commande %s : %s", order.id(), session.getId());
+            Log.infof("Stripe Checkout Session créée pour commande %s : %s", order.id(), session.getId());
             return new PaymentSessionResult(session.getUrl(), session.getId());
         } catch (StripeException e) {
-            LOG.errorf(e, "Erreur Stripe lors de la création de la session pour commande %s", order.id());
+            Log.errorf(e, "Erreur Stripe lors de la création de la session pour commande %s", order.id());
             throw new PaymentSessionCreationException(order.id());
         }
     }
@@ -102,10 +100,10 @@ public class StripePaymentGateway implements PaymentGateway, PaymentCatalogGatew
 
         try {
             com.stripe.model.Refund stripeRefund = com.stripe.model.Refund.create(params);
-            LOG.infof("Remboursement Stripe créé : %s pour payment intent %s", stripeRefund.getId(), stripePaymentIntentId);
+            Log.infof("Remboursement Stripe créé : %s pour payment intent %s", stripeRefund.getId(), stripePaymentIntentId);
             return new RefundResult(stripeRefund.getId(), "succeeded".equals(stripeRefund.getStatus()));
         } catch (StripeException e) {
-            LOG.errorf(e, "Erreur Stripe lors du remboursement pour payment intent %s", stripePaymentIntentId);
+            Log.errorf(e, "Erreur Stripe lors du remboursement pour payment intent %s", stripePaymentIntentId);
             return new RefundResult(null, false);
         }
     }
@@ -143,7 +141,7 @@ public class StripePaymentGateway implements PaymentGateway, PaymentCatalogGatew
             status = PaymentWebhookStatus.FAILED;
         }
 
-        LOG.infof("Webhook Stripe reçu : type=%s, orderId=%s, paymentIntent=%s, paymentStatus=%s",
+        Log.infof("Webhook Stripe reçu : type=%s, orderId=%s, paymentIntent=%s, paymentStatus=%s",
                 eventType, orderId, stripePaymentId, session.getPaymentStatus());
 
         try {
@@ -181,10 +179,10 @@ public class StripePaymentGateway implements PaymentGateway, PaymentCatalogGatew
 
         try {
             com.stripe.model.Product stripeProduct = com.stripe.model.Product.create(params);
-            LOG.infof("Produit Stripe créé : %s pour produit local %d", stripeProduct.getId(), productId);
+            Log.infof("Produit Stripe créé : %s pour produit local %d", stripeProduct.getId(), productId);
             return stripeProduct.getId();
         } catch (StripeException e) {
-            LOG.errorf(e, "Erreur Stripe lors de la création du produit %d", productId);
+            Log.errorf(e, "Erreur Stripe lors de la création du produit %d", productId);
             throw new RuntimeException("Impossible de créer le produit Stripe pour le produit " + productId, e);
         }
     }

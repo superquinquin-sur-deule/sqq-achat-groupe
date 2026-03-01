@@ -63,9 +63,30 @@ class GenerateSupplierOrderHandlerTest {
         List<SupplierOrderLine> result = handler.handle(new GenerateSupplierOrderQuery(venteId));
 
         assertThat(result).containsExactly(
-                new SupplierOrderLine("Carottes", "Ferme A", 5),
-                new SupplierOrderLine("Tomates", "Ferme A", 5),
-                new SupplierOrderLine("Fromage", "Ferme B", 1)
+                new SupplierOrderLine("CAR-001", "Carottes", "Ferme A", "Ferme A", 5, null, null),
+                new SupplierOrderLine("TOM-001", "Tomates", "Ferme A", "Ferme A", 5, null, null),
+                new SupplierOrderLine("FRO-001", "Fromage", "Ferme B", "Ferme B", 1, null, null)
+        );
+    }
+
+    @Test
+    void should_calculate_nombre_colis_when_colisage_is_set() {
+        Long venteId = 1L;
+
+        Product tomatoes = new Product(10L, venteId, "Tomates", "Bio", Money.eur(new BigDecimal("3.50")), BigDecimal.ZERO, "Ferme A", 100, true, "TOM-001", "Legumes", "Ferme A", 6, null, false);
+
+        Order order1 = Order.create(venteId, OrderNumber.generate(),
+                new CustomerInfo("Alice", "Dupont", "alice@test.com", "0601020304"), 1L,
+                List.of(OrderItem.create(10L, 10, Money.eur(new BigDecimal("3.50")))));
+        order1.markAsPaid();
+
+        when(orderRepository.findPaidByVenteId(venteId)).thenReturn(List.of(order1));
+        when(productRepository.findAllByVenteId(venteId)).thenReturn(List.of(tomatoes));
+
+        List<SupplierOrderLine> result = handler.handle(new GenerateSupplierOrderQuery(venteId));
+
+        assertThat(result).containsExactly(
+                new SupplierOrderLine("TOM-001", "Tomates", "Ferme A", "Ferme A", 10, 6, 2)
         );
     }
 }

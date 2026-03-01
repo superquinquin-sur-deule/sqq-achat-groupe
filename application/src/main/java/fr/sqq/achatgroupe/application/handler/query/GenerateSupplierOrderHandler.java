@@ -48,7 +48,10 @@ public class GenerateSupplierOrderHandler implements QueryHandler<GenerateSuppli
         return quantitiesByProduct.entrySet().stream()
                 .map(entry -> {
                     Product product = productsById.get(entry.getKey());
-                    return new SupplierOrderLine(product.name(), product.supplier(), entry.getValue());
+                    int qty = entry.getValue();
+                    Integer colisage = product.colisage();
+                    Integer nombreColis = colisage != null ? (int) Math.ceil((double) qty / colisage) : null;
+                    return new SupplierOrderLine(product.reference(), product.name(), product.brand(), product.supplier(), qty, colisage, nombreColis);
                 })
                 .sorted(Comparator.comparing(SupplierOrderLine::supplier)
                         .thenComparing(SupplierOrderLine::productName))

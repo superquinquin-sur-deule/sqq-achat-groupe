@@ -28,15 +28,15 @@ SELECT setval('ventes_id_seq', 3);
 -- PRODUCTS
 -- ============================================================================
 -- Products for Vente 1 (Printemps Bio 2024)
-INSERT INTO products (id, vente_id, name, description, prix_ht, taux_tva, supplier, stock, active, version, reference, category, brand) VALUES
-(1, 1, 'Panier de legumes bio', 'Assortiment de legumes de saison: carottes, poireaux, choux, navets (environ 5kg)', 23.70, 5.50, 'Ferme du Soleil', 50, true, 0, 'LEG-001', 'Legumes', 'Ferme du Soleil'),
-(2, 1, 'Pommes Golden bio', 'Pommes Golden issues de vergers locaux - caisse de 3kg', 11.85, 5.50, 'Vergers de la Vallee', 30, true, 0, 'FRU-001', 'Fruits', 'Vergers de la Vallee'),
-(3, 1, 'Oeufs fermiers bio', 'Boite de 12 oeufs de poules elevees en plein air', 6.16, 5.50, 'Ferme du Soleil', 100, true, 0, 'OEU-001', 'Oeufs et produits laitiers', 'Ferme du Soleil'),
-(4, 1, 'Fromage de chevre frais', 'Fromage de chevre artisanal - 200g', 8.44, 5.50, 'Chevrerie des Monts', 40, true, 0, 'FRO-001', 'Oeufs et produits laitiers', 'Chevrerie des Monts'),
-(5, 1, 'Miel de fleurs bio', 'Pot de miel toutes fleurs - 500g', 13.27, 5.50, 'Rucher du Vallon', 25, true, 0, 'MIE-001', 'Epicerie', 'Rucher du Vallon'),
-(6, 1, 'Pain de campagne bio', 'Pain au levain naturel - 800g', 5.21, 5.50, 'Boulangerie Artisanale', 60, true, 0, 'PAI-001', 'Boulangerie', 'Boulangerie Artisanale'),
-(7, 1, 'Jus de pomme artisanal', 'Bouteille de jus de pomme pur - 1L', 4.27, 5.50, 'Vergers de la Vallee', 80, true, 0, 'JUS-001', 'Boissons', 'Vergers de la Vallee'),
-(8, 1, 'Yaourts nature bio', 'Lot de 4 yaourts nature au lait entier', 3.98, 5.50, 'Laiterie du Terroir', 45, true, 0, 'YAO-001', 'Oeufs et produits laitiers', 'Laiterie du Terroir');
+INSERT INTO products (id, vente_id, name, description, prix_ht, taux_tva, supplier, stock, active, version, reference, category, brand, colisage) VALUES
+(1, 1, 'Panier de legumes bio', 'Assortiment de legumes de saison: carottes, poireaux, choux, navets (environ 5kg)', 23.70, 5.50, 'Ferme du Soleil', 50, true, 0, 'LEG-001', 'Legumes', 'Ferme du Soleil', 6),
+(2, 1, 'Pommes Golden bio', 'Pommes Golden issues de vergers locaux - caisse de 3kg', 11.85, 5.50, 'Vergers de la Vallee', 30, true, 0, 'FRU-001', 'Fruits', 'Vergers de la Vallee', NULL),
+(3, 1, 'Oeufs fermiers bio', 'Boite de 12 oeufs de poules elevees en plein air', 6.16, 5.50, 'Ferme du Soleil', 100, true, 0, 'OEU-001', 'Oeufs et produits laitiers', 'Ferme du Soleil', 12),
+(4, 1, 'Fromage de chevre frais', 'Fromage de chevre artisanal - 200g', 8.44, 5.50, 'Chevrerie des Monts', 40, true, 0, 'FRO-001', 'Oeufs et produits laitiers', 'Chevrerie des Monts', NULL),
+(5, 1, 'Miel de fleurs bio', 'Pot de miel toutes fleurs - 500g', 13.27, 5.50, 'Rucher du Vallon', 25, true, 0, 'MIE-001', 'Epicerie', 'Rucher du Vallon', NULL),
+(6, 1, 'Pain de campagne bio', 'Pain au levain naturel - 800g', 5.21, 5.50, 'Boulangerie Artisanale', 60, true, 0, 'PAI-001', 'Boulangerie', 'Boulangerie Artisanale', 10),
+(7, 1, 'Jus de pomme artisanal', 'Bouteille de jus de pomme pur - 1L', 4.27, 5.50, 'Vergers de la Vallee', 80, true, 0, 'JUS-001', 'Boissons', 'Vergers de la Vallee', 6),
+(8, 1, 'Yaourts nature bio', 'Lot de 4 yaourts nature au lait entier', 3.98, 5.50, 'Laiterie du Terroir', 45, true, 0, 'YAO-001', 'Oeufs et produits laitiers', 'Laiterie du Terroir', 4);
 
 -- Products for Vente 2 (Panier de Noel 2023) - Closed sale
 INSERT INTO products (id, vente_id, name, description, prix_ht, taux_tva, supplier, stock, active, version, reference, category, brand) VALUES
@@ -185,7 +185,7 @@ INSERT INTO order_items (id, order_id, product_id, quantity, unit_price) VALUES
 (24, 'c9d0e1f2-a3b4-5678-2345-789012345678', 9, 1, 32.00),
 (25, 'c9d0e1f2-a3b4-5678-2345-789012345678', 10, 1, 28.50),
 (26, 'c9d0e1f2-a3b4-5678-2345-789012345678', 12, 1, 18.00),
-(27, 'c9d0e1f2-a3b4-5678-2345-789012345678', 6, 1, 6.00);
+(27, 'c9d0e1f2-a3b4-5678-2345-789012345678', 13, 1, 15.00);
 
 INSERT INTO order_items (id, order_id, product_id, quantity, unit_price) VALUES
 (28, 'd0e1f2a3-b4c5-6789-3456-890123456789', 9, 2, 32.00),

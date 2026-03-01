@@ -134,15 +134,19 @@ async function handleExportXls() {
           <tr
             class="bg-dark text-left text-sm text-white print:bg-white print:text-black print:border-b-2 print:border-black"
           >
+            <th class="px-4 py-3 font-medium">Référence</th>
             <th class="px-4 py-3 font-medium">Produit</th>
+            <th class="px-4 py-3 font-medium">Marque</th>
             <th class="px-4 py-3 font-medium text-right">Quantité totale</th>
+            <th class="px-4 py-3 font-medium text-right">Colisage</th>
+            <th class="px-4 py-3 font-medium text-right">Nb colis</th>
           </tr>
         </thead>
         <tbody>
           <template v-for="[supplier, supplierLines] in groupedBySupplier" :key="supplier">
             <tr data-testid="supplier-group" class="print:break-inside-avoid">
               <td
-                colspan="2"
+                colspan="6"
                 class="bg-surface px-4 py-2 text-sm font-bold text-dark print:bg-white print:border-t print:border-gray-400"
                 data-testid="supplier-group-header"
               >
@@ -156,12 +160,28 @@ async function handleExportXls() {
               data-testid="supplier-order-row"
             >
               <td class="border-t border-gray-100 px-4 py-2 text-dark print:border-gray-300">
+                {{ line.reference }}
+              </td>
+              <td class="border-t border-gray-100 px-4 py-2 text-dark print:border-gray-300">
                 {{ line.productName }}
+              </td>
+              <td class="border-t border-gray-100 px-4 py-2 text-dark print:border-gray-300">
+                {{ line.brand }}
               </td>
               <td
                 class="border-t border-gray-100 px-4 py-2 text-right text-dark print:border-gray-300"
               >
                 {{ line.totalQuantity }}
+              </td>
+              <td
+                class="border-t border-gray-100 px-4 py-2 text-right text-dark print:border-gray-300"
+              >
+                {{ line.colisage ?? '—' }}
+              </td>
+              <td
+                class="border-t border-gray-100 px-4 py-2 text-right text-dark print:border-gray-300"
+              >
+                {{ line.nombreColis ?? '—' }}
               </td>
             </tr>
           </template>
