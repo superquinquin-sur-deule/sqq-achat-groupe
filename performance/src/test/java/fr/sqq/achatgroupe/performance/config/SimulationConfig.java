@@ -11,4 +11,6 @@ public final class SimulationConfig {
     public static final int STOCK_PER_PRODUCT = Integer.getInteger("gatling.stockPerProduct", 100);
     public static final int TIMESLOT_COUNT = Integer.getInteger("gatling.timeslotCount", 5);
     public static final int CAPACITY_PER_SLOT = Integer.getInteger("gatling.capacityPerSlot", 100);
+    public static final String ADMIN_USERNAME = System.getProperty("gatling.adminUsername", "alice");
+    public static final String ADMIN_PASSWORD = System.getProperty("gatling.adminPassword", "alice");
 }

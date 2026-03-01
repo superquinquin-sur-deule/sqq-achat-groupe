@@ -4,6 +4,8 @@ import fr.sqq.achatgroupe.performance.config.SimulationConfig;
 import io.gatling.javaapi.core.*;
 import io.gatling.javaapi.http.*;
 
+import java.net.CookieManager;
+import java.net.CookiePolicy;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -175,9 +177,15 @@ public class SaleRushSimulation extends Simulation {
         System.out.println("Timeslots: " + TIMESLOT_COUNT + " (capacity: " + CAPACITY_PER_SLOT + " each)");
 
         try {
+            CookieManager cookieManager = new CookieManager();
+            cookieManager.setCookiePolicy(CookiePolicy.ACCEPT_ALL);
             HttpClient client = HttpClient.newBuilder()
                     .connectTimeout(Duration.ofSeconds(10))
+                    .cookieHandler(cookieManager)
+                    .followRedirects(HttpClient.Redirect.ALWAYS)
                     .build();
+
+            authenticateAdmin(client);
 
             // 1. Create vente
             Instant now = Instant.now();
@@ -290,6 +298,60 @@ public class SaleRushSimulation extends Simulation {
         } catch (Exception e) {
             throw new RuntimeException("Setup failed", e);
         }
+    }
+
+    private void authenticateAdmin(HttpClient client) throws Exception {
+        String username = SimulationConfig.ADMIN_USERNAME;
+        String password = SimulationConfig.ADMIN_PASSWORD;
+        System.out.println("Authenticating as " + username + " via OIDC...");
+
+        // 1. GET an admin endpoint → follows redirects to Keycloak login page
+        HttpResponse<String> loginPage = client.send(
+                HttpRequest.newBuilder()
+                        .uri(URI.create(BASE_URL + "/api/admin/ventes"))
+                        .header("Accept", "text/html,application/xhtml+xml,*/*")
+                        .GET()
+                        .build(),
+                HttpResponse.BodyHandlers.ofString()
+        );
+
+        // If we got a JSON response, auth is disabled (test profile) — skip
+        String contentType = loginPage.headers().firstValue("content-type").orElse("");
+        if (contentType.contains("application/json") || loginPage.statusCode() == 200) {
+            System.out.println("Admin endpoints accessible without auth (test profile?) — skipping login");
+            return;
+        }
+
+        // 2. Parse the Keycloak login form action URL from HTML
+        String formAction = extractFormAction(loginPage.body());
+        if (formAction == null) {
+            throw new RuntimeException("Could not find login form in Keycloak response (status="
+                    + loginPage.statusCode() + "): " + loginPage.body().substring(0, Math.min(500, loginPage.body().length())));
+        }
+
+        // 3. POST credentials to Keycloak
+        String formBody = "username=" + username + "&password=" + password;
+        HttpResponse<String> loginResult = client.send(
+                HttpRequest.newBuilder()
+                        .uri(URI.create(formAction))
+                        .header("Content-Type", "application/x-www-form-urlencoded")
+                        .POST(HttpRequest.BodyPublishers.ofString(formBody))
+                        .build(),
+                HttpResponse.BodyHandlers.ofString()
+        );
+
+        System.out.println("Authentication completed (status=" + loginResult.statusCode() + ")");
+    }
+
+    private static String extractFormAction(String html) {
+        int formIndex = html.indexOf("<form");
+        if (formIndex == -1) return null;
+        int actionIndex = html.indexOf("action=\"", formIndex);
+        if (actionIndex == -1) return null;
+        int start = actionIndex + "action=\"".length();
+        int end = html.indexOf("\"", start);
+        if (end == -1) return null;
+        return html.substring(start, end).replace("&amp;", "&");
     }
 
     private static String extractJsonValue(String json, String key) {
