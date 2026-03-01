@@ -128,6 +128,7 @@ async function onSubmit(data: {
   category: string
   brand: string
   colisage?: number
+  stripeTaxCode?: string
   imageFile?: File
 }) {
   if (!selectedVenteId.value) return
@@ -147,6 +148,7 @@ async function onSubmit(data: {
         category: data.category,
         brand: data.brand,
         colisage: data.colisage,
+        stripeTaxCode: data.stripeTaxCode,
       }
       await updateMutation.mutateAsync({ id: editingProduct.value.id, data: updateData })
       productId = editingProduct.value.id
@@ -162,6 +164,7 @@ async function onSubmit(data: {
         category: data.category,
         brand: data.brand,
         colisage: data.colisage,
+        stripeTaxCode: data.stripeTaxCode,
       }
       const result = await createMutation.mutateAsync(createData)
       productId = (result.data as { data: { id: number } }).data.id
@@ -212,6 +215,7 @@ async function toggleActive(product: AdminProductResponse) {
       category: product.category,
       brand: product.brand,
       colisage: product.colisage,
+      stripeTaxCode: product.stripeTaxCode,
     }
     await updateMutation.mutateAsync({ id: product.id, data: updateData })
     toast.success(product.active ? 'Produit désactivé' : 'Produit activé')

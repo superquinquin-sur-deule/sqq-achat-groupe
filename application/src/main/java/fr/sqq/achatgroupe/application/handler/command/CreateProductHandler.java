@@ -36,12 +36,14 @@ public class CreateProductHandler implements CommandHandler<CreateProductCommand
                 command.category(),
                 command.brand(),
                 command.colisage(),
+                command.stripeTaxCode(),
                 false
         );
         Product saved = productRepository.saveNew(product);
         String stripeProductId = paymentCatalogGateway.registerProduct(
                 saved.id(), saved.name(), saved.description(),
-                saved.prixHt().amount(), saved.tauxTva(), saved.prixTtc().amount(), saved.reference());
+                saved.prixHt().amount(), saved.tauxTva(), saved.prixTtc().amount(), saved.reference(),
+                saved.stripeTaxCode());
         saved.assignStripeProductId(stripeProductId);
         productRepository.save(saved);
         return saved;

@@ -27,6 +27,23 @@ Fonctionnalité: Gestion des produits (CRUD admin)
     Alors je vois un toast de succès
     Et le produit "Carottes bio" apparaît dans le tableau
 
+  Scénario: Créer un produit avec un stripe tax code
+    Quand je navigue vers la page admin des produits
+    Et je clique sur le bouton ajouter un produit
+    Et je remplis le formulaire produit avec les valeurs
+      | nom              | Beurre fermier    |
+      | prix HT          | 3.80              |
+      | TVA              | 5.50              |
+      | fournisseur      | Ferme du Soleil   |
+      | stock            | 20                |
+      | référence        | BEU-001           |
+      | catégorie        | Crèmerie          |
+      | marque           | Ferme du Soleil   |
+      | stripe tax code  | txcd_99999999     |
+    Et je soumets le formulaire produit
+    Alors je vois un toast de succès
+    Et le produit "Beurre fermier" apparaît dans le tableau
+
   Scénario: Modifier un produit existant
     Quand je navigue vers la page admin des produits
     Et je clique sur le bouton modifier du premier produit

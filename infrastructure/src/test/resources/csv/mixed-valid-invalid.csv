@@ -1,5 +1,5 @@
-nom,description,fournisseur,stock,reference fournisseur,categorie,marque,prix vente ttc,prix vente ht,tva,colisage,prix d'achat,ean
-Farine de blé bio T65,Farine bio locale,Moulin de la Lys,50,FAR-001,Epicerie,Moulin de la Lys,4.75,4.50,5.50,6,3.00,3760001000001
-,Produit sans nom,Fournisseur X,10,REF-002,Divers,Marque X,3.17,3.00,5.50,,2.00,3760001000002
-Miel de tilleul,Miel récolté en Flandre,Rucher des Monts,30,MIE-002,Epicerie,Rucher des Monts,9.39,pas_un_prix,5.50,,7.00,3760001000003
-Savon de Marseille,,La Savonnerie du Midi,abc,SAV-001,Hygiène,La Savonnerie du Midi,3.84,3.20,20.00,12,2.50,3760001000004
+nom,description,fournisseur,stock,reference fournisseur,categorie,marque,prix vente ttc,prix vente ht,tva,colisage,prix d'achat,ean,stripe tax code
+Farine de blé bio T65,Farine bio locale,Moulin de la Lys,50,FAR-001,Epicerie,Moulin de la Lys,4.75,4.50,5.50,6,3.00,3760001000001,
+,Produit sans nom,Fournisseur X,10,REF-002,Divers,Marque X,3.17,3.00,5.50,,2.00,3760001000002,
+Miel de tilleul,Miel récolté en Flandre,Rucher des Monts,30,MIE-002,Epicerie,Rucher des Monts,9.39,pas_un_prix,5.50,,7.00,3760001000003,
+Savon de Marseille,,La Savonnerie du Midi,abc,SAV-001,Hygiène,La Savonnerie du Midi,3.84,3.20,20.00,12,2.50,3760001000004,

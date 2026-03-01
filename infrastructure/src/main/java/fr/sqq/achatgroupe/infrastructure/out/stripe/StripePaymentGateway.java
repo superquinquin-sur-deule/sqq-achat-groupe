@@ -155,10 +155,11 @@ public class StripePaymentGateway implements PaymentGateway, PaymentCatalogGatew
 
     @Override
     public String registerProduct(Long productId, String name, String description,
-                                  BigDecimal prixHt, BigDecimal tauxTva, BigDecimal prixTtc, String reference) {
+                                  BigDecimal prixHt, BigDecimal tauxTva, BigDecimal prixTtc, String reference,
+                                  String stripeTaxCode) {
         long prixTtcInCents = prixTtc.movePointRight(2).longValueExact();
 
-        ProductCreateParams params = ProductCreateParams.builder()
+        ProductCreateParams.Builder builder = ProductCreateParams.builder()
                 .setName(name)
                 .setDefaultPriceData(
                         ProductCreateParams.DefaultPriceData.builder()
@@ -170,8 +171,13 @@ public class StripePaymentGateway implements PaymentGateway, PaymentCatalogGatew
                 .putMetadata("reference", reference)
                 .putMetadata("prix_ht", prixHt.toPlainString())
                 .putMetadata("taux_tva", tauxTva.toPlainString())
-                .putMetadata("tax_percent", tauxTva.toPlainString())
-                .build();
+                .putMetadata("tax_percent", tauxTva.toPlainString());
+
+        if (stripeTaxCode != null) {
+            builder.setTaxCode(stripeTaxCode);
+        }
+
+        ProductCreateParams params = builder.build();
 
         try {
             com.stripe.model.Product stripeProduct = com.stripe.model.Product.create(params);

@@ -16,7 +16,8 @@ public class FakePaymentCatalogGateway implements PaymentCatalogGateway {
 
     @Override
     public String registerProduct(Long productId, String name, String description,
-                                  BigDecimal prixHt, BigDecimal tauxTva, BigDecimal prixTtc, String reference) {
+                                  BigDecimal prixHt, BigDecimal tauxTva, BigDecimal prixTtc, String reference,
+                                  String stripeTaxCode) {
         return "prod_test_fake_" + productId;
     }
 }

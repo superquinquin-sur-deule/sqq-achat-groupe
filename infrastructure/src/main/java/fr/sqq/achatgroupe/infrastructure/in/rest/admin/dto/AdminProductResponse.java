@@ -17,5 +17,6 @@ public record AdminProductResponse(
         String category,
         String brand,
         Integer colisage,
+        String stripeTaxCode,
         String imageUrl
 ) {}

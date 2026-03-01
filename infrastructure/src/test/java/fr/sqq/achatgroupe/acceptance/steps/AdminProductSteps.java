@@ -150,6 +150,9 @@ public class AdminProductSteps {
         page().locator("#product-reference").fill(values.get("référence"));
         page().locator("#product-category").fill(values.get("catégorie"));
         page().locator("#product-brand").fill(values.get("marque"));
+        if (values.containsKey("stripe tax code")) {
+            page().locator("#product-stripe-tax-code").fill(values.get("stripe tax code"));
+        }
     }
 
     @Et("je soumets le formulaire produit")

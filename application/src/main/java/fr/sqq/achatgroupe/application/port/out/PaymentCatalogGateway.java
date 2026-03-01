@@ -5,5 +5,6 @@ import java.math.BigDecimal;
 public interface PaymentCatalogGateway {
 
     String registerProduct(Long productId, String name, String description,
-                           BigDecimal prixHt, BigDecimal tauxTva, BigDecimal prixTtc, String reference);
+                           BigDecimal prixHt, BigDecimal tauxTva, BigDecimal prixTtc, String reference,
+                           String stripeTaxCode);
 }
