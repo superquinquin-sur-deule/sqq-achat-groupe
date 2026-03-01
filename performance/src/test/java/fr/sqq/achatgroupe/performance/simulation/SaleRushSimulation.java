@@ -4,32 +4,30 @@ import fr.sqq.achatgroupe.performance.config.SimulationConfig;
 import io.gatling.javaapi.core.*;
 import io.gatling.javaapi.http.*;
 
-import java.net.CookieManager;
-import java.net.CookiePolicy;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.time.Duration;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import static io.gatling.javaapi.core.CoreDsl.*;
 import static io.gatling.javaapi.http.HttpDsl.*;
 
+/**
+ * Simulates a sale rush using existing seed data (dev profile).
+ * No admin setup required — relies on active ventes, products, and timeslots
+ * already present in the database via Flyway repeatable migration R__dev_seed_data.sql.
+ */
 public class SaleRushSimulation extends Simulation {
 
     private static final String BASE_URL = SimulationConfig.BASE_URL;
     private static final int USERS = SimulationConfig.USERS;
-    private static final int PRODUCT_COUNT = SimulationConfig.PRODUCT_COUNT;
-    private static final int STOCK_PER_PRODUCT = SimulationConfig.STOCK_PER_PRODUCT;
-    private static final int TIMESLOT_COUNT = SimulationConfig.TIMESLOT_COUNT;
-    private static final int CAPACITY_PER_SLOT = SimulationConfig.CAPACITY_PER_SLOT;
 
     private static final String[] FIRST_NAMES = {
             "Alice", "Bob", "Claire", "David", "Emma", "François", "Gabrielle", "Hugo",
@@ -44,6 +42,7 @@ public class SaleRushSimulation extends Simulation {
     };
 
     private final AtomicInteger userCounter = new AtomicInteger(0);
+    private volatile String venteId;
 
     private Iterator<Map<String, Object>> customerFeeder() {
         return Stream.generate(() -> {
@@ -67,81 +66,78 @@ public class SaleRushSimulation extends Simulation {
 
     ScenarioBuilder saleRush = scenario("Ruée à l'ouverture")
             .feed(customerFeeder())
-            // 1. Get active vente
-            .exec(
-                    http("GET ventes")
-                            .get("/api/ventes")
-                            .check(
-                                    status().is(200),
-                                    jsonPath("$.data[0].id").saveAs("venteId")
-                            )
-            )
-            .pause(Duration.ofMillis(500), Duration.ofMillis(2000))
-            // 2. Get products
+            // Inject the venteId discovered in before()
+            .exec(session -> session.set("venteId", venteId))
+            // 1. Get products
             .exec(
                     http("GET products")
                             .get("/api/ventes/#{venteId}/products")
                             .check(
                                     status().is(200),
-                                    jsonPath("$.data[*].id").ofList().saveAs("productIds")
+                                    jsonPath("$.data[*].id").findAll().saveAs("productIds")
                             )
             )
             .pause(Duration.ofSeconds(1), Duration.ofSeconds(4))
-            // 3. Get timeslots
+            // 2. Get timeslots
             .exec(
                     http("GET timeslots")
                             .get("/api/ventes/#{venteId}/timeslots")
                             .check(
                                     status().is(200),
-                                    jsonPath("$.data[*].id").ofList().saveAs("timeSlotIds")
+                                    jsonPath("$.data[*].id").findAll().optional().saveAs("timeSlotIds")
                             )
             )
             .pause(Duration.ofMillis(500), Duration.ofMillis(1500))
-            // 4. Select random products and timeslot, then place order
-            .exec(session -> {
-                ThreadLocalRandom rng = ThreadLocalRandom.current();
-
-                List<?> productIds = session.getList("productIds");
+            // 3. Select random products and timeslot, then place order
+            .doIf(session -> {
                 List<?> timeSlotIds = session.getList("timeSlotIds");
+                return timeSlotIds != null && !timeSlotIds.isEmpty();
+            }).then(
+                    exec(session -> {
+                        ThreadLocalRandom rng = ThreadLocalRandom.current();
 
-                // Random timeslot
-                Object timeSlotId = timeSlotIds.get(rng.nextInt(timeSlotIds.size()));
+                        List<?> productIds = session.getList("productIds");
+                        List<?> timeSlotIds = session.getList("timeSlotIds");
 
-                // Random 1-3 products with quantities 1-3
-                int itemCount = rng.nextInt(1, Math.min(4, productIds.size() + 1));
-                List<Integer> indices = new ArrayList<>();
-                for (int i = 0; i < productIds.size(); i++) indices.add(i);
-                Collections.shuffle(indices, rng);
+                        // Random timeslot
+                        Object timeSlotId = timeSlotIds.get(rng.nextInt(timeSlotIds.size()));
 
-                StringBuilder itemsJson = new StringBuilder("[");
-                for (int i = 0; i < itemCount; i++) {
-                    if (i > 0) itemsJson.append(",");
-                    int quantity = rng.nextInt(1, 4);
-                    itemsJson.append("{\"productId\":").append(productIds.get(indices.get(i)))
-                            .append(",\"quantity\":").append(quantity).append("}");
-                }
-                itemsJson.append("]");
+                        // Random 1-3 products with quantities 1-3
+                        int itemCount = rng.nextInt(1, Math.min(4, productIds.size() + 1));
+                        List<Integer> indices = new ArrayList<>();
+                        for (int i = 0; i < productIds.size(); i++) indices.add(i);
+                        Collections.shuffle(indices, rng);
 
-                return session
-                        .set("selectedTimeSlotId", timeSlotId)
-                        .set("orderItems", itemsJson.toString());
-            })
-            .exec(
-                    http("POST order")
-                            .post("/api/ventes/#{venteId}/orders")
-                            .body(StringBody("""
-                                    {
-                                      "customerFirstName": "#{customerFirstName}",
-                                      "customerLastName": "#{customerLastName}",
-                                      "email": "#{email}",
-                                      "phone": "#{phone}",
-                                      "timeSlotId": #{selectedTimeSlotId},
-                                      "items": #{orderItems}
-                                    }
-                                    """))
-                            .check(
-                                    status().in(201, 400, 409, 422)
-                            )
+                        StringBuilder itemsJson = new StringBuilder("[");
+                        for (int i = 0; i < itemCount; i++) {
+                            if (i > 0) itemsJson.append(",");
+                            int quantity = rng.nextInt(1, 4);
+                            itemsJson.append("{\"productId\":").append(productIds.get(indices.get(i)))
+                                    .append(",\"quantity\":").append(quantity).append("}");
+                        }
+                        itemsJson.append("]");
+
+                        return session
+                                .set("selectedTimeSlotId", timeSlotId)
+                                .set("orderItems", itemsJson.toString());
+                    })
+                    .exec(
+                            http("POST order")
+                                    .post("/api/ventes/#{venteId}/orders")
+                                    .body(StringBody("""
+                                            {
+                                              "customerFirstName": "#{customerFirstName}",
+                                              "customerLastName": "#{customerLastName}",
+                                              "email": "#{email}",
+                                              "phone": "#{phone}",
+                                              "timeSlotId": #{selectedTimeSlotId},
+                                              "items": #{orderItems}
+                                            }
+                                            """))
+                                    .check(
+                                            status().in(201, 400, 409, 422)
+                                    )
+                    )
             );
 
     {
@@ -170,214 +166,86 @@ public class SaleRushSimulation extends Simulation {
 
     @Override
     public void before() {
-        System.out.println("=== Setting up test data ===");
+        System.out.println("=== Sale Rush Simulation ===");
         System.out.println("Base URL: " + BASE_URL);
         System.out.println("Users: " + USERS);
-        System.out.println("Products: " + PRODUCT_COUNT + " (stock: " + STOCK_PER_PRODUCT + " each)");
-        System.out.println("Timeslots: " + TIMESLOT_COUNT + " (capacity: " + CAPACITY_PER_SLOT + " each)");
 
         try {
-            CookieManager cookieManager = new CookieManager();
-            cookieManager.setCookiePolicy(CookiePolicy.ACCEPT_ALL);
             HttpClient client = HttpClient.newBuilder()
                     .connectTimeout(Duration.ofSeconds(10))
-                    .cookieHandler(cookieManager)
-                    .followRedirects(HttpClient.Redirect.ALWAYS)
                     .build();
 
-            authenticateAdmin(client);
-
-            // 1. Create vente
-            Instant now = Instant.now();
-            Instant endDate = now.plus(Duration.ofDays(30));
-            String venteBody = """
-                    {
-                      "name": "Vente Performance Test %s",
-                      "description": "Auto-generated for Gatling performance test",
-                      "startDate": "%s",
-                      "endDate": "%s"
-                    }
-                    """.formatted(now.toEpochMilli(), now.toString(), endDate.toString());
-
-            HttpResponse<String> venteResponse = client.send(
+            // Find an active vente that has products
+            String ventesJson = client.send(
                     HttpRequest.newBuilder()
-                            .uri(URI.create(BASE_URL + "/api/admin/ventes"))
-                            .header("Content-Type", "application/json")
-                            .header("X-Requested-With", "XMLHttpRequest")
-                            .POST(HttpRequest.BodyPublishers.ofString(venteBody))
+                            .uri(URI.create(BASE_URL + "/api/ventes"))
+                            .header("Accept", "application/json")
+                            .GET()
                             .build(),
                     HttpResponse.BodyHandlers.ofString()
-            );
+            ).body();
 
-            if (venteResponse.statusCode() != 201) {
-                throw new RuntimeException("Failed to create vente: " + venteResponse.statusCode() + " - " + venteResponse.body());
+            List<String> venteIds = extractAllJsonValues(ventesJson, "id");
+            if (venteIds.isEmpty()) {
+                throw new RuntimeException("No active ventes found. Is the dev seed data loaded?");
             }
 
-            String venteId = extractJsonValue(venteResponse.body(), "id");
-            System.out.println("Created vente: " + venteId);
-
-            // 2. Create products
-            for (int i = 1; i <= PRODUCT_COUNT; i++) {
-                String productBody = """
-                        {
-                          "name": "Produit Perf %d",
-                          "description": "Produit de test performance",
-                          "prixHt": %.2f,
-                          "tauxTva": 20.0,
-                          "supplier": "Fournisseur Test",
-                          "stock": %d,
-                          "reference": "PERF-%03d",
-                          "category": "Test",
-                          "brand": "PerfBrand",
-                          "colisage": 1
-                        }
-                        """.formatted(i, 5.0 + i, STOCK_PER_PRODUCT, i);
-
-                HttpResponse<String> productResponse = client.send(
+            for (String candidateId : venteIds) {
+                String productsJson = client.send(
                         HttpRequest.newBuilder()
-                                .uri(URI.create(BASE_URL + "/api/admin/ventes/" + venteId + "/products"))
-                                .header("Content-Type", "application/json")
-                                .header("X-Requested-With", "XMLHttpRequest")
-                                .POST(HttpRequest.BodyPublishers.ofString(productBody))
+                                .uri(URI.create(BASE_URL + "/api/ventes/" + candidateId + "/products"))
+                                .header("Accept", "application/json")
+                                .GET()
                                 .build(),
                         HttpResponse.BodyHandlers.ofString()
-                );
+                ).body();
 
-                if (productResponse.statusCode() != 200) {
-                    throw new RuntimeException("Failed to create product " + i + ": " + productResponse.statusCode() + " - " + productResponse.body());
+                List<String> productIds = extractAllJsonValues(productsJson, "id");
+                if (!productIds.isEmpty()) {
+                    venteId = candidateId;
+                    System.out.println("Using vente " + venteId + " with " + productIds.size() + " products");
+                    break;
                 }
-                System.out.println("  Created product " + i + "/" + PRODUCT_COUNT);
             }
 
-            // 3. Create timeslots
-            LocalDate baseDate = LocalDate.now().plusDays(7);
-            for (int i = 0; i < TIMESLOT_COUNT; i++) {
-                LocalDate slotDate = baseDate.plusDays(i);
-                String timeslotBody = """
-                        {
-                          "date": "%s",
-                          "startTime": "09:00",
-                          "endTime": "12:00",
-                          "capacity": %d
-                        }
-                        """.formatted(slotDate.format(DateTimeFormatter.ISO_LOCAL_DATE), CAPACITY_PER_SLOT);
-
-                HttpResponse<String> timeslotResponse = client.send(
-                        HttpRequest.newBuilder()
-                                .uri(URI.create(BASE_URL + "/api/admin/ventes/" + venteId + "/timeslots"))
-                                .header("Content-Type", "application/json")
-                                .header("X-Requested-With", "XMLHttpRequest")
-                                .POST(HttpRequest.BodyPublishers.ofString(timeslotBody))
-                                .build(),
-                        HttpResponse.BodyHandlers.ofString()
-                );
-
-                if (timeslotResponse.statusCode() != 200) {
-                    throw new RuntimeException("Failed to create timeslot " + (i + 1) + ": " + timeslotResponse.statusCode() + " - " + timeslotResponse.body());
-                }
-                System.out.println("  Created timeslot " + (i + 1) + "/" + TIMESLOT_COUNT);
+            if (venteId == null) {
+                throw new RuntimeException("No active vente with products found. Is the dev seed data loaded?");
             }
 
-            // 4. Activate the vente
-            HttpResponse<String> activateResponse = client.send(
+            // Verify timeslots exist
+            String timeslotsJson = client.send(
                     HttpRequest.newBuilder()
-                            .uri(URI.create(BASE_URL + "/api/admin/ventes/" + venteId + "/activate"))
-                            .header("Content-Type", "application/json")
-                            .header("X-Requested-With", "XMLHttpRequest")
-                            .PUT(HttpRequest.BodyPublishers.noBody())
+                            .uri(URI.create(BASE_URL + "/api/ventes/" + venteId + "/timeslots"))
+                            .header("Accept", "application/json")
+                            .GET()
                             .build(),
                     HttpResponse.BodyHandlers.ofString()
-            );
+            ).body();
 
-            if (activateResponse.statusCode() != 200) {
-                throw new RuntimeException("Failed to activate vente: " + activateResponse.statusCode() + " - " + activateResponse.body());
+            List<String> timeslotIds = extractAllJsonValues(timeslotsJson, "id");
+            if (timeslotIds.isEmpty()) {
+                System.out.println("WARNING: No available timeslots — orders will be skipped. Restart app to reset seed data.");
+            } else {
+                System.out.println("Found " + timeslotIds.size() + " available timeslots");
             }
-            System.out.println("Vente activated successfully!");
-            System.out.println("=== Setup complete, starting simulation ===");
+            System.out.println("=== Starting simulation ===");
 
         } catch (Exception e) {
             throw new RuntimeException("Setup failed", e);
         }
     }
 
-    private void authenticateAdmin(HttpClient client) throws Exception {
-        String username = SimulationConfig.ADMIN_USERNAME;
-        String password = SimulationConfig.ADMIN_PASSWORD;
-        System.out.println("Authenticating as " + username + " via OIDC...");
-
-        // 1. GET an admin endpoint → follows redirects to Keycloak login page
-        HttpResponse<String> loginPage = client.send(
-                HttpRequest.newBuilder()
-                        .uri(URI.create(BASE_URL + "/api/admin/ventes"))
-                        .header("Accept", "text/html,application/xhtml+xml,*/*")
-                        .GET()
-                        .build(),
-                HttpResponse.BodyHandlers.ofString()
-        );
-
-        // If we got a JSON response, auth is disabled (test profile) — skip
-        String contentType = loginPage.headers().firstValue("content-type").orElse("");
-        if (contentType.contains("application/json") || loginPage.statusCode() == 200) {
-            System.out.println("Admin endpoints accessible without auth (test profile?) — skipping login");
-            return;
-        }
-
-        // 2. Parse the Keycloak login form action URL from HTML
-        String formAction = extractFormAction(loginPage.body());
-        if (formAction == null) {
-            throw new RuntimeException("Could not find login form in Keycloak response (status="
-                    + loginPage.statusCode() + "): " + loginPage.body().substring(0, Math.min(500, loginPage.body().length())));
-        }
-
-        // 3. POST credentials to Keycloak
-        String formBody = "username=" + username + "&password=" + password;
-        HttpResponse<String> loginResult = client.send(
-                HttpRequest.newBuilder()
-                        .uri(URI.create(formAction))
-                        .header("Content-Type", "application/x-www-form-urlencoded")
-                        .POST(HttpRequest.BodyPublishers.ofString(formBody))
-                        .build(),
-                HttpResponse.BodyHandlers.ofString()
-        );
-
-        System.out.println("Authentication completed (status=" + loginResult.statusCode() + ")");
-    }
-
-    private static String extractFormAction(String html) {
-        int formIndex = html.indexOf("<form");
-        if (formIndex == -1) return null;
-        int actionIndex = html.indexOf("action=\"", formIndex);
-        if (actionIndex == -1) return null;
-        int start = actionIndex + "action=\"".length();
-        int end = html.indexOf("\"", start);
-        if (end == -1) return null;
-        return html.substring(start, end).replace("&amp;", "&");
-    }
-
-    private static String extractJsonValue(String json, String key) {
-        // Simple extraction for "key": value or "key": "value"
-        String searchKey = "\"" + key + "\"";
-        int keyIndex = json.indexOf(searchKey);
-        if (keyIndex == -1) {
-            throw new RuntimeException("Key '" + key + "' not found in JSON: " + json);
-        }
-        int colonIndex = json.indexOf(':', keyIndex + searchKey.length());
-        int valueStart = colonIndex + 1;
-        // Skip whitespace
-        while (valueStart < json.length() && Character.isWhitespace(json.charAt(valueStart))) {
-            valueStart++;
-        }
-        if (json.charAt(valueStart) == '"') {
-            // String value
-            int valueEnd = json.indexOf('"', valueStart + 1);
-            return json.substring(valueStart + 1, valueEnd);
-        } else {
-            // Numeric value
-            int valueEnd = valueStart;
-            while (valueEnd < json.length() && (Character.isDigit(json.charAt(valueEnd)) || json.charAt(valueEnd) == '-' || json.charAt(valueEnd) == '.')) {
-                valueEnd++;
+    private static List<String> extractAllJsonValues(String json, String key) {
+        List<String> values = new ArrayList<>();
+        Pattern pattern = Pattern.compile("\"" + key + "\"\\s*:\\s*([\"\\d][^,}]*)");
+        Matcher matcher = pattern.matcher(json);
+        while (matcher.find()) {
+            String value = matcher.group(1).trim();
+            if (value.startsWith("\"") && value.endsWith("\"")) {
+                value = value.substring(1, value.length() - 1);
             }
-            return json.substring(valueStart, valueEnd);
+            values.add(value);
         }
+        return values;
     }
 }
