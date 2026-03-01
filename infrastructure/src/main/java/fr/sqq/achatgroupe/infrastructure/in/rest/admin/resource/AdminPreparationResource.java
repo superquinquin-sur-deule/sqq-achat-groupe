@@ -1,10 +1,13 @@
 package fr.sqq.achatgroupe.infrastructure.in.rest.admin.resource;
 
+import fr.sqq.achatgroupe.application.query.CursorPage;
+import fr.sqq.achatgroupe.application.query.CursorPageRequest;
 import fr.sqq.achatgroupe.application.query.GeneratePreparationListQuery;
 import fr.sqq.achatgroupe.application.query.GeneratePreparationListQuery.PreparationOrder;
+import fr.sqq.achatgroupe.application.query.ListPreparationOrdersQuery;
 import fr.sqq.achatgroupe.application.service.PreparationPdfGenerator;
 import fr.sqq.achatgroupe.infrastructure.in.rest.admin.mapper.AdminPreparationRestMapper;
-import fr.sqq.achatgroupe.infrastructure.in.rest.common.dto.DataResponse;
+import fr.sqq.achatgroupe.infrastructure.in.rest.common.dto.CursorPageResponse;
 import fr.sqq.achatgroupe.infrastructure.in.rest.common.dto.PreparationOrderResponse;
 import fr.sqq.mediator.Mediator;
 import jakarta.ws.rs.*;
@@ -36,9 +39,15 @@ public class AdminPreparationResource {
     }
 
     @GET
-    public DataResponse<List<PreparationOrderResponse>> getPreparationList(@PathParam("venteId") Long venteId) {
-        List<PreparationOrder> orders = mediator.send(new GeneratePreparationListQuery(venteId));
-        return new DataResponse<>(mapper.toResponse(orders));
+    public CursorPageResponse<PreparationOrderResponse> getPreparationList(
+            @PathParam("venteId") Long venteId,
+            @QueryParam("cursor") String cursor,
+            @QueryParam("size") @DefaultValue("20") int size,
+            @QueryParam("timeSlotId") Long timeSlotId) {
+        var pageRequest = cursor != null ? CursorPageRequest.after(cursor, size) : CursorPageRequest.first(size);
+        CursorPage<PreparationOrder> page = mediator.send(new ListPreparationOrdersQuery(venteId, pageRequest, timeSlotId));
+        List<PreparationOrderResponse> responses = mapper.toResponse(page.items());
+        return new CursorPageResponse<>(responses, new CursorPageResponse.PageInfo(page.endCursor(), page.hasNext()));
     }
 
     @GET

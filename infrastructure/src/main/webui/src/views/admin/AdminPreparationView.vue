@@ -1,35 +1,43 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useVenteStore } from '@/stores/venteStore'
 import { storeToRefs } from 'pinia'
 import { useAdminPreparationQuery } from '@/composables/api/useAdminPreparationApi'
+import { useAdminTimeslotsQuery } from '@/composables/api/useAdminTimeslotsApi'
+import { useCursorPagination } from '@/composables/useCursorPagination'
 import EmptyState from '@/components/ui/EmptyState.vue'
+import Pagination from '@/components/ui/Pagination.vue'
 
 const venteStore = useVenteStore()
 const { selectedVenteId } = storeToRefs(venteStore)
+const pagination = useCursorPagination()
 
-const { data: orders, isLoading: loading } = useAdminPreparationQuery(selectedVenteId)
+const selectedTimeSlotId = ref<number | null>(null)
 
-const selectedSlot = ref('')
-
-const uniqueSlots = computed(() => {
-  const slots = new Set<string>()
-  for (const order of orders.value ?? []) {
-    slots.add(order.timeSlotLabel)
-  }
-  return Array.from(slots).sort()
+watch(selectedVenteId, () => {
+  pagination.reset()
+  selectedTimeSlotId.value = null
 })
 
-const filteredOrders = computed(() => {
-  if (!selectedSlot.value) {
-    return orders.value ?? []
-  }
-  return (orders.value ?? []).filter((o) => o.timeSlotLabel === selectedSlot.value)
+watch(selectedTimeSlotId, () => {
+  pagination.reset()
 })
+
+const { data: pageData, isLoading: loading } = useAdminPreparationQuery(
+  selectedVenteId,
+  pagination.currentCursor,
+  selectedTimeSlotId,
+)
+const orders = computed(() => pageData.value?.data ?? [])
+const pageInfo = computed(() => pageData.value?.pageInfo ?? { endCursor: null, hasNext: false })
+
+// Fetch timeslots for the filter dropdown
+const { data: timeslotsPageData } = useAdminTimeslotsQuery(selectedVenteId)
+const timeSlots = computed(() => timeslotsPageData.value?.data ?? [])
 
 const groupedBySlot = computed(() => {
-  const groups = new Map<string, typeof filteredOrders.value>()
-  for (const order of filteredOrders.value) {
+  const groups = new Map<string, typeof orders.value>()
+  for (const order of orders.value) {
     const existing = groups.get(order.timeSlotLabel)
     if (existing) {
       existing.push(order)
@@ -107,13 +115,15 @@ function handlePrint() {
       </h1>
       <div class="flex items-center gap-3">
         <select
-          v-model="selectedSlot"
+          v-model="selectedTimeSlotId"
           class="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-dark shadow-sm"
           data-testid="preparation-slot-filter"
         >
-          <option value="">Tous les créneaux</option>
-          <option v-for="slot in uniqueSlots" :key="slot" :value="slot">
-            {{ slot }}
+          <option :value="null">Tous les créneaux</option>
+          <option v-for="slot in timeSlots" :key="slot.id" :value="slot.id">
+            {{ slot.date }} {{ slot.startTime?.substring(0, 5) }}-{{
+              slot.endTime?.substring(0, 5)
+            }}
           </option>
         </select>
         <button
@@ -245,6 +255,16 @@ function handlePrint() {
           </div>
         </div>
       </template>
+
+      <Pagination
+        class="print:hidden"
+        :has-next="pageInfo.hasNext"
+        :has-previous="pagination.hasPrevious.value"
+        :page-number="pagination.pageNumber.value"
+        :loading="loading"
+        @next="pagination.goToNext(pageInfo.endCursor!)"
+        @previous="pagination.goToPrevious()"
+      />
     </div>
   </div>
 </template>

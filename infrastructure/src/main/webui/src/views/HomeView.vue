@@ -56,7 +56,11 @@ function handleAddToCart(product: ProductResponse) {
       <p class="text-brown">Revenez plus tard lorsque la période de commande sera activée.</p>
     </div>
     <template v-else>
-      <HeroBanner :vente="vente ?? null" :time-slots="timeSlots ?? []" :time-slots-loading="timeSlotsLoading" />
+      <HeroBanner
+        :vente="vente ?? null"
+        :time-slots="timeSlots ?? []"
+        :time-slots-loading="timeSlotsLoading"
+      />
       <RayonNav
         v-if="!loading && groupedRayons.length > 0"
         :rayons="groupedRayons.map((r) => r.name)"

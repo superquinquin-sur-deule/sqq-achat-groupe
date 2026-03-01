@@ -123,7 +123,14 @@ public class BackofficePreparationSteps {
         assertTrue(options.count() >= 2, "Il doit y avoir au moins 2 options dans le filtre");
         String secondOptionValue = options.nth(1).getAttribute("value");
         selectedSlotText = options.nth(1).textContent().trim();
-        filter.selectOption(secondOptionValue);
+
+        // Server-side filtering: wait for the API response after selecting
+        page().waitForResponse(
+                response -> response.url().contains("/api/admin/ventes/") && response.url().contains("/preparation") && response.status() == 200,
+                () -> filter.selectOption(secondOptionValue)
+        );
+        page().waitForSelector("[data-testid='preparation-card']",
+                new Page.WaitForSelectorOptions().setState(WaitForSelectorState.VISIBLE).setTimeout(5000));
     }
 
     @Alors("seules les fiches du créneau sélectionné sont affichées")

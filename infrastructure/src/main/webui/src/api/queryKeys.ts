@@ -33,7 +33,10 @@ export const queryKeys = {
       detail: (orderId: string) => ['admin', 'orders', orderId] as const,
     },
     dashboard: { stats: (venteId: number) => ['admin', 'dashboard', { venteId }] as const },
-    preparation: { list: (venteId: number) => ['admin', 'preparation', { venteId }] as const },
+    preparation: {
+      list: (venteId: number, cursor?: string | null, timeSlotId?: number | null) =>
+        ['admin', 'preparation', { venteId, cursor, timeSlotId }] as const,
+    },
     supplierOrders: {
       list: (venteId: number) => ['admin', 'supplier-orders', { venteId }] as const,
     },
