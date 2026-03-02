@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import Footer from '@/components/layout/Footer.vue'
 import Toast from '@/components/ui/Toast.vue'
 import { useToast } from '@/composables/useToast'
 
@@ -15,6 +16,7 @@ const { toasts, remove } = useToast()
   <main id="main-content" class="min-h-screen bg-surface">
     <router-view />
   </main>
+  <Footer />
   <Toast
     v-for="toast in toasts"
     :key="toast.id"
