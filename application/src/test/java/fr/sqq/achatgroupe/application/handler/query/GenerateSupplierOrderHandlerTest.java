@@ -46,7 +46,7 @@ class GenerateSupplierOrderHandlerTest {
                 List.of(
                         OrderItem.create(10L, 3, Money.eur(new BigDecimal("3.50"))),
                         OrderItem.create(30L, 1, Money.eur(new BigDecimal("8.00")))
-                ));
+                ), null);
         order1.markAsPaid();
 
         Order order2 = Order.create(venteId, OrderNumber.generate(),
@@ -54,7 +54,7 @@ class GenerateSupplierOrderHandlerTest {
                 List.of(
                         OrderItem.create(10L, 2, Money.eur(new BigDecimal("3.50"))),
                         OrderItem.create(20L, 5, Money.eur(new BigDecimal("2.00")))
-                ));
+                ), null);
         order2.markAsPaid();
 
         when(orderRepository.findPaidByVenteId(venteId)).thenReturn(List.of(order1, order2));
@@ -77,7 +77,7 @@ class GenerateSupplierOrderHandlerTest {
 
         Order order1 = Order.create(venteId, OrderNumber.generate(),
                 new CustomerInfo("Alice", "Dupont", "alice@test.com", "0601020304"), 1L,
-                List.of(OrderItem.create(10L, 10, Money.eur(new BigDecimal("3.50")))));
+                List.of(OrderItem.create(10L, 10, Money.eur(new BigDecimal("3.50")))), null);
         order1.markAsPaid();
 
         when(orderRepository.findPaidByVenteId(venteId)).thenReturn(List.of(order1));

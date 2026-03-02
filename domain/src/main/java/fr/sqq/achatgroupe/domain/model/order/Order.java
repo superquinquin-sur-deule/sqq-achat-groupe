@@ -18,9 +18,11 @@ public class Order {
     private OrderStatus status;
     private final Money totalAmount;
     private final Instant createdAt;
+    private final String idempotencyKey;
 
     public Order(UUID id, Long venteId, OrderNumber orderNumber, CustomerInfo customer, Long timeSlotId,
-                 List<OrderItem> items, OrderStatus status, Money totalAmount, Instant createdAt) {
+                 List<OrderItem> items, OrderStatus status, Money totalAmount, Instant createdAt,
+                 String idempotencyKey) {
         if (orderNumber == null) throw new IllegalArgumentException("Order number must not be null");
         if (customer == null) throw new IllegalArgumentException("Customer must not be null");
         if (timeSlotId == null) throw new IllegalArgumentException("Time slot ID must not be null");
@@ -37,16 +39,18 @@ public class Order {
         this.status = status;
         this.totalAmount = totalAmount;
         this.createdAt = createdAt;
+        this.idempotencyKey = idempotencyKey;
     }
 
-    public static Order create(Long venteId, OrderNumber number, CustomerInfo customer, Long timeSlotId, List<OrderItem> items) {
+    public static Order create(Long venteId, OrderNumber number, CustomerInfo customer, Long timeSlotId, List<OrderItem> items,
+                                String idempotencyKey) {
         if (items == null || items.isEmpty()) {
             throw new IllegalArgumentException("La commande doit contenir au moins un article");
         }
         Money total = items.stream()
                 .map(OrderItem::subtotal)
                 .reduce(Money.ZERO, Money::add);
-        return new Order(UUID.randomUUID(), venteId, number, customer, timeSlotId, items, OrderStatus.PENDING, total, Instant.now());
+        return new Order(UUID.randomUUID(), venteId, number, customer, timeSlotId, items, OrderStatus.PENDING, total, Instant.now(), idempotencyKey);
     }
 
     public void markAsPaid() {
@@ -107,4 +111,5 @@ public class Order {
     public OrderStatus status() { return status; }
     public Money totalAmount() { return totalAmount; }
     public Instant createdAt() { return createdAt; }
+    public String idempotencyKey() { return idempotencyKey; }
 }

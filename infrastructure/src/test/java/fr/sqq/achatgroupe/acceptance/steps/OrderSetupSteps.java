@@ -45,7 +45,7 @@ public class OrderSetupSteps {
             List<OrderItemCommand> items = parseProducts(row.get("produits"));
 
             Order order = mediator.send(new CreateOrderCommand(
-                    venteId, prenom, nom, email, telephone, timeSlotId, items
+                    venteId, prenom, nom, email, telephone, timeSlotId, null, items
             ));
 
             if ("PAID".equals(statut) || "PICKED_UP".equals(statut)) {

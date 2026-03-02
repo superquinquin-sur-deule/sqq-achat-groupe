@@ -51,7 +51,7 @@ class ApplyShortageAdjustmentsHandlerTest {
         // Order with 4x Product A
         Order order = Order.create(VENTE_ID, OrderNumber.generate(),
                 new CustomerInfo("Alice", "Dupont", "alice@test.com", "0601020304"), 1L,
-                List.of(OrderItem.create(PRODUCT_A, 4, Money.eur(new BigDecimal("3.50")))));
+                List.of(OrderItem.create(PRODUCT_A, 4, Money.eur(new BigDecimal("3.50")))), null);
         order.markAsPaid();
 
         // Reception: ordered 4, received 3 → shortage = 1
@@ -85,7 +85,7 @@ class ApplyShortageAdjustmentsHandlerTest {
         Order order = new Order(java.util.UUID.randomUUID(), VENTE_ID, OrderNumber.generate(),
                 new CustomerInfo("Alice", "Dupont", "alice@test.com", "0601020304"), 1L,
                 List.of(adjustedItem), fr.sqq.achatgroupe.domain.model.order.OrderStatus.PAID,
-                Money.eur(new BigDecimal("14.00")), java.time.Instant.now());
+                Money.eur(new BigDecimal("14.00")), java.time.Instant.now(), null);
 
         Reception reception = Reception.create(VENTE_ID, "Ferme A",
                 List.of(ReceptionItem.create(PRODUCT_A, 4, 3)));
@@ -107,7 +107,7 @@ class ApplyShortageAdjustmentsHandlerTest {
         // Two orders with Product A
         Order order1 = Order.create(VENTE_ID, OrderNumber.generate(),
                 new CustomerInfo("Alice", "Dupont", "alice@test.com", "0601020304"), 1L,
-                List.of(OrderItem.create(PRODUCT_A, 3, Money.eur(new BigDecimal("3.50")))));
+                List.of(OrderItem.create(PRODUCT_A, 3, Money.eur(new BigDecimal("3.50")))), null);
         order1.markAsPaid();
 
         // Order2 already has 1 cancelled (from a previous partial run)
@@ -115,7 +115,7 @@ class ApplyShortageAdjustmentsHandlerTest {
         Order order2 = new Order(java.util.UUID.randomUUID(), VENTE_ID, OrderNumber.generate(),
                 new CustomerInfo("Bob", "Martin", "bob@test.com", "0605060708"), 1L,
                 List.of(partiallyAdjustedItem), fr.sqq.achatgroupe.domain.model.order.OrderStatus.PAID,
-                Money.eur(new BigDecimal("7.00")), java.time.Instant.now());
+                Money.eur(new BigDecimal("7.00")), java.time.Instant.now(), null);
 
         // Shortage = 3, already cancelled = 1, remaining = 2
         Reception reception = Reception.create(VENTE_ID, "Ferme A",

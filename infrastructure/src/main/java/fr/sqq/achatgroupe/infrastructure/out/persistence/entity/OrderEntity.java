@@ -54,6 +54,9 @@ public class OrderEntity {
     @Column(name = "created_at", nullable = false)
     private Instant createdAt;
 
+    @Column(name = "idempotency_key", unique = true)
+    private String idempotencyKey;
+
     @Version
     @Column(name = "version")
     private int version;
@@ -103,6 +106,9 @@ public class OrderEntity {
 
     public int getVersion() { return version; }
     public void setVersion(int version) { this.version = version; }
+
+    public String getIdempotencyKey() { return idempotencyKey; }
+    public void setIdempotencyKey(String idempotencyKey) { this.idempotencyKey = idempotencyKey; }
 
     public List<OrderItemEntity> getItems() { return items; }
     public void setItems(List<OrderItemEntity> items) { this.items = items; }

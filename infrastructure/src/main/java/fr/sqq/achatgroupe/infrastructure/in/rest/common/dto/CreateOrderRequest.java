@@ -15,6 +15,7 @@ public record CreateOrderRequest(
         @NotBlank(message = "L'email est requis") @Email(message = "Email invalide") String email,
         @NotBlank(message = "Le téléphone est requis") String phone,
         @NotNull(message = "Le créneau est requis") Long timeSlotId,
+        String idempotencyKey,
         @NotEmpty(message = "La commande doit contenir au moins un article")
         @Size(max = 50, message = "La commande ne peut pas contenir plus de 50 articles")
         List<@Valid OrderItemRequest> items

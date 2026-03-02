@@ -51,6 +51,12 @@ public class OrderPanacheRepository implements OrderRepository, PanacheRepositor
     }
 
     @Override
+    public Optional<Order> findByIdempotencyKey(String idempotencyKey) {
+        return find("idempotencyKey", idempotencyKey).firstResultOptional()
+                .map(mapper::toDomain);
+    }
+
+    @Override
     public Optional<Order> findOrderById(UUID id) {
         return find("id", id).firstResultOptional()
                 .map(mapper::toDomain);

@@ -29,7 +29,8 @@ public interface OrderPersistenceMapper {
                 items,
                 OrderStatus.valueOf(entity.getStatus()),
                 Money.eur(entity.getTotalAmount()),
-                entity.getCreatedAt()
+                entity.getCreatedAt(),
+                entity.getIdempotencyKey()
         );
     }
 
@@ -51,6 +52,7 @@ public interface OrderPersistenceMapper {
         entity.setStatus(domain.status().name());
         entity.setTotalAmount(domain.totalAmount().amount());
         entity.setCreatedAt(domain.createdAt());
+        entity.setIdempotencyKey(domain.idempotencyKey());
 
         List<OrderItemEntity> itemEntities = domain.items().stream()
                 .map(item -> toEntity(item, entity))

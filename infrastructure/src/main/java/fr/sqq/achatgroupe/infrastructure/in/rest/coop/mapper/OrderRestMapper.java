@@ -22,6 +22,7 @@ public interface OrderRestMapper {
                 request.email(),
                 request.phone(),
                 request.timeSlotId(),
+                request.idempotencyKey(),
                 items
         );
     }

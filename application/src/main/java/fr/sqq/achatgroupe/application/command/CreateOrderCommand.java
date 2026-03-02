@@ -12,6 +12,7 @@ public record CreateOrderCommand(
         String email,
         String phone,
         Long timeSlotId,
+        String idempotencyKey,
         List<OrderItemCommand> items
 ) implements Command<Order> {
 

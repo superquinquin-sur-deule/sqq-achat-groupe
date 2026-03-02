@@ -19,6 +19,7 @@ import jakarta.transaction.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @ApplicationScoped
 public class CreateOrderHandler implements CommandHandler<CreateOrderCommand, Order> {
@@ -36,6 +37,13 @@ public class CreateOrderHandler implements CommandHandler<CreateOrderCommand, Or
     @Override
     @Transactional
     public Order handle(CreateOrderCommand command) {
+        if (command.idempotencyKey() != null) {
+            Optional<Order> existing = orderRepository.findByIdempotencyKey(command.idempotencyKey());
+            if (existing.isPresent()) {
+                return existing.get();
+            }
+        }
+
         TimeSlot timeSlot = timeSlotRepository.findSlotById(command.timeSlotId())
                 .orElseThrow(() -> new TimeSlotNotFoundException(command.timeSlotId()));
 
@@ -60,7 +68,7 @@ public class CreateOrderHandler implements CommandHandler<CreateOrderCommand, Or
 
         CustomerInfo customer = new CustomerInfo(command.customerFirstName(), command.customerLastName(), command.email(), command.phone());
         OrderNumber orderNumber = OrderNumber.generate();
-        Order order = Order.create(command.venteId(), orderNumber, customer, command.timeSlotId(), orderItems);
+        Order order = Order.create(command.venteId(), orderNumber, customer, command.timeSlotId(), orderItems, command.idempotencyKey());
 
         return orderRepository.save(order);
     }

@@ -18,6 +18,7 @@ export const useCheckoutStore = defineStore('checkout', () => {
   const isSubmitting = ref(false)
   const error = ref<string | null>(null)
   const lastOrder = ref<OrderResponse | null>(null)
+  const idempotencyKey = ref(crypto.randomUUID())
 
   function setCustomerInfo(info: CustomerInfo) {
     customerInfo.value = info
@@ -38,6 +39,7 @@ export const useCheckoutStore = defineStore('checkout', () => {
       email: customerInfo.value.email,
       phone: customerInfo.value.phone,
       timeSlotId: selectedTimeSlotId.value!,
+      idempotencyKey: idempotencyKey.value,
       items: cartStore.items.map((item) => ({
         productId: item.productId,
         quantity: item.quantity,
@@ -50,6 +52,8 @@ export const useCheckoutStore = defineStore('checkout', () => {
   }
 
   async function initiatePayment(venteId: number): Promise<void> {
+    if (isSubmitting.value) return
+
     isSubmitting.value = true
     error.value = null
 
@@ -69,12 +73,11 @@ export const useCheckoutStore = defineStore('checkout', () => {
         paymentResponse.data as { data: { checkoutUrl: string } }
       ).data.checkoutUrl
     } catch (e: unknown) {
+      isSubmitting.value = false
       if (e instanceof Error) {
         error.value = e.message
       }
       throw e
-    } finally {
-      isSubmitting.value = false
     }
   }
 
@@ -85,6 +88,7 @@ export const useCheckoutStore = defineStore('checkout', () => {
     isSubmitting.value = false
     error.value = null
     lastOrder.value = null
+    idempotencyKey.value = crypto.randomUUID()
   }
 
   return {
@@ -94,6 +98,7 @@ export const useCheckoutStore = defineStore('checkout', () => {
     isSubmitting,
     error,
     lastOrder,
+    idempotencyKey,
     setCustomerInfo,
     selectTimeSlot,
     submitOrder,
