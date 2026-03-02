@@ -88,9 +88,9 @@ public class AdminProductImageSteps {
         Locator cards = page().locator("[data-testid='product-card']");
         assertTrue(cards.count() > 0, "Des cartes produit doivent être visibles");
 
-        Locator productImage = cards.first().locator("img[src='/api/product-images/" + imageProductId + "']");
+        Locator productImage = cards.locator("img[src='/api/product-images/" + imageProductId + "']");
         assertTrue(productImage.count() > 0,
-                "La carte du premier produit doit contenir une balise img avec l'URL de l'image");
+                "Une carte produit doit contenir une balise img avec l'URL de l'image");
     }
 
     @Et("je supprime le premier produit via l'API")

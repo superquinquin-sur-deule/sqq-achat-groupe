@@ -37,10 +37,12 @@ const groupedRayons = computed(() => {
     const cat = product.category || 'Autres'
     if (!seen.has(cat)) seen.set(cat, seen.size)
   }
-  return Array.from(seen.entries()).map(([name, index]) => ({
-    name,
-    color: getRayonColor(index),
-  }))
+  return Array.from(seen.entries())
+    .sort(([a], [b]) => a.localeCompare(b, 'fr'))
+    .map(([name], index) => ({
+      name,
+      color: getRayonColor(index),
+    }))
 })
 
 function handleAddToCart(product: ProductResponse) {

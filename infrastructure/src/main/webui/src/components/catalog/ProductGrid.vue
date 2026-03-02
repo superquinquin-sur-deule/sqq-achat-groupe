@@ -20,11 +20,13 @@ const groupedProducts = computed(() => {
     if (!groups.has(cat)) groups.set(cat, [])
     groups.get(cat)!.push(product)
   }
-  return Array.from(groups.entries()).map(([category, products], index) => ({
-    category,
-    products,
-    color: getRayonColor(index),
-  }))
+  return Array.from(groups.entries())
+    .sort(([a], [b]) => a.localeCompare(b, 'fr'))
+    .map(([category, products], index) => ({
+      category,
+      products,
+      color: getRayonColor(index),
+    }))
 })
 </script>
 
