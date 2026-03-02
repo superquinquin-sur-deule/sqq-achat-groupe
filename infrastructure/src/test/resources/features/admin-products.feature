@@ -87,3 +87,13 @@ Fonctionnalité: Gestion des produits (CRUD admin)
     Étant donné qu'une commande existe sur la vente via le navigateur
     Quand je navigue vers la page admin ventes
     Alors le bouton supprimer de la vente n'est pas visible
+
+  Scénario: Le stripeProductId est préservé après modification d'un produit via l'API
+    Étant donné que le premier produit possède un stripeProductId en base
+    Quand je modifie le premier produit via l'API
+    Alors le stripeProductId du premier produit est inchangé en base
+
+  Scénario: Le stripeProductId est préservé après upload d'image via l'API
+    Étant donné que le premier produit possède un stripeProductId en base
+    Quand j'uploade une image PNG sur le premier produit via l'API
+    Alors le stripeProductId du premier produit est inchangé en base

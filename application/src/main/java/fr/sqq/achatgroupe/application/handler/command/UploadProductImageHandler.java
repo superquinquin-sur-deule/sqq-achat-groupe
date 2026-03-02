@@ -45,6 +45,7 @@ public class UploadProductImageHandler implements CommandHandler<UploadProductIm
                 existing.stripeTaxCode(),
                 true
         );
+        updated.assignStripeProductId(existing.stripeProductId());
         productRepository.save(updated);
         return updated;
     }

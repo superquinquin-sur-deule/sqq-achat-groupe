@@ -63,6 +63,7 @@ public class UpdateProductHandler implements CommandHandler<UpdateProductCommand
                 command.stripeTaxCode(),
                 existing.hasImage()
         );
+        updated.assignStripeProductId(existing.stripeProductId());
         productRepository.save(updated);
         return updated;
     }
