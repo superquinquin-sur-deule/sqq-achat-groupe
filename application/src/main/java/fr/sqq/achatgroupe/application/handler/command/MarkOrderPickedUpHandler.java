@@ -5,6 +5,7 @@ import fr.sqq.achatgroupe.application.port.out.OrderRepository;
 import fr.sqq.achatgroupe.domain.exception.OrderNotFoundException;
 import fr.sqq.achatgroupe.domain.model.order.Order;
 import fr.sqq.mediator.CommandHandler;
+import io.quarkus.logging.Log;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 
@@ -20,6 +21,7 @@ public class MarkOrderPickedUpHandler implements CommandHandler<MarkOrderPickedU
     @Override
     @Transactional
     public Void handle(MarkOrderPickedUpCommand command) {
+        Log.infof("Marking order %s as picked up for %s", command.orderId(), command.venteId());
         Order order = orderRepository.findOrderByIdAndVenteId(command.orderId(), command.venteId())
                 .orElseThrow(() -> new OrderNotFoundException(command.orderId()));
         order.markAsPickedUp();

@@ -12,6 +12,7 @@ import fr.sqq.achatgroupe.domain.model.order.Order;
 import fr.sqq.achatgroupe.domain.model.order.OrderStatus;
 import fr.sqq.achatgroupe.domain.model.payment.Payment;
 import fr.sqq.mediator.CommandHandler;
+import io.quarkus.logging.Log;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
@@ -36,6 +37,7 @@ public class InitiatePaymentHandler implements CommandHandler<InitiatePaymentCom
     @Override
     @Transactional
     public PaymentSession handle(InitiatePaymentCommand command) {
+        Log.infof("Initiating payment for order %d", command.orderId());
         Order order = orderRepository.findOrderById(command.orderId())
                 .orElseThrow(() -> new OrderNotFoundException(command.orderId()));
 

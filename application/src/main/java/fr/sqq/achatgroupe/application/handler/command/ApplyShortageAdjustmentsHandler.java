@@ -10,6 +10,7 @@ import fr.sqq.achatgroupe.domain.model.order.OrderItem;
 import fr.sqq.achatgroupe.domain.model.reception.Reception;
 import fr.sqq.achatgroupe.domain.model.reception.ReceptionItem;
 import fr.sqq.mediator.CommandHandler;
+import io.quarkus.logging.Log;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 import org.jboss.logging.Logger;
@@ -42,6 +43,7 @@ public class ApplyShortageAdjustmentsHandler implements CommandHandler<ApplyShor
     @Override
     @Transactional
     public Void handle(ApplyShortageAdjustmentsCommand command) {
+        Log.infof("Applying shortage adjustements for vente %d", command.venteId());
         List<Reception> receptions = receptionRepository.findAllByVenteId(command.venteId());
 
         List<Order> paidOrders = orderRepository.findPaidByVenteId(command.venteId());

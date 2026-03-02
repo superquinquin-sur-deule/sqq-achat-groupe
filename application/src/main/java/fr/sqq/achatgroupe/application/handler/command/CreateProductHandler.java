@@ -5,6 +5,7 @@ import fr.sqq.achatgroupe.application.port.out.PaymentCatalogGateway;
 import fr.sqq.achatgroupe.application.port.out.ProductRepository;
 import fr.sqq.achatgroupe.domain.model.catalog.Product;
 import fr.sqq.mediator.CommandHandler;
+import io.quarkus.logging.Log;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 
@@ -22,6 +23,7 @@ public class CreateProductHandler implements CommandHandler<CreateProductCommand
     @Override
     @Transactional
     public Product handle(CreateProductCommand command) {
+        Log.infof("Creating product %d for %s", command.name(), command.venteId());
         Product product = new Product(
                 null,
                 command.venteId(),

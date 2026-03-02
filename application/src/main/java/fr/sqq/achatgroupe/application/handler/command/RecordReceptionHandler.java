@@ -12,6 +12,7 @@ import fr.sqq.achatgroupe.domain.model.order.OrderItem;
 import fr.sqq.achatgroupe.domain.model.reception.Reception;
 import fr.sqq.achatgroupe.domain.model.reception.ReceptionItem;
 import fr.sqq.mediator.CommandHandler;
+import io.quarkus.logging.Log;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 import org.jboss.logging.Logger;
@@ -46,6 +47,7 @@ public class RecordReceptionHandler implements CommandHandler<RecordReceptionCom
     @Override
     @Transactional
     public Reception handle(RecordReceptionCommand command) {
+        Log.infof("Recording reception for vente %d, fournisseur %s", command.venteId(), command.supplier());
         Optional<Reception> existingReception = receptionRepository.findByVenteIdAndSupplier(command.venteId(), command.supplier());
 
         if (existingReception.isPresent()) {

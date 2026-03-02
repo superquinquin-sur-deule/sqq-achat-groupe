@@ -5,6 +5,7 @@ import fr.sqq.achatgroupe.application.port.out.TimeSlotRepository;
 import fr.sqq.achatgroupe.domain.exception.TimeSlotNotFoundException;
 import fr.sqq.achatgroupe.domain.model.planning.TimeSlot;
 import fr.sqq.mediator.CommandHandler;
+import io.quarkus.logging.Log;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 
@@ -20,6 +21,7 @@ public class UpdateTimeSlotHandler implements CommandHandler<UpdateTimeSlotComma
     @Override
     @Transactional
     public TimeSlot handle(UpdateTimeSlotCommand command) {
+        Log.infof("Updating time slot %s for %s", command.id(), command.venteId());
         TimeSlot existing = timeSlotRepository.findSlotByIdAndVenteId(command.id(), command.venteId())
                 .orElseThrow(() -> new TimeSlotNotFoundException(command.id()));
 

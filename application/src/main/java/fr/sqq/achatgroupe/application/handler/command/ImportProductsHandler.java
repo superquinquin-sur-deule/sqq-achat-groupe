@@ -6,6 +6,7 @@ import fr.sqq.achatgroupe.application.port.out.PaymentCatalogGateway;
 import fr.sqq.achatgroupe.application.port.out.ProductRepository;
 import fr.sqq.achatgroupe.domain.model.catalog.Product;
 import fr.sqq.mediator.CommandHandler;
+import io.quarkus.logging.Log;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 
@@ -26,6 +27,7 @@ public class ImportProductsHandler implements CommandHandler<ImportProductsComma
     @Override
     @Transactional
     public ImportResult handle(ImportProductsCommand command) {
+        Log.infof("Importing products for %s", command.venteId());
         List<ImportResult.ImportError> errors = new ArrayList<>();
         int imported = 0;
 

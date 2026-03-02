@@ -14,6 +14,7 @@ import fr.sqq.achatgroupe.domain.model.order.OrderItem;
 import fr.sqq.achatgroupe.domain.model.order.OrderNumber;
 import fr.sqq.achatgroupe.domain.model.planning.TimeSlot;
 import fr.sqq.mediator.CommandHandler;
+import io.quarkus.logging.Log;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 
@@ -37,6 +38,7 @@ public class CreateOrderHandler implements CommandHandler<CreateOrderCommand, Or
     @Override
     @Transactional
     public Order handle(CreateOrderCommand command) {
+        Log.infof("Creating order for %s", command.email());
         if (command.idempotencyKey() != null) {
             Optional<Order> existing = orderRepository.findByIdempotencyKey(command.idempotencyKey());
             if (existing.isPresent()) {

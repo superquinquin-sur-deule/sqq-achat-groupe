@@ -6,6 +6,7 @@ import fr.sqq.achatgroupe.application.port.out.ProductRepository;
 import fr.sqq.achatgroupe.domain.exception.ProductNotFoundException;
 import fr.sqq.achatgroupe.domain.model.catalog.Product;
 import fr.sqq.mediator.CommandHandler;
+import io.quarkus.logging.Log;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 
@@ -23,6 +24,7 @@ public class UploadProductImageHandler implements CommandHandler<UploadProductIm
     @Override
     @Transactional
     public Product handle(UploadProductImageCommand command) {
+        Log.infof("Uploading product image for %s", command.productId());
         Product existing = productRepository.findByIdAndVenteId(command.productId(), command.venteId())
                 .orElseThrow(() -> new ProductNotFoundException(command.productId()));
 

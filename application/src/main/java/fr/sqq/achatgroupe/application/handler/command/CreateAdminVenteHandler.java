@@ -4,6 +4,7 @@ import fr.sqq.achatgroupe.application.command.CreateAdminVenteCommand;
 import fr.sqq.achatgroupe.application.port.out.VenteRepository;
 import fr.sqq.achatgroupe.domain.model.vente.Vente;
 import fr.sqq.mediator.CommandHandler;
+import io.quarkus.logging.Log;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 
@@ -19,6 +20,7 @@ public class CreateAdminVenteHandler implements CommandHandler<CreateAdminVenteC
     @Override
     @Transactional
     public Vente handle(CreateAdminVenteCommand cmd) {
+        Log.info("Creating vente with name: " + cmd.name());
         Vente vente = Vente.create(cmd.name(), cmd.description(), cmd.startDate(), cmd.endDate());
         return venteRepository.save(vente);
     }

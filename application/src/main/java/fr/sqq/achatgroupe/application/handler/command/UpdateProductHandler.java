@@ -7,6 +7,7 @@ import fr.sqq.achatgroupe.domain.exception.ProductModificationForbiddenException
 import fr.sqq.achatgroupe.domain.exception.ProductNotFoundException;
 import fr.sqq.achatgroupe.domain.model.catalog.Product;
 import fr.sqq.mediator.CommandHandler;
+import io.quarkus.logging.Log;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 
@@ -26,6 +27,7 @@ public class UpdateProductHandler implements CommandHandler<UpdateProductCommand
     @Override
     @Transactional
     public Product handle(UpdateProductCommand command) {
+        Log.infof("Updating product %d for %s", command.id(), command.venteId());
         Product existing = productRepository.findByIdAndVenteId(command.id(), command.venteId())
                 .orElseThrow(() -> new ProductNotFoundException(command.id()));
 

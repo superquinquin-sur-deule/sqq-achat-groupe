@@ -12,6 +12,7 @@ import fr.sqq.achatgroupe.domain.model.payment.Payment;
 import fr.sqq.achatgroupe.domain.model.payment.Refund;
 import fr.sqq.achatgroupe.domain.model.shared.Money;
 import fr.sqq.mediator.CommandHandler;
+import io.quarkus.logging.Log;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 import org.jboss.logging.Logger;
@@ -41,6 +42,7 @@ public class ProcessRefundsHandler implements CommandHandler<ProcessRefundsComma
     @Override
     @Transactional
     public RefundSummary handle(ProcessRefundsCommand command) {
+        Log.infof("Processing refunds for vente %d", command.venteId());
         List<Order> paidOrders = orderRepository.findPaidByVenteId(command.venteId());
         List<Order> ordersToRefund = paidOrders.stream()
                 .filter(o -> o.refundAmount().isPositive())

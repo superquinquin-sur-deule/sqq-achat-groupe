@@ -4,6 +4,7 @@ import fr.sqq.achatgroupe.application.command.CreateTimeSlotCommand;
 import fr.sqq.achatgroupe.application.port.out.TimeSlotRepository;
 import fr.sqq.achatgroupe.domain.model.planning.TimeSlot;
 import fr.sqq.mediator.CommandHandler;
+import io.quarkus.logging.Log;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 
@@ -19,6 +20,7 @@ public class CreateTimeSlotHandler implements CommandHandler<CreateTimeSlotComma
     @Override
     @Transactional
     public TimeSlot handle(CreateTimeSlotCommand command) {
+        Log.infof("Creating time slot %s for %s", command.date().toString(), command.venteId());
         TimeSlot timeSlot = new TimeSlot(
                 null,
                 command.venteId(),

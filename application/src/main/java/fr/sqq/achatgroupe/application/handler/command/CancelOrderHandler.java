@@ -14,15 +14,12 @@ import fr.sqq.achatgroupe.domain.model.order.OrderItem;
 import fr.sqq.achatgroupe.domain.model.order.OrderStatus;
 import fr.sqq.achatgroupe.domain.model.planning.TimeSlot;
 import fr.sqq.mediator.CommandHandler;
+import io.quarkus.logging.Log;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
-import org.jboss.logging.Logger;
 
 @ApplicationScoped
 public class CancelOrderHandler implements CommandHandler<CancelOrderCommand, Void> {
-
-    private static final Logger LOG = Logger.getLogger(CancelOrderHandler.class);
-
     private final OrderRepository orderRepository;
     private final ProductRepository productRepository;
     private final TimeSlotRepository timeSlotRepository;
@@ -37,11 +34,12 @@ public class CancelOrderHandler implements CommandHandler<CancelOrderCommand, Vo
     @Override
     @Transactional
     public Void handle(CancelOrderCommand command) {
+        
         Order order = orderRepository.findOrderById(command.orderId())
                 .orElseThrow(() -> new OrderNotFoundException(command.orderId()));
 
         if (order.status() == OrderStatus.CANCELLED || order.status() == OrderStatus.PAID) {
-            LOG.infof("Annulation ignorée : commande %s déjà en statut %s", command.orderId(), order.status());
+            Log.infof("Annulation ignorée : commande %s déjà en statut %s", command.orderId(), order.status());
             return null;
         }
 
@@ -60,7 +58,7 @@ public class CancelOrderHandler implements CommandHandler<CancelOrderCommand, Vo
         order.cancel();
         orderRepository.save(order);
 
-        LOG.infof("Commande %s annulée — stocks restaurés, créneau libéré", command.orderId());
+        Log.infof("Commande %s annulée — stocks restaurés, créneau libéré", command.orderId());
         return null;
     }
 }

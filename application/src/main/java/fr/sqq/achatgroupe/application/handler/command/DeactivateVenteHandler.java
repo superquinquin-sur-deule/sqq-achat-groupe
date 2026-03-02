@@ -5,6 +5,7 @@ import fr.sqq.achatgroupe.application.port.out.VenteRepository;
 import fr.sqq.achatgroupe.domain.exception.VenteNotFoundException;
 import fr.sqq.achatgroupe.domain.model.vente.Vente;
 import fr.sqq.mediator.CommandHandler;
+import io.quarkus.logging.Log;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 
@@ -20,6 +21,7 @@ public class DeactivateVenteHandler implements CommandHandler<DeactivateVenteCom
     @Override
     @Transactional
     public Vente handle(DeactivateVenteCommand command) {
+        Log.info("Deactivating vente with id: " + command.id().value());
         Vente vente = venteRepository.findById(command.id())
                 .orElseThrow(() -> new VenteNotFoundException(command.id()));
         Vente closed = vente.close();

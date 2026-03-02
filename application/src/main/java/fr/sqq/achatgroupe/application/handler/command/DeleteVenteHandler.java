@@ -6,6 +6,7 @@ import fr.sqq.achatgroupe.application.port.out.VenteRepository;
 import fr.sqq.achatgroupe.domain.exception.VenteHasOrdersException;
 import fr.sqq.achatgroupe.domain.exception.VenteNotFoundException;
 import fr.sqq.mediator.CommandHandler;
+import io.quarkus.logging.Log;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 
@@ -23,6 +24,7 @@ public class DeleteVenteHandler implements CommandHandler<DeleteVenteCommand, Vo
     @Override
     @Transactional
     public Void handle(DeleteVenteCommand command) {
+        Log.infof("Deleting vente with id: %s", command.id().value());
         venteRepository.findById(command.id())
                 .orElseThrow(() -> new VenteNotFoundException(command.id()));
         if (orderRepository.existsNonCancelledByVenteId(command.id().value())) {
