@@ -36,6 +36,6 @@ public class ProductImagePanacheRepository implements ProductImageRepository, Pa
 
     @Override
     public void deleteByProductId(Long productId) {
-        deleteById(productId);
+        delete("productId", productId);
     }
 }

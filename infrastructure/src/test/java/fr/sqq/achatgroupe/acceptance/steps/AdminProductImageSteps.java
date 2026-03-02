@@ -93,6 +93,30 @@ public class AdminProductImageSteps {
                 "La carte du premier produit doit contenir une balise img avec l'URL de l'image");
     }
 
+    @Et("je supprime le premier produit via l'API")
+    public void jeSupprimeLePremierProduitViaLApi() {
+        imageProductId = testContext.productIds().get(0);
+        Long venteId = testContext.venteId();
+
+        RestAssured.given()
+                .when()
+                .delete("/api/admin/ventes/" + venteId + "/products/" + imageProductId)
+                .then()
+                .statusCode(204);
+    }
+
+    @Alors("le produit est supprimé avec succès")
+    public void leProduitEstSupprimerAvecSucces() {
+        Long venteId = testContext.venteId();
+
+        RestAssured.given()
+                .when()
+                .get("/api/admin/ventes/" + venteId + "/products?size=100")
+                .then()
+                .statusCode(200)
+                .body("data.find { it.id == " + imageProductId + " }", org.hamcrest.Matchers.nullValue());
+    }
+
     private File loadTestResourceFile(String resourcePath) {
         URL resource = Thread.currentThread().getContextClassLoader().getResource(resourcePath);
         if (resource == null) {

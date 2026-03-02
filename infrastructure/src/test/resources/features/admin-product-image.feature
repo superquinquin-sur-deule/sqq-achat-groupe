@@ -16,3 +16,8 @@ Fonctionnalité: Upload d'image pour les produits
     Quand j'uploade une image PNG sur le premier produit via l'API
     Et j'accède à la page du catalogue
     Alors la carte du produit affiche l'image
+
+  Scénario: Supprimer un produit qui possède une image
+    Quand j'uploade une image PNG sur le premier produit via l'API
+    Et je supprime le premier produit via l'API
+    Alors le produit est supprimé avec succès
