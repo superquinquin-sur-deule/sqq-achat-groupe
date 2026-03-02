@@ -16,6 +16,8 @@ export class ApiError extends Error {
   }
 }
 
+let isRedirectingToLogin = false
+
 export const customFetch = async <T>(url: string, init: RequestInit): Promise<T> => {
   const requestHeaders: Record<string, string> = {
     Accept: 'application/json',
@@ -35,6 +37,12 @@ export const customFetch = async <T>(url: string, init: RequestInit): Promise<T>
   })
 
   if (!response.ok) {
+    if (response.status === 401 && !isRedirectingToLogin && !url.endsWith('/api/admin/me')) {
+      isRedirectingToLogin = true
+      window.location.href = '/api/admin/me'
+      return new Promise<T>(() => {})
+    }
+
     const contentType = response.headers.get('content-type')
     if (
       contentType?.includes('application/problem+json') ||
