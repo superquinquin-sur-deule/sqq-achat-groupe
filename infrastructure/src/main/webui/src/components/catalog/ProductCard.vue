@@ -30,7 +30,7 @@ const formattedPrice = computed(() =>
   ),
 )
 
-const productCardVariants = cva('transition-shadow hover:shadow-md', {
+const productCardVariants = cva('', {
   variants: {
     exhausted: {
       true: 'opacity-50',
@@ -72,7 +72,7 @@ function onQuantityInput(event: Event) {
     :data-exhausted="isExhausted || undefined"
     :class="productCardVariants({ exhausted: isExhausted || undefined })"
   >
-    <Card>
+    <Card class="transition-shadow hover:shadow-md">
       <div
         class="-mx-6 -mt-6 mb-4 flex aspect-[4/3] items-center justify-center overflow-hidden rounded-t-xl bg-white"
       >
