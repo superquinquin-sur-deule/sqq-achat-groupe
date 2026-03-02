@@ -30,11 +30,28 @@ const venteStore = useVenteStore()
 const { selectedVenteId } = storeToRefs(venteStore)
 const pagination = useCursorPagination()
 
-watch(selectedVenteId, () => pagination.reset())
+const searchInput = ref('')
+const debouncedSearch = ref<string | null>(null)
+let searchTimeout: ReturnType<typeof setTimeout> | null = null
+
+function onSearchInput() {
+  if (searchTimeout) clearTimeout(searchTimeout)
+  searchTimeout = setTimeout(() => {
+    debouncedSearch.value = searchInput.value.trim() || null
+    pagination.reset()
+  }, 300)
+}
+
+watch(selectedVenteId, () => {
+  pagination.reset()
+  searchInput.value = ''
+  debouncedSearch.value = null
+})
 
 const { data: pageData, isLoading: loading } = useAdminProductsQuery(
   selectedVenteId,
   pagination.currentCursor,
+  debouncedSearch,
 )
 const products = computed(() => pageData.value?.data ?? [])
 const pageInfo = computed(() => pageData.value?.pageInfo ?? { endCursor: null, hasNext: false })
@@ -243,6 +260,17 @@ function formatPrice(price: number): string {
           Ajouter un produit
         </Button>
       </div>
+    </div>
+
+    <div class="mb-4">
+      <input
+        v-model="searchInput"
+        type="text"
+        placeholder="Rechercher par nom, marque, fournisseur..."
+        class="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
+        data-testid="product-search-input"
+        @input="onSearchInput"
+      />
     </div>
 
     <ProductImportForm

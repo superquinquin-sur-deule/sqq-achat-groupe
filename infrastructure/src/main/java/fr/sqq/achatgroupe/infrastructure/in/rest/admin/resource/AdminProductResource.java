@@ -55,9 +55,10 @@ public class AdminProductResource {
     public CursorPageResponse<AdminProductResponse> listProducts(
             @PathParam("venteId") Long venteId,
             @QueryParam("cursor") String cursor,
-            @QueryParam("size") @DefaultValue("20") int size) {
+            @QueryParam("size") @DefaultValue("20") int size,
+            @QueryParam("search") String search) {
         var pageRequest = cursor != null ? CursorPageRequest.after(cursor, size) : CursorPageRequest.first(size);
-        CursorPage<Product> page = mediator.send(new ListAllProductsQuery(venteId, pageRequest));
+        CursorPage<Product> page = mediator.send(new ListAllProductsQuery(venteId, pageRequest, search));
         var responses = page.items().stream()
                 .map(mapper::toResponse)
                 .toList();

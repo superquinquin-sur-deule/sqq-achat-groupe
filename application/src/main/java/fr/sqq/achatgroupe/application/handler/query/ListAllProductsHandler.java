@@ -18,6 +18,6 @@ public class ListAllProductsHandler implements QueryHandler<ListAllProductsQuery
 
     @Override
     public CursorPage<Product> handle(ListAllProductsQuery query) {
-        return productRepository.findAllByVenteId(query.venteId(), query.pageRequest());
+        return productRepository.findAllByVenteId(query.venteId(), query.pageRequest(), query.search());
     }
 }

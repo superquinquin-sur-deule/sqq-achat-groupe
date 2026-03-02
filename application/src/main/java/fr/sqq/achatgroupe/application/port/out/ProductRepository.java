@@ -22,6 +22,8 @@ public interface ProductRepository {
 
     CursorPage<Product> findAllByVenteId(Long venteId, CursorPageRequest pageRequest);
 
+    CursorPage<Product> findAllByVenteId(Long venteId, CursorPageRequest pageRequest, String search);
+
     void save(Product product);
 
     Product saveNew(Product product);

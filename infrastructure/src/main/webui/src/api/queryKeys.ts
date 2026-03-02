@@ -16,8 +16,8 @@ export const queryKeys = {
       hasOrders: (venteId: number) => ['admin', 'ventes', 'has-orders', { venteId }] as const,
     },
     products: {
-      list: (venteId: number, cursor?: string | null) =>
-        ['admin', 'products', { venteId, cursor }] as const,
+      list: (venteId: number, cursor?: string | null, search?: string | null) =>
+        ['admin', 'products', { venteId, cursor, search }] as const,
     },
     timeslots: {
       list: (venteId: number, cursor?: string | null) =>

@@ -14,13 +14,18 @@ import type { CreateProductRequest, UpdateProductRequest } from '@/api/generated
 export function useAdminProductsQuery(
   venteId: MaybeRefOrGetter<number | null>,
   cursor: MaybeRefOrGetter<string | null> = null,
+  search: MaybeRefOrGetter<string | null> = null,
 ) {
   return useQuery({
-    queryKey: computed(() => queryKeys.admin.products.list(toValue(venteId)!, toValue(cursor))),
+    queryKey: computed(() =>
+      queryKeys.admin.products.list(toValue(venteId)!, toValue(cursor), toValue(search)),
+    ),
     queryFn: async () => {
       const params: Record<string, unknown> = {}
       const c = toValue(cursor)
       if (c) params.cursor = c
+      const s = toValue(search)
+      if (s) params.search = s
       const response = await getApiAdminVentesVenteIdProducts(toValue(venteId)!, params)
       return {
         data: response.data.data ?? [],

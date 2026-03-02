@@ -70,20 +70,31 @@ public class ProductPanacheRepository implements ProductRepository, PanacheRepos
 
     @Override
     public CursorPage<Product> findAllByVenteId(Long venteId, CursorPageRequest pageRequest) {
+        return findAllByVenteId(venteId, pageRequest, null);
+    }
+
+    @Override
+    public CursorPage<Product> findAllByVenteId(Long venteId, CursorPageRequest pageRequest, String search) {
         var params = new HashMap<String, Object>();
         params.put("venteId", venteId);
-        String query;
+        StringBuilder query = new StringBuilder("venteId = :venteId");
 
         if (pageRequest.cursor() != null) {
             Long cursorId = CursorCodec.decodeProductCursorId(pageRequest.cursor());
-            query = "venteId = :venteId AND id > :cursorId ORDER BY id ASC";
+            query.append(" AND id > :cursorId");
             params.put("cursorId", cursorId);
-        } else {
-            query = "venteId = :venteId ORDER BY id ASC";
         }
 
+        if (search != null && !search.isBlank()) {
+            String pattern = "%" + search.trim().toLowerCase() + "%";
+            params.put("search", pattern);
+            query.append(" AND (LOWER(name) LIKE :search OR LOWER(description) LIKE :search OR LOWER(brand) LIKE :search OR LOWER(supplier) LIKE :search OR LOWER(reference) LIKE :search)");
+        }
+
+        query.append(" ORDER BY id ASC");
+
         int fetchSize = pageRequest.size() + 1;
-        List<ProductEntity> entities = find(query, params).range(0, fetchSize - 1).list();
+        List<ProductEntity> entities = find(query.toString(), params).range(0, fetchSize - 1).list();
         return buildCursorPage(entities, pageRequest.size());
     }
 
