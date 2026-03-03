@@ -69,10 +69,11 @@ function onQuantityInput(event: Event) {
 <template>
   <div
     data-testid="product-card"
+    class="h-full"
     :data-exhausted="isExhausted || undefined"
     :class="productCardVariants({ exhausted: isExhausted || undefined })"
   >
-    <Card class="transition-shadow hover:shadow-md">
+    <Card class="h-full flex flex-col transition-shadow hover:shadow-md">
       <div
         class="-mx-6 -mt-6 mb-4 flex aspect-[4/3] items-center justify-center overflow-hidden rounded-t-xl bg-white"
       >
@@ -110,88 +111,90 @@ function onQuantityInput(event: Event) {
       <p data-testid="product-description" class="mt-2 text-base text-dark">
         {{ product.description }}
       </p>
-      <div class="mt-4 flex items-center justify-between">
-        <span
-          data-testid="product-price"
-          class="rounded-full bg-primary px-3 py-1 text-sm font-semibold text-dark"
-        >
-          {{ formattedPrice }}
-        </span>
-        <span
-          v-if="isExhausted"
-          data-testid="exhausted-badge"
-          class="text-sm font-medium text-red-600"
-        >
-          Épuisé
-        </span>
-      </div>
-
-      <div v-if="isInCart" class="mt-4 flex w-full items-center justify-center gap-2">
-        <Button
-          data-testid="decrease-quantity"
-          variant="secondary"
-          size="icon"
-          :aria-label="`Diminuer la quantité de ${product.name}`"
-          @click="decrease"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 20 20"
-            fill="currentColor"
-            class="h-5 w-5"
-            aria-hidden="true"
+      <div class="mt-auto">
+        <div class="mt-4 flex items-center justify-between">
+          <span
+            data-testid="product-price"
+            class="rounded-full bg-primary px-3 py-1 text-sm font-semibold text-dark"
           >
-            <path
-              fill-rule="evenodd"
-              d="M4 10a.75.75 0 0 1 .75-.75h10.5a.75.75 0 0 1 0 1.5H4.75A.75.75 0 0 1 4 10Z"
-              clip-rule="evenodd"
-            />
-          </svg>
-        </Button>
+            {{ formattedPrice }}
+          </span>
+          <span
+            v-if="isExhausted"
+            data-testid="exhausted-badge"
+            class="text-sm font-medium text-red-600"
+          >
+            Épuisé
+          </span>
+        </div>
 
-        <input
-          type="number"
-          data-testid="item-quantity"
-          :value="quantity"
-          min="1"
-          class="min-h-[44px] w-14 appearance-none rounded-lg border-2 border-dark bg-white text-center text-base font-semibold text-dark [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none [-moz-appearance:textfield] focus:outline-2 focus:outline-offset-2 focus:outline-dark"
-          :aria-label="`Quantité de ${product.name}`"
-          @change="onQuantityInput"
-          @blur="onQuantityInput"
-        />
+        <div v-if="isInCart" class="mt-4 flex w-full items-center justify-center gap-2">
+          <Button
+            data-testid="decrease-quantity"
+            variant="secondary"
+            size="icon"
+            :aria-label="`Diminuer la quantité de ${product.name}`"
+            @click="decrease"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+              class="h-5 w-5"
+              aria-hidden="true"
+            >
+              <path
+                fill-rule="evenodd"
+                d="M4 10a.75.75 0 0 1 .75-.75h10.5a.75.75 0 0 1 0 1.5H4.75A.75.75 0 0 1 4 10Z"
+                clip-rule="evenodd"
+              />
+            </svg>
+          </Button>
+
+          <input
+            type="number"
+            data-testid="item-quantity"
+            :value="quantity"
+            min="1"
+            class="min-h-[44px] w-14 appearance-none rounded-lg border-2 border-dark bg-white text-center text-base font-semibold text-dark [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none [-moz-appearance:textfield] focus:outline-2 focus:outline-offset-2 focus:outline-dark"
+            :aria-label="`Quantité de ${product.name}`"
+            @change="onQuantityInput"
+            @blur="onQuantityInput"
+          />
+
+          <Button
+            data-testid="increase-quantity"
+            variant="secondary"
+            size="icon"
+            :aria-label="`Augmenter la quantité de ${product.name}`"
+            @click="increase"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+              class="h-5 w-5"
+              aria-hidden="true"
+            >
+              <path
+                d="M10.75 4.75a.75.75 0 0 0-1.5 0v4.5h-4.5a.75.75 0 0 0 0 1.5h4.5v4.5a.75.75 0 0 0 1.5 0v-4.5h4.5a.75.75 0 0 0 0-1.5h-4.5v-4.5Z"
+              />
+            </svg>
+          </Button>
+        </div>
 
         <Button
-          data-testid="increase-quantity"
-          variant="secondary"
-          size="icon"
-          :aria-label="`Augmenter la quantité de ${product.name}`"
-          @click="increase"
+          v-else
+          data-testid="add-button"
+          variant="primary"
+          class="mt-4 w-full transition-transform hover:scale-[1.02] active:scale-[0.98]"
+          :disabled="isExhausted"
+          :aria-label="`Ajouter ${product.name} au panier`"
+          @click="handleAdd"
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 20 20"
-            fill="currentColor"
-            class="h-5 w-5"
-            aria-hidden="true"
-          >
-            <path
-              d="M10.75 4.75a.75.75 0 0 0-1.5 0v4.5h-4.5a.75.75 0 0 0 0 1.5h4.5v4.5a.75.75 0 0 0 1.5 0v-4.5h4.5a.75.75 0 0 0 0-1.5h-4.5v-4.5Z"
-            />
-          </svg>
+          Ajouter
         </Button>
       </div>
-
-      <Button
-        v-else
-        data-testid="add-button"
-        variant="primary"
-        class="mt-4 w-full transition-transform hover:scale-[1.02] active:scale-[0.98]"
-        :disabled="isExhausted"
-        :aria-label="`Ajouter ${product.name} au panier`"
-        @click="handleAdd"
-      >
-        Ajouter
-      </Button>
     </Card>
   </div>
 </template>
