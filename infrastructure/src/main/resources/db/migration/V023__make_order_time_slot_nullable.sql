@@ -1,0 +1,1 @@
+ALTER TABLE orders ALTER COLUMN time_slot_id DROP NOT NULL;

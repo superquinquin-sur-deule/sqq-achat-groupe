@@ -41,5 +41,9 @@ public interface OrderRepository {
 
     boolean existsNonCancelledByVenteId(Long venteId);
 
+    boolean existsNonCancelledByTimeSlotId(Long timeSlotId);
+
+    void detachOrdersFromTimeSlot(Long timeSlotId);
+
     record TopProduct(Long productId, long totalQuantity) {}
 }

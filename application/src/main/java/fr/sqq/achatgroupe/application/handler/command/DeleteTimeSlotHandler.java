@@ -1,6 +1,7 @@
 package fr.sqq.achatgroupe.application.handler.command;
 
 import fr.sqq.achatgroupe.application.command.DeleteTimeSlotCommand;
+import fr.sqq.achatgroupe.application.port.out.OrderRepository;
 import fr.sqq.achatgroupe.application.port.out.TimeSlotRepository;
 import fr.sqq.achatgroupe.domain.exception.TimeSlotHasReservationsException;
 import fr.sqq.achatgroupe.domain.exception.TimeSlotNotFoundException;
@@ -14,22 +15,25 @@ import jakarta.transaction.Transactional;
 public class DeleteTimeSlotHandler implements CommandHandler<DeleteTimeSlotCommand, Void> {
 
     private final TimeSlotRepository timeSlotRepository;
+    private final OrderRepository orderRepository;
 
-    public DeleteTimeSlotHandler(TimeSlotRepository timeSlotRepository) {
+    public DeleteTimeSlotHandler(TimeSlotRepository timeSlotRepository, OrderRepository orderRepository) {
         this.timeSlotRepository = timeSlotRepository;
+        this.orderRepository = orderRepository;
     }
 
     @Override
     @Transactional
     public Void handle(DeleteTimeSlotCommand command) {
         Log.infof("Deleting time slot %s for %s", command.id(), command.venteId());
-        TimeSlot existing = timeSlotRepository.findSlotByIdAndVenteId(command.id(), command.venteId())
+        timeSlotRepository.findSlotByIdAndVenteId(command.id(), command.venteId())
                 .orElseThrow(() -> new TimeSlotNotFoundException(command.id()));
 
-        if (existing.reserved() > 0 && !command.force()) {
-            throw new TimeSlotHasReservationsException(command.id(), existing.reserved());
+        if (orderRepository.existsNonCancelledByTimeSlotId(command.id()) && !command.force()) {
+            throw new TimeSlotHasReservationsException(command.id(), 0);
         }
 
+        orderRepository.detachOrdersFromTimeSlot(command.id());
         timeSlotRepository.delete(command.id());
         return null;
     }

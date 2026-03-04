@@ -166,6 +166,16 @@ public class OrderPanacheRepository implements OrderRepository, PanacheRepositor
     }
 
     @Override
+    public boolean existsNonCancelledByTimeSlotId(Long timeSlotId) {
+        return count("timeSlotId = ?1 and status != 'CANCELLED'", timeSlotId) > 0;
+    }
+
+    @Override
+    public void detachOrdersFromTimeSlot(Long timeSlotId) {
+        update("timeSlotId = null where timeSlotId = ?1", timeSlotId);
+    }
+
+    @Override
     public List<TopProduct> findTopSellingProducts(Long venteId, int limit) {
         List<Object[]> rows = getEntityManager()
                 .createQuery("SELECT oi.productId, SUM(oi.quantity) FROM OrderItemEntity oi JOIN oi.order o WHERE o.venteId = ?1 AND o.status IN ('PAID', 'PICKED_UP') GROUP BY oi.productId ORDER BY SUM(oi.quantity) DESC", Object[].class)

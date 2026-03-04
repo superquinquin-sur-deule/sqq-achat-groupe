@@ -42,7 +42,7 @@ public class OrderEntity {
     @Column(name = "customer_phone", nullable = false)
     private String customerPhone;
 
-    @Column(name = "time_slot_id", nullable = false)
+    @Column(name = "time_slot_id", nullable = true)
     private Long timeSlotId;
 
     @Column(name = "status", nullable = false)

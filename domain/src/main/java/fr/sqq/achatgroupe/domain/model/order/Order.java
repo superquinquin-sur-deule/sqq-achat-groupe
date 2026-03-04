@@ -25,7 +25,6 @@ public class Order {
                  String idempotencyKey) {
         if (orderNumber == null) throw new IllegalArgumentException("Order number must not be null");
         if (customer == null) throw new IllegalArgumentException("Customer must not be null");
-        if (timeSlotId == null) throw new IllegalArgumentException("Time slot ID must not be null");
         if (items == null || items.isEmpty()) throw new IllegalArgumentException("Items must not be empty");
         if (status == null) throw new IllegalArgumentException("Status must not be null");
         if (totalAmount == null) throw new IllegalArgumentException("Total amount must not be null");
@@ -44,6 +43,7 @@ public class Order {
 
     public static Order create(Long venteId, OrderNumber number, CustomerInfo customer, Long timeSlotId, List<OrderItem> items,
                                 String idempotencyKey) {
+        if (timeSlotId == null) throw new IllegalArgumentException("Time slot ID must not be null");
         if (items == null || items.isEmpty()) {
             throw new IllegalArgumentException("La commande doit contenir au moins un article");
         }

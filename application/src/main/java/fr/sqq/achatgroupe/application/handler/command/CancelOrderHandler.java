@@ -50,10 +50,12 @@ public class CancelOrderHandler implements CommandHandler<CancelOrderCommand, Vo
             productRepository.save(product);
         }
 
-        TimeSlot slot = timeSlotRepository.findSlotById(order.timeSlotId())
-                .orElseThrow(() -> new TimeSlotNotFoundException(order.timeSlotId()));
-        slot.releaseOnePlace();
-        timeSlotRepository.save(slot);
+        if (order.timeSlotId() != null) {
+            TimeSlot slot = timeSlotRepository.findSlotById(order.timeSlotId())
+                    .orElseThrow(() -> new TimeSlotNotFoundException(order.timeSlotId()));
+            slot.releaseOnePlace();
+            timeSlotRepository.save(slot);
+        }
 
         order.cancel();
         orderRepository.save(order);
