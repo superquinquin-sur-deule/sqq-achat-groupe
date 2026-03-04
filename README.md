@@ -1,64 +1,74 @@
-# achat-groupe
+# Achat Groupé
 
-This project uses Quarkus, the Supersonic Subatomic Java Framework.
+A group purchasing platform for cooperatives. Organize collective purchasing events (ventes), let members browse products, place orders, pay via Stripe, and pick up at scheduled time slots.
 
-If you want to learn more about Quarkus, please visit its website: <https://quarkus.io/>.
+## Features
 
-## Running the application in dev mode
+### For customers
 
-You can run your application in dev mode that enables live coding using:
+- Browse active purchasing events (ventes)
+- Product catalog with categories, images, and pricing (HT/TTC)
+- Shopping cart with quantity management
+- Multi-step checkout (customer info, time slot selection, order review)
+- Stripe payment with retry support
+- Order confirmation and tracking
 
-```shell script
+### For administrators
+
+- Dashboard with sales stats, top products, daily order charts, and time slot distribution
+- Vente lifecycle management (create, activate, close, delete)
+- Product management (CRUD, CSV bulk import, image upload)
+- Time slot management with capacity control
+- Order management (view, search, mark pickup, generate distribution PDF)
+- Reception management (record supplier deliveries, handle shortages, process refunds)
+- Supplier order Excel export
+
+## Tech Stack
+
+- **Backend**: Quarkus (Java) with Clean Architecture / CQRS
+- **Frontend**: Vue 3 + TypeScript, served via Quinoa
+- **Database**: PostgreSQL with Flyway migrations
+- **Auth**: Keycloak (OIDC) for admin authentication
+- **Payments**: Stripe
+- **Styling**: Tailwind CSS v4
+
+## Getting Started
+
+**Prerequisites**: Java 21+, Docker (for dev services)
+
+```bash
 ./mvnw quarkus:dev
 ```
 
-> **_NOTE:_**  Quarkus now ships with a Dev UI, which is available in dev mode only at <http://localhost:8080/q/dev/>.
+This starts everything — PostgreSQL and Keycloak are auto-provisioned via Quarkus Dev Services.
 
-## Packaging and running the application
+## Configuration
 
-The application can be packaged using:
+User-configurable environment variables:
 
-```shell script
-./mvnw package
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `APP_BASE_URL` | Application base URL (used for Stripe redirects) | `http://localhost:8080` |
+| `STRIPE_API_KEY` | Stripe secret API key | `sk_test_dummy` |
+| `STRIPE_WEBHOOK_SECRET` | Stripe webhook signing secret | `dummy` |
+| `QUARKUS_OIDC_AUTH_SERVER_URL` | Keycloak realm URL | Auto-configured in dev |
+| `QUARKUS_OIDC_CLIENT_ID` | OIDC client ID | Auto-configured in dev |
+| `QUARKUS_OIDC_CREDENTIALS_SECRET` | OIDC client secret | Auto-configured in dev |
+| `QUARKUS_DATASOURCE_JDBC_URL` | PostgreSQL JDBC URL | Auto-configured in dev |
+| `QUARKUS_DATASOURCE_USERNAME` | Database username | Auto-configured in dev |
+| `QUARKUS_DATASOURCE_PASSWORD` | Database password | Auto-configured in dev |
+
+Optional tuning:
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `APP_ORDER_MAX_PAYMENT_ATTEMPTS` | Maximum payment retry attempts | `2` |
+| `APP_ORDER_ABANDON_TIMEOUT` | Timeout before unpaid orders are abandoned | `30m` |
+
+## Testing
+
+```bash
+./mvnw test
 ```
 
-It produces the `quarkus-run.jar` file in the `target/quarkus-app/` directory.
-Be aware that it’s not an _über-jar_ as the dependencies are copied into the `target/quarkus-app/lib/` directory.
-
-The application is now runnable using `java -jar target/quarkus-app/quarkus-run.jar`.
-
-If you want to build an _über-jar_, execute the following command:
-
-```shell script
-./mvnw package -Dquarkus.package.jar.type=uber-jar
-```
-
-The application, packaged as an _über-jar_, is now runnable using `java -jar target/*-runner.jar`.
-
-## Creating a native executable
-
-You can create a native executable using:
-
-```shell script
-./mvnw package -Dnative
-```
-
-Or, if you don't have GraalVM installed, you can run the native executable build in a container using:
-
-```shell script
-./mvnw package -Dnative -Dquarkus.native.container-build=true
-```
-
-You can then execute your native executable with: `./target/achat-groupe-1.0.0-runner`
-
-If you want to learn more about building native executables, please consult <https://quarkus.io/guides/maven-tooling>.
-
-## Related Guides
-
-- Hibernate ORM with Panache ([guide](https://quarkus.io/guides/hibernate-orm-panache)): Simplify your persistence code for Hibernate ORM via the active record or the repository pattern
-- REST Jackson ([guide](https://quarkus.io/guides/rest#json-serialisation)): Jackson serialization support for Quarkus REST. This extension is not compatible with the quarkus-resteasy extension, or any of the extensions that depend on it
-- SmallRye Health ([guide](https://quarkus.io/guides/smallrye-health)): Monitor service health
-- SmallRye OpenAPI ([guide](https://quarkus.io/guides/openapi-swaggerui)): Document your REST APIs with OpenAPI - comes with Swagger UI
-- JDBC Driver - PostgreSQL ([guide](https://quarkus.io/guides/datasource)): Connect to the PostgreSQL database via JDBC
-- OpenID Connect ([guide](https://quarkus.io/guides/security-openid-connect)): Verify Bearer access tokens and authenticate users with Authorization Code Flow
-- Quinoa ([guide](https://quarkiverse.github.io/quarkiverse-docs/quarkus-quinoa/dev/index.html)): Develop, build, and serve your npm-compatible web applications such as React, Angular, Vue, Lit, Svelte, Astro, SolidJS, and others alongside Quarkus.
+Runs Cucumber BDD and Playwright E2E tests.
