@@ -6,6 +6,7 @@ import fr.sqq.achatgroupe.domain.model.order.Order;
 
 import fr.sqq.achatgroupe.domain.model.shared.Money;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
@@ -40,6 +41,8 @@ public interface OrderRepository {
 
     List<TopProduct> findTopSellingProducts(Long venteId, int limit);
 
+    List<TopRevenueProduct> findTopRevenueProducts(Long venteId, int limit);
+
     record SlotOrderCount(Long slotId, long orderCount) {}
 
     boolean existsNonCancelledByVenteId(Long venteId);
@@ -51,4 +54,6 @@ public interface OrderRepository {
     record TopProduct(Long productId, long totalQuantity) {}
 
     record DailyOrderCount(LocalDate date, long orderCount) {}
+
+    record TopRevenueProduct(Long productId, BigDecimal totalRevenue) {}
 }

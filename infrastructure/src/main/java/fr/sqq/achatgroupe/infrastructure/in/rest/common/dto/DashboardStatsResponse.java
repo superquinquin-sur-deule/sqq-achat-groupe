@@ -11,6 +11,7 @@ public record DashboardStatsResponse(
         BigDecimal averageBasket,
         List<SlotDistribution> slotDistribution,
         List<TopProductResponse> topProducts,
+        List<TopRevenueProductResponse> topRevenueProducts,
         List<DailyOrderCountResponse> dailyOrderCounts
 ) {
     public record DailyOrderCountResponse(LocalDate date, long orderCount) {}

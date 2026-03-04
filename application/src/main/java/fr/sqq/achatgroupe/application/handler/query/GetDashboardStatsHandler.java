@@ -7,6 +7,7 @@ import fr.sqq.achatgroupe.application.query.GetDashboardStatsQuery.DailyOrderCou
 import fr.sqq.achatgroupe.application.query.GetDashboardStatsQuery.DashboardStats;
 import fr.sqq.achatgroupe.application.query.GetDashboardStatsQuery.SlotOrderCount;
 import fr.sqq.achatgroupe.application.query.GetDashboardStatsQuery.TopProductStat;
+import fr.sqq.achatgroupe.application.query.GetDashboardStatsQuery.TopRevenueProductStat;
 import fr.sqq.achatgroupe.domain.model.catalog.Product;
 import fr.sqq.achatgroupe.domain.model.shared.Money;
 import fr.sqq.mediator.QueryHandler;
@@ -61,10 +62,17 @@ public class GetDashboardStatsHandler implements QueryHandler<GetDashboardStatsQ
                         tp.totalQuantity()))
                 .toList();
 
+        List<TopRevenueProductStat> topRevenueProducts = orderRepository.findTopRevenueProducts(venteId, 3).stream()
+                .map(tp -> new TopRevenueProductStat(
+                        tp.productId(),
+                        productNames.getOrDefault(tp.productId(), "Produit #" + tp.productId()),
+                        tp.totalRevenue()))
+                .toList();
+
         List<DailyOrderCount> dailyOrderCounts = orderRepository.countByDayForVente(venteId).stream()
                 .map(dc -> new DailyOrderCount(dc.date(), dc.orderCount()))
                 .toList();
 
-        return new DashboardStats(totalOrders, totalAmount, pickupRate, averageBasket, slotDistribution, topProducts, dailyOrderCounts);
+        return new DashboardStats(totalOrders, totalAmount, pickupRate, averageBasket, slotDistribution, topProducts, topRevenueProducts, dailyOrderCounts);
     }
 }

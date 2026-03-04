@@ -5,6 +5,7 @@ import fr.sqq.achatgroupe.application.port.out.OrderRepository;
 import fr.sqq.achatgroupe.application.port.out.OrderRepository.DailyOrderCount;
 import fr.sqq.achatgroupe.application.port.out.OrderRepository.SlotOrderCount;
 import fr.sqq.achatgroupe.application.port.out.OrderRepository.TopProduct;
+import fr.sqq.achatgroupe.application.port.out.OrderRepository.TopRevenueProduct;
 import fr.sqq.achatgroupe.application.query.CursorPage;
 import fr.sqq.achatgroupe.application.query.CursorPageRequest;
 import fr.sqq.achatgroupe.infrastructure.out.persistence.cursor.CursorCodec;
@@ -197,6 +198,18 @@ public class OrderPanacheRepository implements OrderRepository, PanacheRepositor
                 .getResultList();
         return rows.stream()
                 .map(row -> new TopProduct((Long) row[0], ((Number) row[1]).longValue()))
+                .toList();
+    }
+
+    @Override
+    public List<TopRevenueProduct> findTopRevenueProducts(Long venteId, int limit) {
+        List<Object[]> rows = getEntityManager()
+                .createQuery("SELECT oi.productId, SUM(oi.unitPrice * oi.quantity) FROM OrderItemEntity oi JOIN oi.order o WHERE o.venteId = ?1 AND o.status IN ('PAID', 'PICKED_UP') GROUP BY oi.productId ORDER BY SUM(oi.unitPrice * oi.quantity) DESC", Object[].class)
+                .setParameter(1, venteId)
+                .setMaxResults(limit)
+                .getResultList();
+        return rows.stream()
+                .map(row -> new TopRevenueProduct((Long) row[0], (BigDecimal) row[1]))
                 .toList();
     }
 }

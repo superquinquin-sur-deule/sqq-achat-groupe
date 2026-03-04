@@ -6,6 +6,7 @@ import fr.sqq.achatgroupe.infrastructure.in.rest.common.dto.DashboardStatsRespon
 import fr.sqq.achatgroupe.infrastructure.in.rest.common.dto.DashboardStatsResponse.DailyOrderCountResponse;
 import fr.sqq.achatgroupe.infrastructure.in.rest.common.dto.SlotDistribution;
 import fr.sqq.achatgroupe.infrastructure.in.rest.common.dto.TopProductResponse;
+import fr.sqq.achatgroupe.infrastructure.in.rest.common.dto.TopRevenueProductResponse;
 import org.mapstruct.Mapper;
 
 import java.time.LocalDate;
@@ -35,6 +36,10 @@ public interface AdminDashboardRestMapper {
                 .map(tp -> new TopProductResponse(tp.productName(), tp.totalQuantity()))
                 .toList();
 
+        List<TopRevenueProductResponse> topRevenueProducts = stats.topRevenueProducts().stream()
+                .map(tp -> new TopRevenueProductResponse(tp.productName(), tp.totalRevenue()))
+                .toList();
+
         List<DailyOrderCountResponse> dailyOrderCounts = stats.dailyOrderCounts().stream()
                 .map(dc -> new DailyOrderCountResponse(dc.date(), dc.orderCount()))
                 .toList();
@@ -46,6 +51,7 @@ public interface AdminDashboardRestMapper {
                 stats.averageBasket().amount(),
                 distribution,
                 topProducts,
+                topRevenueProducts,
                 dailyOrderCounts
         );
     }

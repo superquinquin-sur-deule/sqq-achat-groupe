@@ -80,65 +80,108 @@ const daySegments = computed(() => {
         />
       </div>
 
-      <!-- Podium top 3 produits -->
-      <Card v-if="stats.topProducts.length > 0" class="mb-8">
-        <h2 class="mb-6 text-center text-lg font-semibold text-dark">Top produits vendus</h2>
-        <div class="flex items-end justify-center gap-3">
-          <!-- 2e place -->
-          <div v-if="stats.topProducts.length >= 2" class="flex w-28 flex-col items-center">
-            <p
-              class="mb-2 truncate text-center text-sm font-medium text-dark"
-              :title="stats.topProducts[1]?.productName"
-            >
-              {{ stats.topProducts[1]?.productName }}
-            </p>
-            <div class="flex h-24 w-full items-end justify-center rounded-t-lg bg-brown/20">
-              <span class="pb-2 text-lg font-bold text-brown">{{
-                stats.topProducts[1]?.totalQuantity
-              }}</span>
+      <!-- Podiums top 3 produits -->
+      <div class="mb-8 grid gap-6 md:grid-cols-2">
+        <Card v-if="stats.topProducts.length > 0">
+          <h2 class="mb-6 text-center text-lg font-semibold text-dark">Top produits vendus</h2>
+          <div class="flex items-end justify-center gap-3">
+            <!-- 2e place -->
+            <div v-if="stats.topProducts.length >= 2" class="flex w-28 flex-col items-center">
+              <p class="mb-2 w-full break-words text-center text-sm font-medium text-dark">
+                {{ stats.topProducts[1]?.productName }}
+              </p>
+              <div class="flex h-24 w-full items-end justify-center rounded-t-lg bg-brown/20">
+                <span class="pb-2 text-lg font-bold text-brown">{{
+                  stats.topProducts[1]?.totalQuantity
+                }}</span>
+              </div>
+              <div class="w-full rounded-b-lg bg-brown py-1 text-center text-sm font-bold text-white">
+                2e
+              </div>
             </div>
-            <div class="w-full rounded-b-lg bg-brown py-1 text-center text-sm font-bold text-white">
-              2e
+            <!-- 1ere place -->
+            <div class="flex w-28 flex-col items-center">
+              <p class="mb-2 w-full break-words text-center text-sm font-medium text-dark">
+                {{ stats.topProducts[0]?.productName }}
+              </p>
+              <div class="flex h-36 w-full items-end justify-center rounded-t-lg bg-primary/20">
+                <span class="pb-2 text-xl font-bold text-primary">{{
+                  stats.topProducts[0]?.totalQuantity
+                }}</span>
+              </div>
+              <div
+                class="w-full rounded-b-lg bg-primary py-1 text-center text-sm font-bold text-white"
+              >
+                1er
+              </div>
             </div>
-          </div>
-          <!-- 1ere place -->
-          <div class="flex w-28 flex-col items-center">
-            <p
-              class="mb-2 truncate text-center text-sm font-medium text-dark"
-              :title="stats.topProducts[0]?.productName"
-            >
-              {{ stats.topProducts[0]?.productName }}
-            </p>
-            <div class="flex h-36 w-full items-end justify-center rounded-t-lg bg-primary/20">
-              <span class="pb-2 text-xl font-bold text-primary">{{
-                stats.topProducts[0]?.totalQuantity
-              }}</span>
-            </div>
-            <div
-              class="w-full rounded-b-lg bg-primary py-1 text-center text-sm font-bold text-white"
-            >
-              1er
-            </div>
-          </div>
-          <!-- 3e place -->
-          <div v-if="stats.topProducts.length >= 3" class="flex w-28 flex-col items-center">
-            <p
-              class="mb-2 truncate text-center text-sm font-medium text-dark"
-              :title="stats.topProducts[2]?.productName"
-            >
-              {{ stats.topProducts[2]?.productName }}
-            </p>
-            <div class="flex h-16 w-full items-end justify-center rounded-t-lg bg-dark/10">
-              <span class="pb-2 text-lg font-bold text-dark">{{
-                stats.topProducts[2]?.totalQuantity
-              }}</span>
-            </div>
-            <div class="w-full rounded-b-lg bg-dark py-1 text-center text-sm font-bold text-white">
-              3e
+            <!-- 3e place -->
+            <div v-if="stats.topProducts.length >= 3" class="flex w-28 flex-col items-center">
+              <p class="mb-2 w-full break-words text-center text-sm font-medium text-dark">
+                {{ stats.topProducts[2]?.productName }}
+              </p>
+              <div class="flex h-16 w-full items-end justify-center rounded-t-lg bg-dark/10">
+                <span class="pb-2 text-lg font-bold text-dark">{{
+                  stats.topProducts[2]?.totalQuantity
+                }}</span>
+              </div>
+              <div class="w-full rounded-b-lg bg-dark py-1 text-center text-sm font-bold text-white">
+                3e
+              </div>
             </div>
           </div>
-        </div>
-      </Card>
+        </Card>
+
+        <Card v-if="stats.topRevenueProducts.length > 0">
+          <h2 class="mb-6 text-center text-lg font-semibold text-dark">Top produits par CA</h2>
+          <div class="flex items-end justify-center gap-3">
+            <!-- 2e place -->
+            <div v-if="stats.topRevenueProducts.length >= 2" class="flex w-28 flex-col items-center">
+              <p class="mb-2 w-full break-words text-center text-sm font-medium text-dark">
+                {{ stats.topRevenueProducts[1]?.productName }}
+              </p>
+              <div class="flex h-24 w-full items-end justify-center rounded-t-lg bg-brown/20">
+                <span class="pb-2 text-sm font-bold text-brown">{{
+                  formatCurrency(stats.topRevenueProducts[1]!.totalRevenue)
+                }}</span>
+              </div>
+              <div class="w-full rounded-b-lg bg-brown py-1 text-center text-sm font-bold text-white">
+                2e
+              </div>
+            </div>
+            <!-- 1ere place -->
+            <div class="flex w-28 flex-col items-center">
+              <p class="mb-2 w-full break-words text-center text-sm font-medium text-dark">
+                {{ stats.topRevenueProducts[0]?.productName }}
+              </p>
+              <div class="flex h-36 w-full items-end justify-center rounded-t-lg bg-primary/20">
+                <span class="pb-2 text-sm font-bold text-primary">{{
+                  formatCurrency(stats.topRevenueProducts[0]!.totalRevenue)
+                }}</span>
+              </div>
+              <div
+                class="w-full rounded-b-lg bg-primary py-1 text-center text-sm font-bold text-white"
+              >
+                1er
+              </div>
+            </div>
+            <!-- 3e place -->
+            <div v-if="stats.topRevenueProducts.length >= 3" class="flex w-28 flex-col items-center">
+              <p class="mb-2 w-full break-words text-center text-sm font-medium text-dark">
+                {{ stats.topRevenueProducts[2]?.productName }}
+              </p>
+              <div class="flex h-16 w-full items-end justify-center rounded-t-lg bg-dark/10">
+                <span class="pb-2 text-sm font-bold text-dark">{{
+                  formatCurrency(stats.topRevenueProducts[2]!.totalRevenue)
+                }}</span>
+              </div>
+              <div class="w-full rounded-b-lg bg-dark py-1 text-center text-sm font-bold text-white">
+                3e
+              </div>
+            </div>
+          </div>
+        </Card>
+      </div>
 
       <Card class="mb-8">
         <h2 class="mb-4 text-center text-lg font-semibold text-dark">Commandes par jour</h2>
