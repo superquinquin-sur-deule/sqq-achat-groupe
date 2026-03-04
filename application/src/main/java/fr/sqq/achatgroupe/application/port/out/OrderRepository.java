@@ -25,11 +25,7 @@ public interface OrderRepository {
 
     List<Order> findPendingOrdersBefore(Instant cutoff);
 
-    long countPaidByVenteId(Long venteId);
-
-    Money sumTotalPaidByVenteId(Long venteId);
-
-    long countPickedUpByVenteId(Long venteId);
+    OrderAggregates getOrderAggregates(Long venteId);
 
     List<SlotOrderCount> countByTimeSlotForVente(Long venteId);
 
@@ -39,9 +35,11 @@ public interface OrderRepository {
 
     CursorPage<Order> findPaidByVenteId(Long venteId, CursorPageRequest pageRequest, String searchName, Long timeSlotId);
 
-    List<TopProduct> findTopSellingProducts(Long venteId, int limit);
+    List<ProductStats> findProductStats(Long venteId);
 
-    List<TopRevenueProduct> findTopRevenueProducts(Long venteId, int limit);
+    record OrderAggregates(long totalOrders, Money totalAmount, long pickedUpCount) {}
+
+    record ProductStats(Long productId, long totalQuantity, BigDecimal totalRevenue) {}
 
     record SlotOrderCount(Long slotId, long orderCount) {}
 
@@ -51,9 +49,5 @@ public interface OrderRepository {
 
     void detachOrdersFromTimeSlot(Long timeSlotId);
 
-    record TopProduct(Long productId, long totalQuantity) {}
-
     record DailyOrderCount(LocalDate date, long orderCount) {}
-
-    record TopRevenueProduct(Long productId, BigDecimal totalRevenue) {}
 }

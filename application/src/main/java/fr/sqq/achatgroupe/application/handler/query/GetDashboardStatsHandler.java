@@ -1,6 +1,8 @@
 package fr.sqq.achatgroupe.application.handler.query;
 
 import fr.sqq.achatgroupe.application.port.out.OrderRepository;
+import fr.sqq.achatgroupe.application.port.out.OrderRepository.OrderAggregates;
+import fr.sqq.achatgroupe.application.port.out.OrderRepository.ProductStats;
 import fr.sqq.achatgroupe.application.port.out.ProductRepository;
 import fr.sqq.achatgroupe.application.query.GetDashboardStatsQuery;
 import fr.sqq.achatgroupe.application.query.GetDashboardStatsQuery.DailyOrderCount;
@@ -16,6 +18,7 @@ import jakarta.transaction.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -35,9 +38,11 @@ public class GetDashboardStatsHandler implements QueryHandler<GetDashboardStatsQ
     @Transactional
     public DashboardStats handle(GetDashboardStatsQuery query) {
         Long venteId = query.venteId();
-        long totalOrders = orderRepository.countPaidByVenteId(venteId);
-        Money totalAmount = orderRepository.sumTotalPaidByVenteId(venteId);
-        long pickedUpCount = orderRepository.countPickedUpByVenteId(venteId);
+
+        OrderAggregates aggregates = orderRepository.getOrderAggregates(venteId);
+        long totalOrders = aggregates.totalOrders();
+        Money totalAmount = aggregates.totalAmount();
+        long pickedUpCount = aggregates.pickedUpCount();
 
         Money averageBasket = totalOrders > 0
                 ? Money.eur(totalAmount.amount().divide(BigDecimal.valueOf(totalOrders), 2, RoundingMode.HALF_UP))
@@ -55,18 +60,24 @@ public class GetDashboardStatsHandler implements QueryHandler<GetDashboardStatsQ
         Map<Long, String> productNames = productRepository.findAllByVenteId(venteId).stream()
                 .collect(Collectors.toMap(Product::id, Product::name));
 
-        List<TopProductStat> topProducts = orderRepository.findTopSellingProducts(venteId, 3).stream()
-                .map(tp -> new TopProductStat(
-                        tp.productId(),
-                        productNames.getOrDefault(tp.productId(), "Produit #" + tp.productId()),
-                        tp.totalQuantity()))
+        List<ProductStats> allProductStats = orderRepository.findProductStats(venteId);
+
+        List<TopProductStat> topProducts = allProductStats.stream()
+                .sorted(Comparator.comparingLong(ProductStats::totalQuantity).reversed())
+                .limit(3)
+                .map(ps -> new TopProductStat(
+                        ps.productId(),
+                        productNames.getOrDefault(ps.productId(), "Produit #" + ps.productId()),
+                        ps.totalQuantity()))
                 .toList();
 
-        List<TopRevenueProductStat> topRevenueProducts = orderRepository.findTopRevenueProducts(venteId, 3).stream()
-                .map(tp -> new TopRevenueProductStat(
-                        tp.productId(),
-                        productNames.getOrDefault(tp.productId(), "Produit #" + tp.productId()),
-                        tp.totalRevenue()))
+        List<TopRevenueProductStat> topRevenueProducts = allProductStats.stream()
+                .sorted(Comparator.comparing(ProductStats::totalRevenue).reversed())
+                .limit(3)
+                .map(ps -> new TopRevenueProductStat(
+                        ps.productId(),
+                        productNames.getOrDefault(ps.productId(), "Produit #" + ps.productId()),
+                        ps.totalRevenue()))
                 .toList();
 
         List<DailyOrderCount> dailyOrderCounts = orderRepository.countByDayForVente(venteId).stream()

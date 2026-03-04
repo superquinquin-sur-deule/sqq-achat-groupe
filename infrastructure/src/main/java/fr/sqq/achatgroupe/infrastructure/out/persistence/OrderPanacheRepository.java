@@ -3,9 +3,9 @@ package fr.sqq.achatgroupe.infrastructure.out.persistence;
 import fr.sqq.achatgroupe.domain.model.order.Order;
 import fr.sqq.achatgroupe.application.port.out.OrderRepository;
 import fr.sqq.achatgroupe.application.port.out.OrderRepository.DailyOrderCount;
+import fr.sqq.achatgroupe.application.port.out.OrderRepository.OrderAggregates;
+import fr.sqq.achatgroupe.application.port.out.OrderRepository.ProductStats;
 import fr.sqq.achatgroupe.application.port.out.OrderRepository.SlotOrderCount;
-import fr.sqq.achatgroupe.application.port.out.OrderRepository.TopProduct;
-import fr.sqq.achatgroupe.application.port.out.OrderRepository.TopRevenueProduct;
 import fr.sqq.achatgroupe.application.query.CursorPage;
 import fr.sqq.achatgroupe.application.query.CursorPageRequest;
 import fr.sqq.achatgroupe.infrastructure.out.persistence.cursor.CursorCodec;
@@ -79,22 +79,16 @@ public class OrderPanacheRepository implements OrderRepository, PanacheRepositor
     }
 
     @Override
-    public long countPaidByVenteId(Long venteId) {
-        return count("venteId = ?1 and status in ('PAID', 'PICKED_UP')", venteId);
-    }
-
-    @Override
-    public Money sumTotalPaidByVenteId(Long venteId) {
-        BigDecimal result = getEntityManager()
-                .createQuery("SELECT COALESCE(SUM(o.totalAmount), 0) FROM OrderEntity o WHERE o.venteId = ?1 AND o.status IN ('PAID', 'PICKED_UP')", BigDecimal.class)
+    public OrderAggregates getOrderAggregates(Long venteId) {
+        Object[] row = getEntityManager()
+                .createQuery("SELECT COUNT(o), COALESCE(SUM(o.totalAmount), 0), COALESCE(SUM(CASE WHEN o.status = 'PICKED_UP' THEN 1 ELSE 0 END), 0) FROM OrderEntity o WHERE o.venteId = ?1 AND o.status IN ('PAID', 'PICKED_UP')", Object[].class)
                 .setParameter(1, venteId)
                 .getSingleResult();
-        return Money.eur(result != null ? result : BigDecimal.ZERO);
-    }
-
-    @Override
-    public long countPickedUpByVenteId(Long venteId) {
-        return count("venteId = ?1 and status = 'PICKED_UP'", venteId);
+        return new OrderAggregates(
+                (Long) row[0],
+                Money.eur((BigDecimal) row[1]),
+                ((Number) row[2]).longValue()
+        );
     }
 
     @Override
@@ -190,26 +184,13 @@ public class OrderPanacheRepository implements OrderRepository, PanacheRepositor
     }
 
     @Override
-    public List<TopProduct> findTopSellingProducts(Long venteId, int limit) {
+    public List<ProductStats> findProductStats(Long venteId) {
         List<Object[]> rows = getEntityManager()
-                .createQuery("SELECT oi.productId, SUM(oi.quantity) FROM OrderItemEntity oi JOIN oi.order o WHERE o.venteId = ?1 AND o.status IN ('PAID', 'PICKED_UP') GROUP BY oi.productId ORDER BY SUM(oi.quantity) DESC", Object[].class)
+                .createQuery("SELECT oi.productId, SUM(oi.quantity), SUM(oi.unitPrice * oi.quantity) FROM OrderItemEntity oi JOIN oi.order o WHERE o.venteId = ?1 AND o.status IN ('PAID', 'PICKED_UP') GROUP BY oi.productId", Object[].class)
                 .setParameter(1, venteId)
-                .setMaxResults(limit)
                 .getResultList();
         return rows.stream()
-                .map(row -> new TopProduct((Long) row[0], ((Number) row[1]).longValue()))
-                .toList();
-    }
-
-    @Override
-    public List<TopRevenueProduct> findTopRevenueProducts(Long venteId, int limit) {
-        List<Object[]> rows = getEntityManager()
-                .createQuery("SELECT oi.productId, SUM(oi.unitPrice * oi.quantity) FROM OrderItemEntity oi JOIN oi.order o WHERE o.venteId = ?1 AND o.status IN ('PAID', 'PICKED_UP') GROUP BY oi.productId ORDER BY SUM(oi.unitPrice * oi.quantity) DESC", Object[].class)
-                .setParameter(1, venteId)
-                .setMaxResults(limit)
-                .getResultList();
-        return rows.stream()
-                .map(row -> new TopRevenueProduct((Long) row[0], (BigDecimal) row[1]))
+                .map(row -> new ProductStats((Long) row[0], ((Number) row[1]).longValue(), (BigDecimal) row[2]))
                 .toList();
     }
 }
