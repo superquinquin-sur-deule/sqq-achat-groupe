@@ -3,6 +3,7 @@ package fr.sqq.achatgroupe.application.handler.query;
 import fr.sqq.achatgroupe.application.port.out.OrderRepository;
 import fr.sqq.achatgroupe.application.port.out.ProductRepository;
 import fr.sqq.achatgroupe.application.query.GetDashboardStatsQuery;
+import fr.sqq.achatgroupe.application.query.GetDashboardStatsQuery.DailyOrderCount;
 import fr.sqq.achatgroupe.application.query.GetDashboardStatsQuery.DashboardStats;
 import fr.sqq.achatgroupe.application.query.GetDashboardStatsQuery.SlotOrderCount;
 import fr.sqq.achatgroupe.application.query.GetDashboardStatsQuery.TopProductStat;
@@ -60,6 +61,10 @@ public class GetDashboardStatsHandler implements QueryHandler<GetDashboardStatsQ
                         tp.totalQuantity()))
                 .toList();
 
-        return new DashboardStats(totalOrders, totalAmount, pickupRate, averageBasket, slotDistribution, topProducts);
+        List<DailyOrderCount> dailyOrderCounts = orderRepository.countByDayForVente(venteId).stream()
+                .map(dc -> new DailyOrderCount(dc.date(), dc.orderCount()))
+                .toList();
+
+        return new DashboardStats(totalOrders, totalAmount, pickupRate, averageBasket, slotDistribution, topProducts, dailyOrderCounts);
     }
 }

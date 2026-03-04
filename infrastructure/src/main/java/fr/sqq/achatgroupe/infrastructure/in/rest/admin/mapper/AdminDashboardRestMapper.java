@@ -3,6 +3,7 @@ package fr.sqq.achatgroupe.infrastructure.in.rest.admin.mapper;
 import fr.sqq.achatgroupe.application.query.GetDashboardStatsQuery.DashboardStats;
 import fr.sqq.achatgroupe.domain.model.planning.TimeSlot;
 import fr.sqq.achatgroupe.infrastructure.in.rest.common.dto.DashboardStatsResponse;
+import fr.sqq.achatgroupe.infrastructure.in.rest.common.dto.DashboardStatsResponse.DailyOrderCountResponse;
 import fr.sqq.achatgroupe.infrastructure.in.rest.common.dto.SlotDistribution;
 import fr.sqq.achatgroupe.infrastructure.in.rest.common.dto.TopProductResponse;
 import org.mapstruct.Mapper;
@@ -34,13 +35,18 @@ public interface AdminDashboardRestMapper {
                 .map(tp -> new TopProductResponse(tp.productName(), tp.totalQuantity()))
                 .toList();
 
+        List<DailyOrderCountResponse> dailyOrderCounts = stats.dailyOrderCounts().stream()
+                .map(dc -> new DailyOrderCountResponse(dc.date(), dc.orderCount()))
+                .toList();
+
         return new DashboardStatsResponse(
                 stats.totalOrders(),
                 stats.totalAmount().amount(),
                 stats.pickupRate(),
                 stats.averageBasket().amount(),
                 distribution,
-                topProducts
+                topProducts,
+                dailyOrderCounts
         );
     }
 }

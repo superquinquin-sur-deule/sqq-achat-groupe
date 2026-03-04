@@ -2,6 +2,7 @@ package fr.sqq.achatgroupe.infrastructure.out.persistence;
 
 import fr.sqq.achatgroupe.domain.model.order.Order;
 import fr.sqq.achatgroupe.application.port.out.OrderRepository;
+import fr.sqq.achatgroupe.application.port.out.OrderRepository.DailyOrderCount;
 import fr.sqq.achatgroupe.application.port.out.OrderRepository.SlotOrderCount;
 import fr.sqq.achatgroupe.application.port.out.OrderRepository.TopProduct;
 import fr.sqq.achatgroupe.application.query.CursorPage;
@@ -18,6 +19,7 @@ import fr.sqq.achatgroupe.domain.model.shared.Money;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -173,6 +175,17 @@ public class OrderPanacheRepository implements OrderRepository, PanacheRepositor
     @Override
     public void detachOrdersFromTimeSlot(Long timeSlotId) {
         update("timeSlotId = null where timeSlotId = ?1", timeSlotId);
+    }
+
+    @Override
+    public List<DailyOrderCount> countByDayForVente(Long venteId) {
+        List<Object[]> rows = getEntityManager()
+                .createQuery("SELECT CAST(o.createdAt AS LocalDate), COUNT(o) FROM OrderEntity o WHERE o.venteId = ?1 AND o.status IN ('PAID', 'PICKED_UP') GROUP BY CAST(o.createdAt AS LocalDate) ORDER BY CAST(o.createdAt AS LocalDate)", Object[].class)
+                .setParameter(1, venteId)
+                .getResultList();
+        return rows.stream()
+                .map(row -> new DailyOrderCount((LocalDate) row[0], (Long) row[1]))
+                .toList();
     }
 
     @Override

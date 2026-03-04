@@ -3,6 +3,7 @@ import { computed } from 'vue'
 import StatCard from '@/components/admin/StatCard.vue'
 import Card from '@/components/ui/Card.vue'
 import PieChart from '@/components/admin/PieChart.vue'
+import BarChart from '@/components/admin/BarChart.vue'
 import { useVenteStore } from '@/stores/venteStore'
 import { storeToRefs } from 'pinia'
 import { useAdminDashboardQuery } from '@/composables/api/useAdminDashboardApi'
@@ -26,6 +27,13 @@ const slotSegments = computed(() =>
   (stats.value?.slotDistribution ?? []).map((s) => ({
     label: s.slotLabel,
     value: s.orderCount,
+  })),
+)
+
+const dailyOrderSegments = computed(() =>
+  (stats.value?.dailyOrderCounts ?? []).map((d) => ({
+    label: dateFormatter.format(new Date(d.date + 'T00:00:00')),
+    value: d.orderCount,
   })),
 )
 
@@ -130,6 +138,11 @@ const daySegments = computed(() => {
             </div>
           </div>
         </div>
+      </Card>
+
+      <Card class="mb-8">
+        <h2 class="mb-4 text-center text-lg font-semibold text-dark">Commandes par jour</h2>
+        <BarChart :segments="dailyOrderSegments" />
       </Card>
 
       <div class="mb-8 grid gap-6 md:grid-cols-2">

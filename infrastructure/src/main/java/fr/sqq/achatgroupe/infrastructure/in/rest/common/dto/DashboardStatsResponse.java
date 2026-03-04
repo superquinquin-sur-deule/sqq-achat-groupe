@@ -1,6 +1,7 @@
 package fr.sqq.achatgroupe.infrastructure.in.rest.common.dto;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 
 public record DashboardStatsResponse(
@@ -9,6 +10,8 @@ public record DashboardStatsResponse(
         double pickupRate,
         BigDecimal averageBasket,
         List<SlotDistribution> slotDistribution,
-        List<TopProductResponse> topProducts
+        List<TopProductResponse> topProducts,
+        List<DailyOrderCountResponse> dailyOrderCounts
 ) {
+    public record DailyOrderCountResponse(LocalDate date, long orderCount) {}
 }

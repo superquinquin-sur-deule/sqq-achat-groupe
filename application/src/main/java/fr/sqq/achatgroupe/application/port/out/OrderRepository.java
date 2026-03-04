@@ -7,6 +7,7 @@ import fr.sqq.achatgroupe.domain.model.order.Order;
 import fr.sqq.achatgroupe.domain.model.shared.Money;
 
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -31,6 +32,8 @@ public interface OrderRepository {
 
     List<SlotOrderCount> countByTimeSlotForVente(Long venteId);
 
+    List<DailyOrderCount> countByDayForVente(Long venteId);
+
     List<Order> findPaidByVenteId(Long venteId);
 
     CursorPage<Order> findPaidByVenteId(Long venteId, CursorPageRequest pageRequest, String searchName, Long timeSlotId);
@@ -46,4 +49,6 @@ public interface OrderRepository {
     void detachOrdersFromTimeSlot(Long timeSlotId);
 
     record TopProduct(Long productId, long totalQuantity) {}
+
+    record DailyOrderCount(LocalDate date, long orderCount) {}
 }
