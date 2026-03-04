@@ -7,6 +7,7 @@ import fr.sqq.achatgroupe.infrastructure.in.rest.common.dto.SlotDistribution;
 import fr.sqq.achatgroupe.infrastructure.in.rest.common.dto.TopProductResponse;
 import org.mapstruct.Mapper;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -24,7 +25,8 @@ public interface AdminDashboardRestMapper {
                     String label = slot != null
                             ? slot.date() + " " + slot.startTime() + "-" + slot.endTime()
                             : "Créneau #" + sc.slotId();
-                    return new SlotDistribution(sc.slotId(), label, sc.orderCount());
+                    LocalDate date = slot != null ? slot.date() : null;
+                    return new SlotDistribution(sc.slotId(), label, sc.orderCount(), date);
                 })
                 .toList();
 

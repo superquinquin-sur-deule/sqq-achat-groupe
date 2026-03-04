@@ -59,9 +59,21 @@ public class AdminDashboardSteps {
         assertTrue(card.first().isVisible(), "La carte '" + cardLabel + "' doit être visible");
     }
 
-    @Et("je vois le tableau de répartition par créneau")
-    public void jeVoisLeTableauDeRepartition() {
-        Locator table = page().locator("[data-testid='slot-distribution-table']");
-        assertTrue(table.isVisible(), "Le tableau de répartition par créneau doit être visible");
+    @Et("je vois le camembert de répartition par créneau")
+    public void jeVoisLeCamembertDeRepartitionParCreneau() {
+        Locator chart = page().locator("[data-testid='pie-chart-slot']");
+        chart.waitFor(new Locator.WaitForOptions()
+                .setState(WaitForSelectorState.VISIBLE)
+                .setTimeout(5000));
+        assertTrue(chart.isVisible(), "Le camembert de répartition par créneau doit être visible");
+    }
+
+    @Et("je vois le camembert de répartition par jour")
+    public void jeVoisLeCamembertDeRepartitionParJour() {
+        Locator chart = page().locator("[data-testid='pie-chart-day']");
+        chart.waitFor(new Locator.WaitForOptions()
+                .setState(WaitForSelectorState.VISIBLE)
+                .setTimeout(5000));
+        assertTrue(chart.isVisible(), "Le camembert de répartition par jour doit être visible");
     }
 }

@@ -1,10 +1,11 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import StatCard from '@/components/admin/StatCard.vue'
 import Card from '@/components/ui/Card.vue'
+import PieChart from '@/components/admin/PieChart.vue'
 import { useVenteStore } from '@/stores/venteStore'
 import { storeToRefs } from 'pinia'
 import { useAdminDashboardQuery } from '@/composables/api/useAdminDashboardApi'
-import AdminTable from '@/components/admin/AdminTable.vue'
 
 const venteStore = useVenteStore()
 const { selectedVenteId } = storeToRefs(venteStore)
@@ -14,6 +15,34 @@ const { data: stats, isLoading: loading } = useAdminDashboardQuery(selectedVente
 function formatCurrency(value: number): string {
   return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(value)
 }
+
+const dateFormatter = new Intl.DateTimeFormat('fr-FR', {
+  weekday: 'long',
+  day: 'numeric',
+  month: 'long',
+})
+
+const slotSegments = computed(() =>
+  (stats.value?.slotDistribution ?? []).map((s) => ({
+    label: s.slotLabel,
+    value: s.orderCount,
+  })),
+)
+
+const daySegments = computed(() => {
+  const byDay = new Map<string, number>()
+  for (const slot of stats.value?.slotDistribution ?? []) {
+    if (!slot.date) continue
+    const current = byDay.get(slot.date) ?? 0
+    byDay.set(slot.date, current + slot.orderCount)
+  }
+  return Array.from(byDay.entries())
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([date, count]) => ({
+      label: dateFormatter.format(new Date(date + 'T00:00:00')),
+      value: count,
+    }))
+})
 </script>
 
 <template>
@@ -103,24 +132,19 @@ function formatCurrency(value: number): string {
         </div>
       </Card>
 
-      <AdminTable
-        :columns="['Créneau', 'Nombre de commandes']"
-        caption="Répartition des commandes par créneau"
-        dataTestid="slot-distribution-table"
-      >
-        <tr
-          v-for="slot in stats.slotDistribution"
-          :key="slot.slotId"
-          class="border-t border-gray-100 transition-colors hover:bg-surface"
-          data-testid="slot-distribution-row"
-        >
-          <td class="px-4 py-3 text-dark">{{ slot.slotLabel }}</td>
-          <td class="px-4 py-3 font-medium text-dark">{{ slot.orderCount }}</td>
-        </tr>
-        <tr v-if="stats.slotDistribution.length === 0">
-          <td colspan="2" class="px-4 py-6 text-center text-brown">Aucune commande par créneau</td>
-        </tr>
-      </AdminTable>
+      <div class="mb-8 grid gap-6 md:grid-cols-2">
+        <Card data-testid="pie-chart-slot">
+          <h2 class="mb-4 text-center text-lg font-semibold text-dark">
+            Répartition par créneau
+          </h2>
+          <PieChart :segments="slotSegments" />
+        </Card>
+        <Card data-testid="pie-chart-day">
+          <h2 class="mb-4 text-center text-lg font-semibold text-dark">Répartition par jour</h2>
+          <PieChart :segments="daySegments" />
+        </Card>
+      </div>
+
     </template>
 
     <div v-else class="py-12 text-center text-brown">Aucune donnée disponible</div>

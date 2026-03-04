@@ -14,4 +14,5 @@ Fonctionnalité: Dashboard administrateur
     Et je vois la carte "Montant total"
     Et je vois la carte "Taux de retrait"
     Et je vois la carte "Panier moyen"
-    Et je vois le tableau de répartition par créneau
+    Et je vois le camembert de répartition par créneau
+    Et je vois le camembert de répartition par jour
