@@ -10,6 +10,7 @@ import fr.sqq.achatgroupe.infrastructure.in.rest.common.dto.TopRevenueProductRes
 import org.mapstruct.Mapper;
 
 import java.time.LocalDate;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -30,6 +31,9 @@ public interface AdminDashboardRestMapper {
                     LocalDate date = slot != null ? slot.date() : null;
                     return new SlotDistribution(sc.slotId(), label, sc.orderCount(), date);
                 })
+                .sorted(Comparator
+                        .comparing(SlotDistribution::date, Comparator.nullsLast(Comparator.naturalOrder()))
+                        .thenComparing(SlotDistribution::slotLabel))
                 .toList();
 
         List<TopProductResponse> topProducts = stats.topProducts().stream()
