@@ -29,4 +29,8 @@ app.use(pinia)
 app.use(router)
 app.use(VueQueryPlugin, vueQueryOptions)
 
+window.addEventListener('vite:preloadError', () => {
+  window.location.reload()
+})
+
 app.mount('#app')
