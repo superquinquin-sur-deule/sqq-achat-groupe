@@ -1,5 +1,6 @@
-package fr.sqq.achatgroupe.application.service;
+package fr.sqq.achatgroupe.infrastructure.out.excel;
 
+import fr.sqq.achatgroupe.application.port.out.SupplierOrderExcelGenerator;
 import fr.sqq.achatgroupe.application.query.GenerateSupplierOrderQuery.SupplierOrderLine;
 import jakarta.enterprise.context.ApplicationScoped;
 import org.apache.poi.ss.usermodel.*;
@@ -12,8 +13,9 @@ import java.util.List;
 import java.util.Map;
 
 @ApplicationScoped
-public class SupplierOrderExcelGenerator {
+public class PoiSupplierOrderExcelGenerator implements SupplierOrderExcelGenerator {
 
+    @Override
     public byte[] generate(List<SupplierOrderLine> lines) throws IOException {
         Map<String, List<SupplierOrderLine>> bySupplier = new LinkedHashMap<>();
         for (SupplierOrderLine line : lines) {

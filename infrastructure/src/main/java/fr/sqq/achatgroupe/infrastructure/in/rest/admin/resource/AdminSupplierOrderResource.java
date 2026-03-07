@@ -2,7 +2,7 @@ package fr.sqq.achatgroupe.infrastructure.in.rest.admin.resource;
 
 import fr.sqq.achatgroupe.application.query.GenerateSupplierOrderQuery;
 import fr.sqq.achatgroupe.application.query.GenerateSupplierOrderQuery.SupplierOrderLine;
-import fr.sqq.achatgroupe.application.service.SupplierOrderExcelGenerator;
+import fr.sqq.achatgroupe.application.port.out.SupplierOrderExcelGenerator;
 import fr.sqq.achatgroupe.infrastructure.in.rest.admin.mapper.AdminSupplierOrderRestMapper;
 import fr.sqq.achatgroupe.infrastructure.in.rest.common.dto.DataResponse;
 import fr.sqq.achatgroupe.infrastructure.in.rest.common.dto.SupplierOrderLineResponse;
