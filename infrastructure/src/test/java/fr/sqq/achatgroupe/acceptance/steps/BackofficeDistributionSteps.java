@@ -148,6 +148,10 @@ public class BackofficeDistributionSteps {
 
         // Compter les boutons avant le clic
         int countBefore = pickupBtns.count();
+
+        // Accepter le confirm() natif déclenché par le clic
+        page().onceDialog(dialog -> dialog.accept());
+
         pickupBtns.first().click();
 
         // Attendre que le bouton disparaisse (preuve que l'optimistic update a eu lieu)

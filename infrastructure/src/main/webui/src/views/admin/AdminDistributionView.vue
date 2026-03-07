@@ -85,6 +85,7 @@ function handlePrint() {
 }
 
 async function handlePickup(orderId: string) {
+  if (!confirm('Voulez-vous vraiment marquer cette commande comme récupérée ?')) return
   if (pickingUp.value.has(orderId)) return
   const orderList = orders.value ?? []
   const order = orderList.find((o) => o.id === orderId)
