@@ -59,12 +59,14 @@ async function fetchSupplierData() {
       return
     }
     isEditing.value = supplierData.status === 'COMPLETED'
-    receptionForm.value = supplierData.lines.map((l) => ({
-      productId: l.productId,
-      productName: l.productName,
-      orderedQuantity: l.orderedQuantity,
-      receivedQuantity: isEditing.value ? l.receivedQuantity : l.orderedQuantity,
-    }))
+    receptionForm.value = supplierData.lines
+      .map((l) => ({
+        productId: l.productId,
+        productName: l.productName,
+        orderedQuantity: l.orderedQuantity,
+        receivedQuantity: isEditing.value ? l.receivedQuantity : l.orderedQuantity,
+      }))
+      .sort((a, b) => a.productName.localeCompare(b.productName, 'fr'))
   } catch {
     toast.error('Erreur lors du chargement des données')
     router.push({ name: 'admin-reception' })
