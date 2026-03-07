@@ -99,6 +99,11 @@ const router = createRouter({
           name: 'admin-reception',
           component: () => import('@/views/admin/AdminReceptionView.vue'),
         },
+        {
+          path: 'reception/:supplier',
+          name: 'admin-reception-form',
+          component: () => import('@/views/admin/AdminReceptionFormView.vue'),
+        },
       ],
     },
     {

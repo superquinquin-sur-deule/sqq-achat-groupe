@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
+import { RouterLink } from 'vue-router'
 import { useVenteStore } from '@/stores/venteStore'
 import { storeToRefs } from 'pinia'
 import { useToast } from '@/composables/useToast'
@@ -61,13 +62,6 @@ const shortagePreview = ref<ShortageItem[]>([])
 const refundPreview = ref<RefundOrder[]>([])
 const refundResult = ref<RefundResult | null>(null)
 
-// Reception form state
-const showReceptionForm = ref(false)
-const currentSupplier = ref('')
-const isEditing = ref(false)
-const receptionForm = ref<
-  { productId: number; productName: string; orderedQuantity: number; receivedQuantity: number }[]
->([])
 const submitting = ref(false)
 
 // Computed
@@ -112,47 +106,6 @@ async function fetchRefundPreview() {
     refundPreview.value = res.data.data.orders
   } catch {
     toast.error('Erreur lors du chargement des remboursements')
-  }
-}
-
-function openReceptionForm(supplier: SupplierStatus) {
-  currentSupplier.value = supplier.supplier
-  isEditing.value = supplier.status === 'COMPLETED'
-  receptionForm.value = supplier.lines.map((l) => ({
-    productId: l.productId,
-    productName: l.productName,
-    orderedQuantity: l.orderedQuantity,
-    receivedQuantity: isEditing.value ? l.receivedQuantity : l.orderedQuantity,
-  }))
-  showReceptionForm.value = true
-}
-
-async function submitReception() {
-  if (!selectedVenteId.value || submitting.value) return
-  submitting.value = true
-  try {
-    await customFetch(`/api/admin/ventes/${selectedVenteId.value}/receptions`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        supplier: currentSupplier.value,
-        lines: receptionForm.value.map((l) => ({
-          productId: l.productId,
-          receivedQuantity: l.receivedQuantity,
-        })),
-      }),
-    })
-    toast.success(isEditing.value ? 'Réception modifiée' : 'Réception enregistrée')
-    showReceptionForm.value = false
-    await fetchReceptionStatus()
-    if (receptionStatus.value?.allReceived) {
-      await fetchShortagePreview()
-      await fetchRefundPreview()
-    }
-  } catch {
-    toast.error("Erreur lors de l'enregistrement de la réception")
-  } finally {
-    submitting.value = false
   }
 }
 
@@ -271,22 +224,22 @@ watch(
                 </span>
               </div>
               <div class="flex gap-2">
-                <button
+                <RouterLink
                   v-if="supplier.status === 'PENDING'"
+                  :to="{ name: 'admin-reception-form', params: { supplier: supplier.supplier } }"
                   class="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-dark shadow-sm transition-colors hover:bg-primary/90"
                   data-testid="reception-record-btn"
-                  @click="openReceptionForm(supplier)"
                 >
                   Saisir réception
-                </button>
-                <button
+                </RouterLink>
+                <RouterLink
                   v-if="supplier.status === 'COMPLETED' && !receptionStatus?.hasRefunds"
+                  :to="{ name: 'admin-reception-form', params: { supplier: supplier.supplier } }"
                   class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-dark hover:bg-gray-50"
                   data-testid="reception-edit-btn"
-                  @click="openReceptionForm(supplier)"
                 >
                   Modifier
-                </button>
+                </RouterLink>
               </div>
             </div>
 
@@ -320,65 +273,6 @@ watch(
                 </tbody>
               </table>
             </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Reception Form Modal -->
-      <div
-        v-if="showReceptionForm"
-        class="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
-        data-testid="reception-form-modal"
-      >
-        <div class="w-full max-w-lg rounded-xl bg-white p-6 shadow-xl">
-          <h3 class="mb-4 text-lg font-semibold text-dark">
-            {{ isEditing ? 'Modifier la réception' : 'Réception' }} — {{ currentSupplier }}
-          </h3>
-          <table class="mb-4 w-full text-sm" data-testid="reception-form-table">
-            <thead>
-              <tr class="border-b border-gray-200 text-left">
-                <th class="pb-1 font-medium text-dark">Produit</th>
-                <th class="pb-1 text-right font-medium text-dark">Commandé</th>
-                <th class="pb-1 text-right font-medium text-dark">Reçu</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr
-                v-for="item in receptionForm"
-                :key="item.productId"
-                class="border-b border-gray-100"
-              >
-                <td class="py-2 text-dark">{{ item.productName }}</td>
-                <td class="py-2 text-right text-dark">{{ item.orderedQuantity }}</td>
-                <td class="py-2 text-right">
-                  <input
-                    v-model.number="item.receivedQuantity"
-                    type="number"
-                    min="0"
-                    :max="item.orderedQuantity"
-                    class="w-20 rounded border border-gray-300 px-2 py-1 text-right text-sm focus:border-primary focus:outline-none"
-                    data-testid="reception-qty-input"
-                  />
-                </td>
-              </tr>
-            </tbody>
-          </table>
-          <div class="flex justify-end gap-3">
-            <button
-              class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-dark hover:bg-gray-50"
-              data-testid="reception-form-cancel"
-              @click="showReceptionForm = false"
-            >
-              Annuler
-            </button>
-            <button
-              class="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-dark shadow-sm transition-colors hover:bg-primary/90 disabled:opacity-50"
-              :disabled="submitting"
-              data-testid="reception-form-submit"
-              @click="submitReception"
-            >
-              {{ submitting ? 'Enregistrement...' : 'Valider la réception' }}
-            </button>
           </div>
         </div>
       </div>

@@ -106,16 +106,16 @@ public class BackofficeReceptionSteps {
         Locator btn = page().locator("[data-testid='reception-record-btn']").first();
         assertTrue(btn.isVisible(), "Le bouton 'Saisir réception' doit être visible");
         btn.click();
-        page().waitForSelector("[data-testid='reception-form-modal']",
+        page().waitForSelector("[data-testid='reception-form-page']",
                 new Page.WaitForSelectorOptions()
                         .setState(WaitForSelectorState.VISIBLE)
-                        .setTimeout(5000));
+                        .setTimeout(15000));
     }
 
     @Alors("je vois le formulaire de réception")
     public void jeVoisLeFormulaireDeReception() {
-        Locator modal = page().locator("[data-testid='reception-form-modal']");
-        assertTrue(modal.isVisible(), "Le formulaire de réception doit être visible");
+        Locator formPage = page().locator("[data-testid='reception-form-page']");
+        assertTrue(formPage.isVisible(), "La page du formulaire de réception doit être visible");
 
         Locator table = page().locator("[data-testid='reception-form-table']");
         assertTrue(table.isVisible(), "Le tableau du formulaire doit être visible");
@@ -125,11 +125,11 @@ public class BackofficeReceptionSteps {
     public void jeValideLaReceptionAvecLesQuantitesParDefaut() {
         Locator submit = page().locator("[data-testid='reception-form-submit']");
         submit.click();
-        // Wait for modal to close
-        page().waitForSelector("[data-testid='reception-form-modal']",
+        // Wait for navigation back to reception page
+        page().waitForSelector("[data-testid='reception-title']",
                 new Page.WaitForSelectorOptions()
-                        .setState(WaitForSelectorState.HIDDEN)
-                        .setTimeout(10000));
+                        .setState(WaitForSelectorState.VISIBLE)
+                        .setTimeout(15000));
     }
 
     @Alors("le fournisseur est marqué comme reçu")
@@ -227,18 +227,18 @@ public class BackofficeReceptionSteps {
         Locator btn = page().locator("[data-testid='reception-edit-btn']").first();
         assertTrue(btn.isVisible(), "Le bouton 'Modifier' doit être visible");
         btn.click();
-        page().waitForSelector("[data-testid='reception-form-modal']",
+        page().waitForSelector("[data-testid='reception-form-page']",
                 new Page.WaitForSelectorOptions()
                         .setState(WaitForSelectorState.VISIBLE)
-                        .setTimeout(5000));
+                        .setTimeout(15000));
     }
 
     @Alors("je vois le formulaire de modification de réception")
     public void jeVoisLeFormulaireDeModificationDeReception() {
-        Locator modal = page().locator("[data-testid='reception-form-modal']");
-        assertTrue(modal.isVisible(), "Le formulaire de modification doit être visible");
+        Locator formPage = page().locator("[data-testid='reception-form-page']");
+        assertTrue(formPage.isVisible(), "La page du formulaire de modification doit être visible");
 
-        Locator title = modal.locator("h3");
+        Locator title = formPage.locator("h1");
         assertTrue(title.textContent().contains("Modifier"),
                 "Le titre doit contenir 'Modifier', trouvé: " + title.textContent());
     }
