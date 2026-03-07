@@ -1,5 +1,6 @@
-package fr.sqq.achatgroupe.application.service;
+package fr.sqq.achatgroupe.infrastructure.out.pdf;
 
+import fr.sqq.achatgroupe.application.port.out.PreparationPdfGenerator;
 import fr.sqq.achatgroupe.application.query.GeneratePreparationListQuery.PreparationItem;
 import fr.sqq.achatgroupe.application.query.GeneratePreparationListQuery.PreparationOrder;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -18,7 +19,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @ApplicationScoped
-public class PreparationPdfGenerator {
+public class PdfBoxPreparationPdfGenerator implements PreparationPdfGenerator {
 
     private static final float MARGIN = 50;
     private static final float LINE_HEIGHT = 16;
@@ -29,6 +30,7 @@ public class PreparationPdfGenerator {
     private static final float TABLE_FONT_SIZE = 9;
     private static final float CHECKBOX_SIZE = 8;
 
+    @Override
     public byte[] generate(List<PreparationOrder> orders) throws IOException {
         try (PDDocument document = new PDDocument()) {
             PDType1Font fontBold = new PDType1Font(Standard14Fonts.FontName.HELVETICA_BOLD);

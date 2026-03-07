@@ -9,7 +9,7 @@ import fr.sqq.achatgroupe.application.query.GetOrderDetailsQuery;
 import fr.sqq.achatgroupe.application.query.ListAllProductsQuery;
 import fr.sqq.achatgroupe.application.query.ListAllTimeSlotsQuery;
 import fr.sqq.achatgroupe.application.query.ListOrdersQuery;
-import fr.sqq.achatgroupe.application.service.DistributionPdfGenerator;
+import fr.sqq.achatgroupe.application.port.out.DistributionPdfGenerator;
 import fr.sqq.achatgroupe.domain.model.catalog.Product;
 import fr.sqq.achatgroupe.domain.model.order.Order;
 import fr.sqq.achatgroupe.domain.model.planning.TimeSlot;

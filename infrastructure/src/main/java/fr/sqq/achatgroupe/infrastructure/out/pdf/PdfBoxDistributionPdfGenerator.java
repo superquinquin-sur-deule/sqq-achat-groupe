@@ -1,5 +1,6 @@
-package fr.sqq.achatgroupe.application.service;
+package fr.sqq.achatgroupe.infrastructure.out.pdf;
 
+import fr.sqq.achatgroupe.application.port.out.DistributionPdfGenerator;
 import fr.sqq.achatgroupe.application.query.GenerateDistributionListQuery.DistributionOrder;
 import jakarta.enterprise.context.ApplicationScoped;
 import org.apache.pdfbox.pdmodel.PDDocument;
@@ -19,7 +20,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @ApplicationScoped
-public class DistributionPdfGenerator {
+public class PdfBoxDistributionPdfGenerator implements DistributionPdfGenerator {
 
     private static final float MARGIN = 50;
     private static final float LINE_HEIGHT = 16;
@@ -29,6 +30,7 @@ public class DistributionPdfGenerator {
     private static final float CHECKBOX_SIZE = 8;
     private static final float BOTTOM_MARGIN = 60;
 
+    @Override
     public byte[] generate(List<DistributionOrder> orders) throws IOException {
         try (PDDocument document = new PDDocument()) {
             PDType1Font fontBold = new PDType1Font(Standard14Fonts.FontName.HELVETICA_BOLD);

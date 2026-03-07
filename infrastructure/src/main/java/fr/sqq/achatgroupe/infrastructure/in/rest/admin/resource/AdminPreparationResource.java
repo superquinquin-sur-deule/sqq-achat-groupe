@@ -5,7 +5,7 @@ import fr.sqq.achatgroupe.application.query.CursorPageRequest;
 import fr.sqq.achatgroupe.application.query.GeneratePreparationListQuery;
 import fr.sqq.achatgroupe.application.query.GeneratePreparationListQuery.PreparationOrder;
 import fr.sqq.achatgroupe.application.query.ListPreparationOrdersQuery;
-import fr.sqq.achatgroupe.application.service.PreparationPdfGenerator;
+import fr.sqq.achatgroupe.application.port.out.PreparationPdfGenerator;
 import fr.sqq.achatgroupe.infrastructure.in.rest.admin.mapper.AdminPreparationRestMapper;
 import fr.sqq.achatgroupe.infrastructure.in.rest.common.dto.CursorPageResponse;
 import fr.sqq.achatgroupe.infrastructure.in.rest.common.dto.PreparationOrderResponse;
