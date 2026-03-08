@@ -178,6 +178,16 @@ public class PdfBoxPreparationPdfGenerator implements PreparationPdfGenerator {
                 drawText(cs, "Un remboursement sera émis pour le montant de ces produits.",
                         fontOblique, TABLE_FONT_SIZE, MARGIN, y);
             }
+
+            // Signature zone — fixed at bottom of page
+            float signatureY = MARGIN + 30;
+            drawText(cs, "Signature :", fontBold, TEXT_FONT_SIZE, MARGIN, signatureY);
+            float labelWidth = fontBold.getStringWidth("Signature :") / 1000 * TEXT_FONT_SIZE;
+            float lineStartX = MARGIN + labelWidth + 5;
+            cs.setLineWidth(0.5f);
+            cs.moveTo(lineStartX, signatureY);
+            cs.lineTo(lineStartX + 200, signatureY);
+            cs.stroke();
         }
     }
 
