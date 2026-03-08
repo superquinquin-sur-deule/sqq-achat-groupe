@@ -12,6 +12,7 @@ import org.apache.pdfbox.pdmodel.font.Standard14Fonts;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.time.Clock;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.LinkedHashMap;
@@ -21,6 +22,16 @@ import java.util.stream.Collectors;
 
 @ApplicationScoped
 public class PdfBoxDistributionPdfGenerator implements DistributionPdfGenerator {
+
+    private final Clock clock;
+
+    PdfBoxDistributionPdfGenerator() {
+        this(Clock.systemDefaultZone());
+    }
+
+    public PdfBoxDistributionPdfGenerator(Clock clock) {
+        this.clock = clock;
+    }
 
     private static final float MARGIN = 50;
     private static final float LINE_HEIGHT = 16;
@@ -45,7 +56,7 @@ public class PdfBoxDistributionPdfGenerator implements DistributionPdfGenerator 
 
             // Title
             String title = "SuperQuinquin \u2014 Liste de distribution \u2014 "
-                    + LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+                    + LocalDate.now(clock).format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
             y = drawText(cs, title, fontBold, TITLE_FONT_SIZE, MARGIN, y);
             y -= LINE_HEIGHT * 0.5f;
 
