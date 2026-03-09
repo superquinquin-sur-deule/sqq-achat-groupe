@@ -61,6 +61,12 @@ const filteredOrders = computed(() => {
     )
   }
 
+  result = [...result].sort(
+    (a, b) =>
+      a.customerLastName.localeCompare(b.customerLastName, 'fr') ||
+      a.customerFirstName.localeCompare(b.customerFirstName, 'fr'),
+  )
+
   return result
 })
 
