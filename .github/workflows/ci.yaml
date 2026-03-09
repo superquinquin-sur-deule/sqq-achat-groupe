@@ -25,6 +25,7 @@ jobs:
       packages: write
     outputs:
       latest-sha: ${{ steps.docker_build.outputs.digest }}
+      version: ${{ steps.meta.outputs.version }}
     steps:
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6
         name: Checkout
@@ -50,13 +51,14 @@ jobs:
         shell: bash
         run: |
           IMAGE_BASE="ghcr.io/${{ github.repository_owner }}/${{ github.event.repository.name }}"
-          if [[ "${GITHUB_EVENT_NAME}" == "push" && "${GITHUB_REF_TYPE}" == "branch" && "${GITHUB_REF_NAME}" == "main" ]]; then
-            # For main branch: only update latest (release tags are immutable)
-            echo "tags=${IMAGE_BASE}:latest" >> "$GITHUB_OUTPUT"
-          elif [[ "${GITHUB_REF_TYPE}" == "tag" ]]; then
+          if [[ "${GITHUB_REF_TYPE}" == "tag" ]]; then
             # For release tags pushed by release-please (e.g., v1.2.3), push only the release tag
             TAG_NO_V="${GITHUB_REF_NAME#v}"
             echo "tags=${IMAGE_BASE}:${TAG_NO_V}" >> "$GITHUB_OUTPUT"
+            echo "version=${TAG_NO_V}" >> "$GITHUB_OUTPUT"
+          elif [[ "${GITHUB_EVENT_NAME}" == "push" && "${GITHUB_REF_TYPE}" == "branch" && "${GITHUB_REF_NAME}" == "main" ]]; then
+            # For main branch: only update latest (release tags are immutable)
+            echo "tags=${IMAGE_BASE}:latest" >> "$GITHUB_OUTPUT"
           else
             # Default to not setting tags (no push on PRs)
             echo "tags=" >> "$GITHUB_OUTPUT"
@@ -86,3 +88,60 @@ jobs:
           platforms: linux/amd64,linux/arm64
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
+
+  deploy-staging:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.event_name == 'push' && github.ref_type == 'branch' && github.ref_name == 'main'
+    steps:
+      - name: Install yq
+        uses: mikefarah/yq@master
+
+      - name: Clone GitOps repo
+        run: |
+          git clone https://x-access-token:${{ secrets.HOMELABITTY_TOKEN }}@github.com/lucas-dclrcq/homelabitty.git
+
+      - name: Update staging image digest
+        run: |
+          yq -i '.spec.values.controllers.main.containers.main.image.digest = "${{ needs.build.outputs.latest-sha }}"' \
+            homelabitty/kubernetes/apps/sqq/sqq-vente-groupee-staging/app/helmrelease.yaml
+
+      - name: Commit and push
+        run: |
+          cd homelabitty
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git diff --cached --quiet && echo "No changes to commit" && exit 0
+          git commit -m "chore(sqq-staging): update image digest to ${{ needs.build.outputs.latest-sha }}"
+          git push
+
+  deploy-production:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.ref_type == 'tag'
+    environment: production
+    steps:
+      - name: Install yq
+        uses: mikefarah/yq@master
+
+      - name: Clone GitOps repo
+        run: |
+          git clone https://x-access-token:${{ secrets.HOMELABITTY_TOKEN }}@github.com/lucas-dclrcq/homelabitty.git
+
+      - name: Update production image tag
+        run: |
+          yq -i '.spec.values.controllers.main.containers.main.image.tag = "${{ needs.build.outputs.version }}"' \
+            homelabitty/kubernetes/apps/sqq/sqq-vente-groupee/app/helmrelease.yaml
+
+      - name: Commit and push
+        run: |
+          cd homelabitty
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git diff --cached --quiet && echo "No changes to commit" && exit 0
+          git commit -m "chore(sqq): update image tag to ${{ needs.build.outputs.version }}"
+          git push
