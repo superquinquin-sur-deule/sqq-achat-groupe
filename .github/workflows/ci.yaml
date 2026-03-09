@@ -102,9 +102,9 @@ jobs:
         run: |
           git clone https://x-access-token:${{ secrets.HOMELABITTY_TOKEN }}@github.com/lucas-dclrcq/homelabitty.git
 
-      - name: Update staging image digest
+      - name: Update staging image tag
         run: |
-          yq -i '.spec.values.controllers.main.containers.main.image.digest = "${{ needs.build.outputs.latest-sha }}"' \
+          yq -i '.spec.values.controllers.main.containers.main.image.tag = "latest@${{ needs.build.outputs.latest-sha }}"' \
             homelabitty/kubernetes/apps/sqq/sqq-vente-groupee-staging/app/helmrelease.yaml
 
       - name: Commit and push
