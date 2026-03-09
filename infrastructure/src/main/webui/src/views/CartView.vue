@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useRoute, useRouter } from 'vue-router'
 import { useCartStore } from '@/stores/cartStore'
+import { useVenteExpiredRedirect } from '@/composables/useVenteExpiredRedirect'
 import CartSummary from '@/components/cart/CartSummary.vue'
 import Button from '@/components/ui/Button.vue'
 import Stepper from '@/components/ui/Stepper.vue'
@@ -9,6 +10,8 @@ const cartStore = useCartStore()
 const route = useRoute()
 const router = useRouter()
 const venteId = Number(route.params.venteId)
+
+useVenteExpiredRedirect(venteId)
 
 const steps = [
   { label: 'Panier' },

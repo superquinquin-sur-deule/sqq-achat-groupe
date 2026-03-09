@@ -4,6 +4,7 @@ import { useRoute } from 'vue-router'
 import { useToast } from '@/composables/useToast'
 import { useCartStore } from '@/stores/cartStore'
 import { useVenteQuery } from '@/composables/api/useVentesApi'
+import { useVenteExpiredRedirect } from '@/composables/useVenteExpiredRedirect'
 import { useVenteProductsQuery } from '@/composables/api/useProductsApi'
 import { useVenteTimeslotsQuery } from '@/composables/api/useTimeslotsApi'
 import type { ProductResponse } from '@/api/generated/model'
@@ -19,6 +20,8 @@ const toast = useToast()
 const cartStore = useCartStore()
 
 cartStore.setVenteId(venteId)
+
+useVenteExpiredRedirect(venteId)
 
 const { data: vente } = useVenteQuery(venteId)
 const venteClosed = computed(() => vente.value?.status === 'CLOSED')

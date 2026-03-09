@@ -5,6 +5,7 @@ import { useCartStore } from '@/stores/cartStore'
 import { useCheckoutStore } from '@/stores/checkoutStore'
 import { useToast } from '@/composables/useToast'
 import { useVenteTimeslotsQuery } from '@/composables/api/useTimeslotsApi'
+import { useVenteExpiredRedirect } from '@/composables/useVenteExpiredRedirect'
 import { ApiError } from '@/api/mutator/custom-fetch'
 import Stepper from '@/components/ui/Stepper.vue'
 import CheckoutForm from '@/components/checkout/CheckoutForm.vue'
@@ -17,6 +18,8 @@ const cartStore = useCartStore()
 const checkoutStore = useCheckoutStore()
 const toast = useToast()
 const venteId = Number(route.params.venteId)
+
+useVenteExpiredRedirect(venteId)
 
 const { data: timeSlots, isLoading: isLoadingTimeSlots } = useVenteTimeslotsQuery(venteId)
 
