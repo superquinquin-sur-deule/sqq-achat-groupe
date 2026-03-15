@@ -74,6 +74,13 @@ public class Order {
         this.status = OrderStatus.CANCELLED;
     }
 
+    public void reactivateAfterPayment() {
+        if (this.status != OrderStatus.CANCELLED) {
+            throw new IllegalStateException("Seule une commande annulée peut être réactivée après paiement");
+        }
+        this.status = OrderStatus.PAID;
+    }
+
     public void cancelDueToShortage() {
         if (this.status != OrderStatus.PAID) {
             throw new IllegalStateException("Seule une commande payée peut être annulée pour rupture");

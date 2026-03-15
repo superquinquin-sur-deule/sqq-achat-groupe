@@ -5,6 +5,8 @@ import com.microsoft.playwright.Page;
 import com.microsoft.playwright.options.WaitForSelectorState;
 import fr.sqq.achatgroupe.acceptance.support.FakePaymentGateway;
 import fr.sqq.achatgroupe.acceptance.support.TestContext;
+import fr.sqq.achatgroupe.application.command.CancelOrderCommand;
+import fr.sqq.mediator.Mediator;
 import io.cucumber.java.Before;
 import io.cucumber.java.fr.Alors;
 import io.cucumber.java.fr.Et;
@@ -25,11 +27,19 @@ public class PaymentSteps {
     @Inject
     TestContext testContext;
 
+    @Inject
+    Mediator mediator;
+
     private Response apiResponse;
     private String createdOrderId;
 
     @Before("@payment")
     public void setUp() {
+        FakePaymentGateway.reset();
+    }
+
+    @Before("@payment-race-condition")
+    public void setUpRaceCondition() {
         FakePaymentGateway.reset();
     }
 
@@ -137,6 +147,11 @@ public class PaymentSteps {
     @Étantdonnéque("une commande en attente de paiement existe")
     public void uneCommandeEnAttenteExiste() {
         createOrderViaBrowser();
+    }
+
+    @Et("la commande a été annulée entre-temps")
+    public void laCommandeAEteAnnuleeEntreTemps() {
+        mediator.send(new CancelOrderCommand(java.util.UUID.fromString(createdOrderId)));
     }
 
     @Étantdonnéque("une commande a déjà été payée")
