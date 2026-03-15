@@ -24,6 +24,8 @@ const quantity = computed(() => cartStore.getItemQuantity(props.product.id))
 
 const isInCart = computed(() => quantity.value > 0)
 
+const isMaxQuantity = computed(() => quantity.value >= props.product.stock)
+
 const formattedPrice = computed(() =>
   new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(
     props.product.prixTtc,
@@ -39,13 +41,15 @@ const productCardVariants = cva('', {
 })
 
 function handleAdd() {
-  if (!isExhausted.value) {
+  if (!isExhausted.value && !isMaxQuantity.value) {
     emit('add', props.product)
   }
 }
 
 function increase() {
-  cartStore.updateQuantity(props.product.id, quantity.value + 1)
+  if (!isMaxQuantity.value) {
+    cartStore.updateQuantity(props.product.id, quantity.value + 1)
+  }
 }
 
 function decrease() {
@@ -61,7 +65,7 @@ function onQuantityInput(event: Event) {
   if (!value || value < 1) {
     cartStore.removeItem(props.product.id)
   } else {
-    cartStore.updateQuantity(props.product.id, value)
+    cartStore.updateQuantity(props.product.id, Math.min(value, props.product.stock))
   }
 }
 </script>
@@ -156,6 +160,7 @@ function onQuantityInput(event: Event) {
             data-testid="item-quantity"
             :value="quantity"
             min="1"
+            :max="product.stock"
             class="min-h-[44px] w-14 appearance-none rounded-lg border-2 border-dark bg-white text-center text-base font-semibold text-dark [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none [-moz-appearance:textfield] focus:outline-2 focus:outline-offset-2 focus:outline-dark"
             :aria-label="`Quantité de ${product.name}`"
             @change="onQuantityInput"
@@ -166,6 +171,7 @@ function onQuantityInput(event: Event) {
             data-testid="increase-quantity"
             variant="secondary"
             size="icon"
+            :disabled="isMaxQuantity"
             :aria-label="`Augmenter la quantité de ${product.name}`"
             @click="increase"
           >

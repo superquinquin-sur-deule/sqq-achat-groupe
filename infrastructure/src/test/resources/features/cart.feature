@@ -76,6 +76,14 @@ Fonctionnalité: Panier d'achat
     Et je clique sur "Continuer mes achats"
     Alors je suis redirigé vers le catalogue
 
+  Scénario: La quantité ne peut pas dépasser le stock disponible
+    Étant donné qu'une vente existe avec un produit ayant un stock de 2
+    Quand je navigue vers la page d'accueil
+    Et je clique sur "Ajouter" pour le premier produit disponible
+    Et j'augmente la quantité du produit depuis le catalogue
+    Alors le sélecteur affiche la quantité 2
+    Et le bouton "+" du premier produit est désactivé
+
   Scénario: Panier vide avec message et lien vers le catalogue
     Étant donné qu'une vente existe avec des produits et des créneaux
     Quand je navigue vers la page panier

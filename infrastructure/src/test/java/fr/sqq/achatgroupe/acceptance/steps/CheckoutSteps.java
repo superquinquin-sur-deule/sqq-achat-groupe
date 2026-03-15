@@ -109,17 +109,16 @@ public class CheckoutSteps {
     public void jAiUnProduitEnQuantiteSuperieureAuStock() {
         navigateToHome();
         addFirstProductToCart();
-        PlaywrightHooks.page().locator("a[aria-label='Panier']").click();
-        PlaywrightHooks.page().waitForURL("**/cart");
-        PlaywrightHooks.page().waitForSelector("[data-testid='cart-item']", new Page.WaitForSelectorOptions()
+        // Override cart quantity via localStorage to exceed stock (UI now prevents this)
+        PlaywrightHooks.page().evaluate("""
+                const cart = JSON.parse(localStorage.getItem('cart'));
+                cart.items[0].quantity = cart.items[0].stock + 10;
+                localStorage.setItem('cart', JSON.stringify(cart));
+                """);
+        PlaywrightHooks.page().reload();
+        PlaywrightHooks.page().waitForSelector("[data-testid='product-card']", new Page.WaitForSelectorOptions()
                 .setState(WaitForSelectorState.VISIBLE)
-                .setTimeout(5000));
-        Locator cartItem = PlaywrightHooks.page().locator("[data-testid='cart-item']").first();
-        Locator increaseButton = cartItem.locator("[data-testid='increase-quantity']");
-        // Increase quantity many times to exceed stock
-        for (int i = 0; i < 100; i++) {
-            increaseButton.click();
-        }
+                .setTimeout(15000));
     }
 
     @Et("mon panier est vide")

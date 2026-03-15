@@ -340,6 +340,13 @@ public class CartSteps {
         assertTrue(text.contains("Découvrir nos produits"), "Le bouton doit contenir 'Découvrir nos produits'");
     }
 
+    @Alors("le bouton \"+\" du premier produit est désactivé")
+    public void leBoutonPlusDuPremierProduitEstDesactive() {
+        Locator firstCard = PlaywrightHooks.page().locator("[data-testid='product-card']:not([data-exhausted='true'])").first();
+        Locator increaseButton = firstCard.locator("[data-testid='increase-quantity']");
+        assertTrue(increaseButton.isDisabled(), "Le bouton '+' doit être désactivé quand le stock max est atteint");
+    }
+
     @Alors("je suis redirigé vers le catalogue")
     public void jeSuisRedirigeVersLeCatalogue() {
         PlaywrightHooks.page().waitForSelector("[data-testid='product-card']", new Page.WaitForSelectorOptions()

@@ -24,6 +24,11 @@ public class VenteSteps {
         createVente();
     }
 
+    @Étantdonnéque("une vente existe avec un produit ayant un stock de {int}")
+    public void uneVenteExisteAvecUnProduitAyantUnStockDe(int stock) {
+        createVenteWithLimitedStock(stock);
+    }
+
     @Étantdonnéque("une vente sans commande existe")
     public void uneVenteSansCommandeExiste() {
         Instant startDate = Instant.now().minus(1, ChronoUnit.DAYS);
@@ -48,6 +53,66 @@ public class VenteSteps {
                 .getLong("data.id");
 
         testContext.setEmptyVenteId(emptyVenteId);
+    }
+
+    private void createVenteWithLimitedStock(int stock) {
+        LocalDate futureDate = LocalDate.now().plusDays(30);
+        Instant startDate = Instant.now().minus(1, ChronoUnit.DAYS);
+        Instant endDate = Instant.now().plus(60, ChronoUnit.DAYS);
+
+        Long venteId = RestAssured.given()
+                .contentType(ContentType.JSON)
+                .body("""
+                        {"name": "Vente Stock Limité %d", "description": "Test stock limité", "startDate": "%s", "endDate": "%s"}
+                        """.formatted(System.nanoTime(), startDate, endDate))
+                .when()
+                .post("/api/admin/ventes")
+                .then()
+                .statusCode(201)
+                .extract()
+                .jsonPath()
+                .getLong("data.id");
+
+        testContext.setVenteId(venteId);
+
+        Long productId = RestAssured.given()
+                .contentType(ContentType.JSON)
+                .body("""
+                        {"name": "Produit stock limité", "description": "Produit avec stock limité pour test", "prixHt": 5.00, "tauxTva": 5.50, "supplier": "Fournisseur Test", "stock": %d, "reference": "TST-001", "category": "Test", "brand": "Test Brand"}
+                        """.formatted(stock))
+                .when()
+                .post("/api/admin/ventes/" + venteId + "/products")
+                .then()
+                .statusCode(200)
+                .extract()
+                .jsonPath()
+                .getLong("data.id");
+
+        testContext.setProductIds(List.of(productId));
+
+        String timeSlotBody = """
+                {"date": "%s", "startTime": "10:00", "endTime": "11:00", "capacity": 30}
+                """.formatted(futureDate);
+
+        Long timeSlotId = RestAssured.given()
+                .contentType(ContentType.JSON)
+                .body(timeSlotBody)
+                .when()
+                .post("/api/admin/ventes/" + venteId + "/timeslots")
+                .then()
+                .statusCode(200)
+                .extract()
+                .jsonPath()
+                .getLong("data.id");
+
+        testContext.setTimeSlotIds(List.of(timeSlotId));
+
+        RestAssured.given()
+                .contentType(ContentType.JSON)
+                .when()
+                .put("/api/admin/ventes/" + venteId + "/activate")
+                .then()
+                .statusCode(200);
     }
 
     private void createVente() {

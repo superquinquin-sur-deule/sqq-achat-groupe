@@ -21,9 +21,12 @@ const formattedPrice = computed(() =>
 )
 
 const isMinQuantity = computed(() => props.item.quantity <= 1)
+const isMaxQuantity = computed(() => props.item.quantity >= props.item.stock)
 
 function increase() {
-  cartStore.updateQuantity(props.item.productId, props.item.quantity + 1)
+  if (!isMaxQuantity.value) {
+    cartStore.updateQuantity(props.item.productId, props.item.quantity + 1)
+  }
 }
 
 function decrease() {
@@ -85,6 +88,7 @@ function remove() {
         data-testid="increase-quantity"
         variant="secondary"
         size="icon"
+        :disabled="isMaxQuantity"
         :aria-label="`Augmenter la quantité de ${item.name}`"
         @click="increase"
       >
