@@ -26,10 +26,11 @@ useVenteExpiredRedirect(venteId)
 const { data: vente } = useVenteQuery(venteId)
 const venteClosed = computed(() => vente.value?.status === 'CLOSED')
 
-const { data: products, isLoading: loading } = useVenteProductsQuery(
-  venteId,
-  computed(() => !venteClosed.value),
-)
+const {
+  data: products,
+  isLoading: loading,
+  isFetchingNextPage,
+} = useVenteProductsQuery(venteId, computed(() => !venteClosed.value))
 
 const { data: timeSlots, isLoading: timeSlotsLoading } = useVenteTimeslotsQuery(venteId)
 
@@ -73,6 +74,9 @@ function handleAddToCart(product: ProductResponse) {
       />
       <div class="py-8">
         <ProductGrid :products="products ?? []" :loading="loading" @add="handleAddToCart" />
+        <p v-if="isFetchingNextPage" class="py-4 text-center text-sm text-brown">
+          Chargement des produits…
+        </p>
       </div>
     </template>
   </section>

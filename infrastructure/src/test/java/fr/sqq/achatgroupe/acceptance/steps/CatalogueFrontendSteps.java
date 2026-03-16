@@ -52,7 +52,7 @@ public class CatalogueFrontendSteps {
     public void laPageEstEnCoursDeChargement() {
         // Delay API response in background thread to keep skeleton screens visible
         // without blocking the Playwright message processing thread
-        PlaywrightHooks.page().route("**/api/ventes/*/products", route -> {
+        PlaywrightHooks.page().route("**/api/ventes/*/products*", route -> {
             new Thread(() -> {
                 try { Thread.sleep(2000); } catch (InterruptedException ignored) {}
                 route.resume();
