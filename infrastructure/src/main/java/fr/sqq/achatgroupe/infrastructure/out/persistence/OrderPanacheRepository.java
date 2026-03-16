@@ -43,6 +43,7 @@ public class OrderPanacheRepository implements OrderRepository, PanacheRepositor
         }
 
         existing.setStatus(order.status().name());
+        existing.setCancellationReason(order.cancellationReason());
         for (OrderItemEntity itemEntity : existing.getItems()) {
             order.items().stream()
                     .filter(i -> i.id() != null && i.id().equals(itemEntity.getId()))
@@ -101,6 +102,15 @@ public class OrderPanacheRepository implements OrderRepository, PanacheRepositor
 
     @Override
     public CursorPage<Order> findPaidByVenteId(Long venteId, CursorPageRequest pageRequest, String searchName, Long timeSlotId) {
+        return findByVenteIdWithStatuses(venteId, pageRequest, searchName, timeSlotId, List.of("PAID", "PICKED_UP"));
+    }
+
+    @Override
+    public CursorPage<Order> findByVenteId(Long venteId, CursorPageRequest pageRequest, String searchName, Long timeSlotId) {
+        return findByVenteIdWithStatuses(venteId, pageRequest, searchName, timeSlotId, List.of("PAID", "PICKED_UP", "CANCELLED"));
+    }
+
+    private CursorPage<Order> findByVenteIdWithStatuses(Long venteId, CursorPageRequest pageRequest, String searchName, Long timeSlotId, List<String> statuses) {
         var conditions = new ArrayList<String>();
         var params = new HashMap<String, Object>();
 
@@ -108,7 +118,7 @@ public class OrderPanacheRepository implements OrderRepository, PanacheRepositor
         params.put("venteId", venteId);
 
         conditions.add("status IN :statuses");
-        params.put("statuses", List.of("PAID", "PICKED_UP"));
+        params.put("statuses", statuses);
 
         if (searchName != null && !searchName.isBlank()) {
             conditions.add("(LOWER(customerFirstName) LIKE :searchName OR LOWER(customerLastName) LIKE :searchName)");

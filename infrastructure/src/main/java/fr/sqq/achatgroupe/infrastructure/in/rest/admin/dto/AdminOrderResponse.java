@@ -13,5 +13,6 @@ public record AdminOrderResponse(
         String timeSlotLabel,
         BigDecimal totalAmount,
         String status,
-        Instant createdAt
+        Instant createdAt,
+        String cancellationReason
 ) {}

@@ -57,6 +57,9 @@ public class OrderEntity {
     @Column(name = "idempotency_key", unique = true)
     private String idempotencyKey;
 
+    @Column(name = "cancellation_reason")
+    private String cancellationReason;
+
     @Version
     @Column(name = "version")
     private int version;
@@ -109,6 +112,9 @@ public class OrderEntity {
 
     public String getIdempotencyKey() { return idempotencyKey; }
     public void setIdempotencyKey(String idempotencyKey) { this.idempotencyKey = idempotencyKey; }
+
+    public String getCancellationReason() { return cancellationReason; }
+    public void setCancellationReason(String cancellationReason) { this.cancellationReason = cancellationReason; }
 
     public List<OrderItemEntity> getItems() { return items; }
     public void setItems(List<OrderItemEntity> items) { this.items = items; }

@@ -31,7 +31,8 @@ public interface AdminOrderRestMapper {
                 timeSlotLabel,
                 order.totalAmount().amount(),
                 order.status().name(),
-                order.createdAt()
+                order.createdAt(),
+                order.cancellationReason()
         );
     }
 

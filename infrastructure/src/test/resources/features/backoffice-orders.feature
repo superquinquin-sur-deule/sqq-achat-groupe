@@ -7,9 +7,10 @@ Fonctionnalité: Liste des commandes back-office
   Contexte:
     Étant donné qu'une vente existe avec des produits et des créneaux
     Et les commandes suivantes existent
-      | prénom | nom    | email            | téléphone  | créneau | produits | statut |
-      | Marie  | Dupont | marie@exemple.fr | 0612345678 | 0       | 0:2      | PAID   |
-      | Jean   | Martin | jean@exemple.fr  | 0698765432 | 1       | 0:1      | PAID   |
+      | prénom | nom    | email            | téléphone  | créneau | produits | statut    | raison              |
+      | Marie  | Dupont | marie@exemple.fr | 0612345678 | 0       | 0:2      | PAID      |                     |
+      | Jean   | Martin | jean@exemple.fr  | 0698765432 | 1       | 0:1      | PAID      |                     |
+      | Paul   | Durand | paul@exemple.fr  | 0611223344 | 0       | 0:1      | CANCELLED | Commande abandonnée |
 
   Scénario: Affichage de la sidenav d'administration unifiée avec sélecteur de vente
     Quand je navigue vers la page backoffice commandes
@@ -40,6 +41,11 @@ Fonctionnalité: Liste des commandes back-office
     Quand je navigue vers la page backoffice commandes
     Et je sélectionne un créneau dans le filtre backoffice
     Alors seules les commandes de ce créneau sont affichées
+
+  Scénario: Affichage des commandes annulées avec raison d'annulation
+    Quand je navigue vers la page backoffice commandes
+    Alors je vois le tableau des commandes backoffice
+    Et je vois une commande annulée avec sa raison d'annulation
 
   Scénario: Détail d'une commande
     Quand je navigue vers la page backoffice commandes

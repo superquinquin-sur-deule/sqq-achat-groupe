@@ -89,8 +89,8 @@ public class BackofficeOrderSteps {
         assertTrue(cells.nth(5).textContent().contains("€"), "Le montant doit contenir '€'");
         // Colonne 7 : statut
         String statusText = cells.nth(6).textContent();
-        assertTrue(statusText.contains("Payé") || statusText.contains("Récupéré"),
-                "Le statut doit être 'Payé' ou 'Récupéré', got: " + statusText);
+        assertTrue(statusText.contains("Payé") || statusText.contains("Récupéré") || statusText.contains("Annulé"),
+                "Le statut doit être 'Payé', 'Récupéré' ou 'Annulé', got: " + statusText);
     }
 
     @Et("les badges de statut sont colorés correctement")
@@ -99,8 +99,26 @@ public class BackofficeOrderSteps {
         assertTrue(badges.count() > 0, "Il doit y avoir des badges de statut");
         Locator firstBadge = badges.first();
         String text = firstBadge.textContent();
-        assertTrue(text.contains("Payé") || text.contains("Récupéré"),
-                "Le badge doit afficher 'Payé' ou 'Récupéré', got: " + text);
+        assertTrue(text.contains("Payé") || text.contains("Récupéré") || text.contains("Annulé"),
+                "Le badge doit afficher 'Payé', 'Récupéré' ou 'Annulé', got: " + text);
+    }
+
+    @Et("je vois une commande annulée avec sa raison d'annulation")
+    public void jeVoisUneCommandeAnnuleeAvecSaRaisonDAnnulation() {
+        Locator rows = page().locator("[data-testid='backoffice-order-row']");
+        boolean foundCancelled = false;
+        for (int i = 0; i < rows.count(); i++) {
+            Locator statusCell = rows.nth(i).locator("[data-testid='backoffice-order-status']");
+            if (statusCell.textContent().contains("Annulé")) {
+                foundCancelled = true;
+                Locator icon = rows.nth(i).locator("[data-testid='cancellation-reason-icon']");
+                assertTrue(icon.isVisible(), "L'icône de raison d'annulation doit être visible");
+                String title = icon.locator("title").textContent();
+                assertFalse(title.isBlank(), "La raison d'annulation ne doit pas être vide");
+                break;
+            }
+        }
+        assertTrue(foundCancelled, "Il doit y avoir au moins une commande annulée");
     }
 
     @Et("je saisis {string} dans le champ de recherche backoffice")
@@ -146,8 +164,20 @@ public class BackofficeOrderSteps {
 
     @Et("je clique sur une commande dans la liste backoffice")
     public void jeCliqueSurUneCommandeDansLaListe() {
-        Locator firstRow = page().locator("[data-testid='backoffice-order-row']").first();
-        firstRow.locator("a").first().click();
+        // Find a paid order row (not cancelled) to click on for detail view
+        Locator rows = page().locator("[data-testid='backoffice-order-row']");
+        Locator targetRow = null;
+        for (int i = 0; i < rows.count(); i++) {
+            String statusText = rows.nth(i).locator("[data-testid='backoffice-order-status']").textContent();
+            if (statusText.contains("Payé") || statusText.contains("Récupéré")) {
+                targetRow = rows.nth(i);
+                break;
+            }
+        }
+        if (targetRow == null) {
+            targetRow = rows.first();
+        }
+        targetRow.locator("a").first().click();
         page().waitForSelector("[data-testid='order-detail-customer']", new Page.WaitForSelectorOptions()
                 .setState(WaitForSelectorState.VISIBLE)
                 .setTimeout(10000));

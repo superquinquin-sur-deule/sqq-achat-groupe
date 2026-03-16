@@ -82,7 +82,7 @@ const timeSlots = computed(() => timeslotsPageData.value?.data ?? [])
 
     <EmptyState
       v-else-if="!orders || orders.length === 0"
-      message="Aucune commande payée pour cette vente."
+      message="Aucune commande pour cette vente."
     />
 
     <AdminTable
@@ -117,13 +117,30 @@ const timeSlots = computed(() => timeslotsPageData.value?.data ?? [])
           {{ formatPrice(order.totalAmount) }}
         </td>
         <td class="border-t border-gray-100 px-4 py-3" data-testid="backoffice-order-status">
-          <span
-            :class="[
-              'inline-block rounded-full px-2 py-0.5 text-xs font-medium',
-              statusClasses(order.status),
-            ]"
-          >
-            {{ statusLabel(order.status) }}
+          <span class="inline-flex items-center gap-1">
+            <span
+              :class="[
+                'inline-block rounded-full px-2 py-0.5 text-xs font-medium',
+                statusClasses(order.status),
+              ]"
+            >
+              {{ statusLabel(order.status) }}
+            </span>
+            <svg
+              v-if="order.status === 'CANCELLED' && order.cancellationReason"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+              class="h-4 w-4 text-gray-400"
+              data-testid="cancellation-reason-icon"
+            >
+              <title>{{ order.cancellationReason }}</title>
+              <path
+                fill-rule="evenodd"
+                d="M18 10a8 8 0 1 1-16 0 8 8 0 0 1 16 0Zm-7-4a1 1 0 1 0-2 0v4a1 1 0 0 0 2 0V6Zm-1 8a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z"
+                clip-rule="evenodd"
+              />
+            </svg>
           </span>
         </td>
       </tr>

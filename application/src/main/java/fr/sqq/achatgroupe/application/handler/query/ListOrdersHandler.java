@@ -20,6 +20,6 @@ public class ListOrdersHandler implements QueryHandler<ListOrdersQuery, CursorPa
     @Override
     @Transactional
     public CursorPage<Order> handle(ListOrdersQuery query) {
-        return orderRepository.findPaidByVenteId(query.venteId(), query.pageRequest(), query.searchName(), query.timeSlotId());
+        return orderRepository.findByVenteId(query.venteId(), query.pageRequest(), query.searchName(), query.timeSlotId());
     }
 }

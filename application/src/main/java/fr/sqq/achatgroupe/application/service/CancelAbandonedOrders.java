@@ -42,7 +42,7 @@ public class CancelAbandonedOrders {
 
         for (Order order : abandonedOrders) {
             try {
-                mediator.send(new CancelOrderCommand(order.id()));
+                mediator.send(new CancelOrderCommand(order.id(), "Commande abandonnée"));
             } catch (Exception e) {
                 LOG.errorf(e, "Erreur lors de l'annulation de la commande abandonnée %d", order.id());
             }

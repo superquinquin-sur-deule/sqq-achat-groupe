@@ -19,10 +19,11 @@ public class Order {
     private final Money totalAmount;
     private final Instant createdAt;
     private final String idempotencyKey;
+    private String cancellationReason;
 
     public Order(UUID id, Long venteId, OrderNumber orderNumber, CustomerInfo customer, Long timeSlotId,
                  List<OrderItem> items, OrderStatus status, Money totalAmount, Instant createdAt,
-                 String idempotencyKey) {
+                 String idempotencyKey, String cancellationReason) {
         if (orderNumber == null) throw new IllegalArgumentException("Order number must not be null");
         if (customer == null) throw new IllegalArgumentException("Customer must not be null");
         if (items == null || items.isEmpty()) throw new IllegalArgumentException("Items must not be empty");
@@ -39,6 +40,7 @@ public class Order {
         this.totalAmount = totalAmount;
         this.createdAt = createdAt;
         this.idempotencyKey = idempotencyKey;
+        this.cancellationReason = cancellationReason;
     }
 
     public static Order create(Long venteId, OrderNumber number, CustomerInfo customer, Long timeSlotId, List<OrderItem> items,
@@ -50,7 +52,7 @@ public class Order {
         Money total = items.stream()
                 .map(OrderItem::subtotal)
                 .reduce(Money.ZERO, Money::add);
-        return new Order(UUID.randomUUID(), venteId, number, customer, timeSlotId, items, OrderStatus.PENDING, total, Instant.now(), idempotencyKey);
+        return new Order(UUID.randomUUID(), venteId, number, customer, timeSlotId, items, OrderStatus.PENDING, total, Instant.now(), idempotencyKey, null);
     }
 
     public void markAsPaid() {
@@ -67,11 +69,12 @@ public class Order {
         this.status = OrderStatus.PICKED_UP;
     }
 
-    public void cancel() {
+    public void cancel(String reason) {
         if (this.status == OrderStatus.PAID || this.status == OrderStatus.PICKED_UP) {
             throw new IllegalStateException("Impossible d'annuler une commande en statut " + this.status);
         }
         this.status = OrderStatus.CANCELLED;
+        this.cancellationReason = reason;
     }
 
     public void reactivateAfterPayment() {
@@ -79,6 +82,7 @@ public class Order {
             throw new IllegalStateException("Seule une commande annulée peut être réactivée après paiement");
         }
         this.status = OrderStatus.PAID;
+        this.cancellationReason = null;
     }
 
     public void cancelDueToShortage() {
@@ -89,6 +93,7 @@ public class Order {
             throw new IllegalStateException("Seule une commande entièrement annulée peut être marquée annulée");
         }
         this.status = OrderStatus.CANCELLED;
+        this.cancellationReason = "Rupture de stock";
     }
 
     public Money effectiveTotalAmount() {
@@ -119,4 +124,5 @@ public class Order {
     public Money totalAmount() { return totalAmount; }
     public Instant createdAt() { return createdAt; }
     public String idempotencyKey() { return idempotencyKey; }
+    public String cancellationReason() { return cancellationReason; }
 }

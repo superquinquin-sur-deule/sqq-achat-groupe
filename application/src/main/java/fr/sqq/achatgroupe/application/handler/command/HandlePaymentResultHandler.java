@@ -86,7 +86,7 @@ public class HandlePaymentResultHandler implements CommandHandler<HandlePaymentR
                     order.id(), payment.attempts(), maxPaymentAttempts);
 
             if (payment.attempts() >= maxPaymentAttempts) {
-                mediator.send(new CancelOrderCommand(order.id()));
+                mediator.send(new CancelOrderCommand(order.id(), "Paiement échoué"));
                 Log.infof("Commande %s annulée après %d tentatives de paiement échouées",
                         order.id(), maxPaymentAttempts);
             }

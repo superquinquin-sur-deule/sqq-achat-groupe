@@ -23,7 +23,7 @@ public class GetOrderDetailsHandler implements QueryHandler<GetOrderDetailsQuery
     public Order handle(GetOrderDetailsQuery query) {
         Order order = orderRepository.findOrderByIdAndVenteId(query.orderId(), query.venteId())
                 .orElseThrow(() -> new OrderNotFoundException(query.orderId()));
-        if (order.status() != OrderStatus.PAID && order.status() != OrderStatus.PICKED_UP) {
+        if (order.status() != OrderStatus.PAID && order.status() != OrderStatus.PICKED_UP && order.status() != OrderStatus.CANCELLED) {
             throw new OrderNotFoundException(query.orderId());
         }
         return order;

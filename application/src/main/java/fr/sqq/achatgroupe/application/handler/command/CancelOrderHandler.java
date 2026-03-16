@@ -49,7 +49,7 @@ public class CancelOrderHandler implements CommandHandler<CancelOrderCommand, Vo
 
         orderStockService.releaseStock(order);
 
-        order.cancel();
+        order.cancel(command.reason());
         orderRepository.save(order);
 
         Log.infof("Commande %s annulée — stocks restaurés, créneau libéré", command.orderId());

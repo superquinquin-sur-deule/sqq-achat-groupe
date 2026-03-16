@@ -35,6 +35,8 @@ public interface OrderRepository {
 
     CursorPage<Order> findPaidByVenteId(Long venteId, CursorPageRequest pageRequest, String searchName, Long timeSlotId);
 
+    CursorPage<Order> findByVenteId(Long venteId, CursorPageRequest pageRequest, String searchName, Long timeSlotId);
+
     List<ProductStats> findProductStats(Long venteId);
 
     record OrderAggregates(long totalOrders, Money totalAmount, long pickedUpCount) {}

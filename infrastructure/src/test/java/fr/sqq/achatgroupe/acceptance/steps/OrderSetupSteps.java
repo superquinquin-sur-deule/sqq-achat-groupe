@@ -54,6 +54,10 @@ public class OrderSetupSteps {
             if ("PICKED_UP".equals(statut)) {
                 order.markAsPickedUp();
             }
+            if ("CANCELLED".equals(statut)) {
+                String raison = row.get("raison");
+                order.cancel(raison);
+            }
 
             orderRepository.save(order);
         }
