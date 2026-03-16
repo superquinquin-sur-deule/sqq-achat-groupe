@@ -66,11 +66,30 @@ Fonctionnalité: Gestion des produits (CRUD admin)
     Et je soumets le formulaire produit vide
     Alors je vois des messages d'erreur de validation
 
-  Scénario: Modification produit bloquée quand la vente a des commandes
+  Scénario: Modification partielle autorisée quand la vente a des commandes
     Étant donné qu'une commande existe sur la vente via le navigateur
     Quand je navigue vers la page admin des produits
     Alors je vois le message d'avertissement commandes existantes
-    Et le bouton modifier n'est pas visible
+    Et le bouton modifier est visible
+    Et je clique sur le bouton modifier du premier produit
+    Alors les champs verrouillés sont désactivés
+    Et les champs description et stock sont activés
+
+  Scénario: Modification description réussie avec commandes existantes
+    Étant donné qu'une commande existe sur la vente via le navigateur
+    Quand je navigue vers la page admin des produits
+    Et je clique sur le bouton modifier du premier produit
+    Et je modifie la description du produit en "Nouvelle description"
+    Et je soumets le formulaire produit en modification
+    Alors je vois un toast de succès
+
+  Scénario: Réduction stock bloquée en dessous de la quantité commandée
+    Étant donné qu'une commande existe sur la vente via le navigateur
+    Quand je navigue vers la page admin des produits
+    Et je clique sur le bouton modifier du premier produit
+    Et je modifie le stock du produit en "0"
+    Et je soumets le formulaire produit en modification
+    Alors je vois un toast d'erreur
 
   Scénario: Désactivation produit autorisée quand la vente a des commandes
     Étant donné qu'une commande existe sur la vente via le navigateur

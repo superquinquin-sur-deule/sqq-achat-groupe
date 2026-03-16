@@ -248,11 +248,40 @@ public class AdminProductSteps {
         assertTrue(warning.isVisible(), "Le message d'avertissement commandes existantes doit être visible");
     }
 
-    @Alors("le bouton modifier n'est pas visible")
-    public void leBoutonModifierNEstPasVisible() {
+    @Alors("le bouton modifier est visible")
+    public void leBoutonModifierEstVisible() {
         Locator firstRow = page().locator("[data-testid='product-row']").first();
         Locator modifyBtn = firstRow.locator("button:has-text('Modifier')");
-        assertEquals(0, modifyBtn.count(), "Le bouton Modifier ne doit pas être visible quand des commandes existent");
+        assertTrue(modifyBtn.count() > 0, "Le bouton Modifier doit être visible quand des commandes existent");
+    }
+
+    @Alors("les champs verrouillés sont désactivés")
+    public void lesChampsVerrouillsSontDesactives() {
+        assertTrue(page().locator("#product-name").isDisabled(), "Le champ nom doit être désactivé");
+        assertTrue(page().locator("#product-reference").isDisabled(), "Le champ référence doit être désactivé");
+        assertTrue(page().locator("#product-category").isDisabled(), "Le champ catégorie doit être désactivé");
+        assertTrue(page().locator("#product-brand").isDisabled(), "Le champ marque doit être désactivé");
+        assertTrue(page().locator("#product-prix-ht").isDisabled(), "Le champ prix HT doit être désactivé");
+        assertTrue(page().locator("#product-taux-tva").isDisabled(), "Le champ TVA doit être désactivé");
+        assertTrue(page().locator("#product-supplier").isDisabled(), "Le champ fournisseur doit être désactivé");
+        assertTrue(page().locator("#product-colisage").isDisabled(), "Le champ colisage doit être désactivé");
+        assertTrue(page().locator("#product-stripe-tax-code").isDisabled(), "Le champ stripe tax code doit être désactivé");
+    }
+
+    @Et("les champs description et stock sont activés")
+    public void lesChampsDescriptionEtStockSontActives() {
+        assertFalse(page().locator("#product-description").isDisabled(), "Le champ description doit être activé");
+        assertFalse(page().locator("#product-stock").isDisabled(), "Le champ stock doit être activé");
+    }
+
+    @Et("je modifie la description du produit en {string}")
+    public void jeModifieLaDescriptionDuProduitEn(String description) {
+        page().locator("#product-description").fill(description);
+    }
+
+    @Et("je modifie le stock du produit en {string}")
+    public void jeModifieLeStockDuProduitEn(String stock) {
+        page().locator("#product-stock").fill(stock);
     }
 
     @Et("je clique sur le bouton désactiver du premier produit")

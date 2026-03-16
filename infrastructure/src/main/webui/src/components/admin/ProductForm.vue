@@ -11,6 +11,7 @@ import type { AdminProductResponse } from '@/api/generated/model'
 const props = defineProps<{
   product?: AdminProductResponse
   loading?: boolean
+  hasOrders?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -35,6 +36,7 @@ const emit = defineEmits<{
 }>()
 
 const isEdit = !!props.product
+const fieldsLocked = !!(props.hasOrders && isEdit)
 
 const schema = toTypedSchema(
   z.object({
@@ -217,6 +219,7 @@ const onSubmit = handleSubmit((values) => {
           label="Nom"
           type="text"
           :error="nameError ?? ''"
+          :disabled="fieldsLocked"
           required
           @blur="nameBlur"
         />
@@ -226,6 +229,7 @@ const onSubmit = handleSubmit((values) => {
           label="Référence"
           type="text"
           :error="referenceError ?? ''"
+          :disabled="fieldsLocked"
           required
           @blur="referenceBlur"
         />
@@ -237,6 +241,7 @@ const onSubmit = handleSubmit((values) => {
           label="Catégorie"
           type="text"
           :error="categoryError ?? ''"
+          :disabled="fieldsLocked"
           required
           @blur="categoryBlur"
         />
@@ -246,6 +251,7 @@ const onSubmit = handleSubmit((values) => {
           label="Marque"
           type="text"
           :error="brandError ?? ''"
+          :disabled="fieldsLocked"
           required
           @blur="brandBlur"
         />
@@ -316,6 +322,7 @@ const onSubmit = handleSubmit((values) => {
           step="0.01"
           min="0.01"
           :error="prixHtError ?? ''"
+          :disabled="fieldsLocked"
           required
           @blur="prixHtBlur"
         />
@@ -327,6 +334,7 @@ const onSubmit = handleSubmit((values) => {
           step="0.01"
           min="0"
           :error="tauxTvaError ?? ''"
+          :disabled="fieldsLocked"
           required
           @blur="tauxTvaBlur"
         />
@@ -357,6 +365,7 @@ const onSubmit = handleSubmit((values) => {
           label="Fournisseur"
           type="text"
           :error="supplierError ?? ''"
+          :disabled="fieldsLocked"
           required
           @blur="supplierBlur"
         />
@@ -368,6 +377,7 @@ const onSubmit = handleSubmit((values) => {
           min="1"
           step="1"
           :error="colisageError ?? ''"
+          :disabled="fieldsLocked"
           @blur="colisageBlur"
         />
         <Input
@@ -375,6 +385,7 @@ const onSubmit = handleSubmit((values) => {
           v-model="stripeTaxCode"
           label="Stripe Tax Code"
           type="text"
+          :disabled="fieldsLocked"
         />
       </div>
       <div class="mt-2 flex gap-2">

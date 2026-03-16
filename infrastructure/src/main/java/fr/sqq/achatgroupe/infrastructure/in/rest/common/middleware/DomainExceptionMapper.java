@@ -8,6 +8,7 @@ import fr.sqq.achatgroupe.domain.exception.PaymentAlreadySucceededException;
 import fr.sqq.achatgroupe.domain.exception.PaymentSessionCreationException;
 import fr.sqq.achatgroupe.domain.exception.PaymentWebhookException;
 import fr.sqq.achatgroupe.domain.exception.ProductModificationForbiddenException;
+import fr.sqq.achatgroupe.domain.exception.StockBelowOrderedQuantityException;
 import fr.sqq.achatgroupe.domain.exception.ProductNotFoundException;
 import fr.sqq.achatgroupe.domain.exception.TimeSlotFullException;
 import fr.sqq.achatgroupe.domain.exception.TimeSlotHasReservationsException;
@@ -56,6 +57,9 @@ public class DomainExceptionMapper implements ExceptionMapper<DomainException> {
         }
         if (e instanceof VenteHasOrdersException) {
             return buildResponse("https://api.sqq.fr/errors/vente-has-orders", "Vente avec commandes", 409, e.getMessage());
+        }
+        if (e instanceof StockBelowOrderedQuantityException) {
+            return buildResponse("https://api.sqq.fr/errors/stock-below-ordered", "Stock insuffisant", 409, e.getMessage());
         }
         if (e instanceof ProductModificationForbiddenException) {
             return buildResponse("https://api.sqq.fr/errors/product-modification-forbidden", "Modification interdite", 409, e.getMessage());

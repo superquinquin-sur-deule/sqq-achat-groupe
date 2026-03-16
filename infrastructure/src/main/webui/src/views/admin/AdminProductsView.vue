@@ -286,6 +286,7 @@ function formatPrice(price: number): string {
       v-if="showForm"
       :product="editingProduct"
       :loading="submitting"
+      :has-orders="hasOrders"
       class="mb-6"
       @submit="onSubmit"
       @cancel="closeForm"
@@ -295,8 +296,8 @@ function formatPrice(price: number): string {
       v-if="hasOrders"
       class="mb-4 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 text-sm text-blue-800"
     >
-      Cette vente contient des commandes. La modification et la suppression des produits sont
-      désactivées. Vous pouvez toujours activer ou désactiver un produit.
+      Cette vente contient des commandes. Certains champs (prix, nom, fournisseur…) ne sont pas
+      modifiables. Vous pouvez modifier la description, le stock et l'image.
     </div>
 
     <div v-if="loading" class="py-12 text-center text-brown">Chargement des produits...</div>
@@ -356,6 +357,14 @@ function formatPrice(price: number): string {
         <td class="px-4 py-3">
           <div class="flex gap-2">
             <template v-if="hasOrders">
+              <Button
+                variant="secondary"
+                size="md"
+                :aria-label="'Modifier ' + product.name"
+                @click="openEditForm(product)"
+              >
+                Modifier
+              </Button>
               <Button
                 :variant="product.active ? 'secondary' : 'primary'"
                 size="md"

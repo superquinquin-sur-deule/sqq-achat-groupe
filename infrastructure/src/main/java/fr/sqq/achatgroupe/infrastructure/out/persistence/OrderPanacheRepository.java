@@ -194,6 +194,17 @@ public class OrderPanacheRepository implements OrderRepository, PanacheRepositor
     }
 
     @Override
+    public List<ProductOrderedQuantity> findEffectiveOrderedQuantities(Long venteId) {
+        List<Object[]> rows = getEntityManager()
+                .createQuery("SELECT oi.productId, SUM(oi.quantity - oi.cancelledQuantity) FROM OrderItemEntity oi JOIN oi.order o WHERE o.venteId = ?1 AND o.status != 'CANCELLED' GROUP BY oi.productId", Object[].class)
+                .setParameter(1, venteId)
+                .getResultList();
+        return rows.stream()
+                .map(row -> new ProductOrderedQuantity((Long) row[0], ((Number) row[1]).longValue()))
+                .toList();
+    }
+
+    @Override
     public List<ProductStats> findProductStats(Long venteId) {
         List<Object[]> rows = getEntityManager()
                 .createQuery("SELECT oi.productId, SUM(oi.quantity), SUM(oi.unitPrice * oi.quantity) FROM OrderItemEntity oi JOIN oi.order o WHERE o.venteId = ?1 AND o.status IN ('PAID', 'PICKED_UP') GROUP BY oi.productId", Object[].class)

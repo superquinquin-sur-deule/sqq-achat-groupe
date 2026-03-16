@@ -52,4 +52,8 @@ public interface OrderRepository {
     void detachOrdersFromTimeSlot(Long timeSlotId);
 
     record DailyOrderCount(LocalDate date, long orderCount) {}
+
+    record ProductOrderedQuantity(Long productId, long effectiveQuantity) {}
+
+    List<ProductOrderedQuantity> findEffectiveOrderedQuantities(Long venteId);
 }
