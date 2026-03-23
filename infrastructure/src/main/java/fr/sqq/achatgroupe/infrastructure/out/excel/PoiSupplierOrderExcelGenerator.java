@@ -8,7 +8,6 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -17,7 +16,7 @@ public class PoiSupplierOrderExcelGenerator implements SupplierOrderExcelGenerat
 
     @Override
     public byte[] generate(List<SupplierOrderLine> lines) throws IOException {
-        Map<String, List<SupplierOrderLine>> bySupplier = new LinkedHashMap<>();
+        Map<String, List<SupplierOrderLine>> bySupplier = new java.util.TreeMap<>(String.CASE_INSENSITIVE_ORDER);
         for (SupplierOrderLine line : lines) {
             bySupplier.computeIfAbsent(line.supplier(), k -> new java.util.ArrayList<>()).add(line);
         }
@@ -29,7 +28,7 @@ public class PoiSupplierOrderExcelGenerator implements SupplierOrderExcelGenerat
             headerStyle.setFont(headerFont);
 
             for (Map.Entry<String, List<SupplierOrderLine>> entry : bySupplier.entrySet()) {
-                String sheetName = sanitizeSheetName(entry.getKey());
+                String sheetName = sanitizeSheetName(toTitleCase(entry.getKey()));
                 Sheet sheet = workbook.createSheet(sheetName);
 
                 sheet.setColumnWidth(0, 15 * 256);
@@ -63,6 +62,18 @@ public class PoiSupplierOrderExcelGenerator implements SupplierOrderExcelGenerat
             workbook.write(out);
             return out.toByteArray();
         }
+    }
+
+    private static String toTitleCase(String name) {
+        String[] words = name.toLowerCase().split("\\s+");
+        StringBuilder sb = new StringBuilder();
+        for (String word : words) {
+            if (!word.isEmpty()) {
+                if (sb.length() > 0) sb.append(' ');
+                sb.append(Character.toUpperCase(word.charAt(0))).append(word.substring(1));
+            }
+        }
+        return sb.toString();
     }
 
     private static String sanitizeSheetName(String name) {
