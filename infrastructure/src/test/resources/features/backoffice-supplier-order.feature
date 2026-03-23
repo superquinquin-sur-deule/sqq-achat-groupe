@@ -27,6 +27,12 @@ Fonctionnalité: Bon de commande fournisseur
     Et je clique sur exporter Excel du bon fournisseur
     Alors un fichier Excel bon fournisseur est téléchargé
 
+  Scénario: Une erreur serveur lors de l'export Excel affiche un message d'erreur
+    Quand je navigue vers la page bon fournisseur
+    Et l'export Excel retourne une erreur serveur
+    Et je clique sur exporter Excel du bon fournisseur sans attendre le téléchargement
+    Alors je vois un toast d'erreur "Erreur lors de l'export Excel"
+
   @backoffice-supplier-order-empty
   Scénario: Aucune commande — état vide
     Étant donné une vente sans commande existe

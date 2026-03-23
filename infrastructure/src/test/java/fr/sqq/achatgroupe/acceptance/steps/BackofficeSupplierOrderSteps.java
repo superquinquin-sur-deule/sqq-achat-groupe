@@ -139,4 +139,25 @@ public class BackofficeSupplierOrderSteps {
         assertTrue(empty.isVisible(), "L'état vide doit être visible");
         assertTrue(empty.textContent().contains(message), "Le message doit contenir '" + message + "'");
     }
+
+    @Et("l'export Excel retourne une erreur serveur")
+    public void lExportExcelRetourneUneErreurServeur() {
+        page().route("**/supplier-orders/xlsx", route -> route.fulfill(new Route.FulfillOptions()
+                .setStatus(500)
+                .setContentType("application/json")
+                .setBody("{\"error\":\"Internal Server Error\"}")));
+    }
+
+    @Et("je clique sur exporter Excel du bon fournisseur sans attendre le téléchargement")
+    public void jeCliqueSurExporterExcelSansAttendreLeTeleChargement() {
+        page().locator("[data-testid='supplier-order-export-btn']").click();
+    }
+
+    @Alors("je vois un toast d'erreur {string}")
+    public void jeVoisUnToastErreur(String message) {
+        Locator toast = page().locator("[role='alert']");
+        toast.waitFor(new Locator.WaitForOptions().setTimeout(5000));
+        assertTrue(toast.isVisible(), "Le toast d'erreur doit être visible");
+        assertTrue(toast.textContent().contains(message), "Le toast doit contenir '" + message + "'");
+    }
 }

@@ -4,9 +4,11 @@ import { useVenteStore } from '@/stores/venteStore'
 import { storeToRefs } from 'pinia'
 import { useAdminSupplierOrdersQuery } from '@/composables/api/useAdminSupplierOrdersApi'
 import EmptyState from '@/components/ui/EmptyState.vue'
+import { useToast } from '@/composables/useToast'
 
 const venteStore = useVenteStore()
 const { selectedVenteId } = storeToRefs(venteStore)
+const toast = useToast()
 
 const { data: lines, isLoading: loading } = useAdminSupplierOrdersQuery(selectedVenteId)
 
@@ -34,19 +36,27 @@ function handlePrint() {
 
 async function handleExportXls() {
   if (!selectedVenteId.value) return
-  const response = await fetch(`/api/admin/ventes/${selectedVenteId.value}/supplier-orders/xlsx`)
-  const blob = await response.blob()
-  const disposition = response.headers.get('Content-Disposition')
-  const match = disposition?.match(/filename="?(.+?)"?$/)
-  const filename = match?.[1] ?? `bon-fournisseur-${new Date().toISOString().slice(0, 10)}.xlsx`
-  const url = URL.createObjectURL(blob)
-  const link = document.createElement('a')
-  link.href = url
-  link.download = filename
-  document.body.appendChild(link)
-  link.click()
-  document.body.removeChild(link)
-  URL.revokeObjectURL(url)
+  try {
+    const response = await fetch(`/api/admin/ventes/${selectedVenteId.value}/supplier-orders/xlsx`)
+    if (!response.ok) {
+      toast.error("Erreur lors de l'export Excel")
+      return
+    }
+    const blob = await response.blob()
+    const disposition = response.headers.get('Content-Disposition')
+    const match = disposition?.match(/filename="?(.+?)"?$/)
+    const filename = match?.[1] ?? `bon-fournisseur-${new Date().toISOString().slice(0, 10)}.xlsx`
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = filename
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    URL.revokeObjectURL(url)
+  } catch {
+    toast.error("Erreur lors de l'export Excel")
+  }
 }
 </script>
 
