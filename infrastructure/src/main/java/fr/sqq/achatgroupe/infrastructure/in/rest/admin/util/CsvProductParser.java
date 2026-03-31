@@ -49,18 +49,37 @@ public class CsvProductParser {
 
             String line;
             int lineNumber = 2;
+            int recordStartLine = 2;
+            StringBuilder currentRecord = null;
             while ((line = reader.readLine()) != null) {
-                if (line.isBlank()) {
-                    lineNumber++;
-                    continue;
-                }
-                try {
-                    CsvProductRow row = parseLine(line, separator, columnIndex);
-                    rows.add(row);
-                } catch (CsvLineParseException e) {
-                    errors.add(new CsvParseError(lineNumber, e.getMessage()));
+                if (currentRecord != null) {
+                    currentRecord.append('\n').append(line);
+                    if (hasBalancedQuotes(currentRecord.toString())) {
+                        try {
+                            CsvProductRow row = parseLine(currentRecord.toString(), separator, columnIndex);
+                            rows.add(row);
+                        } catch (CsvLineParseException e) {
+                            errors.add(new CsvParseError(recordStartLine, e.getMessage()));
+                        }
+                        currentRecord = null;
+                    }
+                } else if (line.isBlank()) {
+                    // skip blank lines
+                } else if (!hasBalancedQuotes(line)) {
+                    currentRecord = new StringBuilder(line);
+                    recordStartLine = lineNumber;
+                } else {
+                    try {
+                        CsvProductRow row = parseLine(line, separator, columnIndex);
+                        rows.add(row);
+                    } catch (CsvLineParseException e) {
+                        errors.add(new CsvParseError(lineNumber, e.getMessage()));
+                    }
                 }
                 lineNumber++;
+            }
+            if (currentRecord != null) {
+                errors.add(new CsvParseError(recordStartLine, "Guillemets non fermés"));
             }
         } catch (IOException e) {
             return CsvParseResult.failure("Erreur de lecture du fichier CSV");
@@ -182,8 +201,40 @@ public class CsvProductParser {
         return values[idx];
     }
 
+    private boolean hasBalancedQuotes(String line) {
+        boolean inQuotes = false;
+        for (int i = 0; i < line.length(); i++) {
+            if (line.charAt(i) == '"') {
+                inQuotes = !inQuotes;
+            }
+        }
+        return !inQuotes;
+    }
+
     private String[] splitLine(String line, char separator) {
-        return line.split(String.valueOf(separator), -1);
+        List<String> fields = new ArrayList<>();
+        StringBuilder current = new StringBuilder();
+        boolean inQuotes = false;
+
+        for (int i = 0; i < line.length(); i++) {
+            char c = line.charAt(i);
+            if (c == '"') {
+                if (inQuotes && i + 1 < line.length() && line.charAt(i + 1) == '"') {
+                    current.append('"');
+                    i++;
+                } else {
+                    inQuotes = !inQuotes;
+                }
+            } else if (c == separator && !inQuotes) {
+                fields.add(current.toString());
+                current.setLength(0);
+            } else {
+                current.append(c);
+            }
+        }
+        fields.add(current.toString());
+
+        return fields.toArray(new String[0]);
     }
 
     public record CsvParseResult(

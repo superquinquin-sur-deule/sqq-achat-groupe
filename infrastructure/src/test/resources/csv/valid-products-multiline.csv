@@ -1,0 +1,6 @@
+nom,description,fournisseur,stock,reference fournisseur,categorie,marque,prix vente ttc,prix vente ht,tva,colisage,stripe tax code
+Farine de blé bio T65,Farine bio locale moulin artisanal,Moulin de la Lys,50,FAR-001,Epicerie,Moulin de la Lys,4.75,4.50,5.50,6,
+"Vin pétillant nature Bio","Notes citronnées et florales.
+effervescence légère avec des notes
+de poivre blanc.",Domaine Bio,10,VIN-001,Vins,Domaine Bio,7.89,6.58,20,6,
+Savon de Marseille,,La Savonnerie du Midi,100,SAV-001,Hygiène,La Savonnerie du Midi,3.84,3.20,20.00,12,

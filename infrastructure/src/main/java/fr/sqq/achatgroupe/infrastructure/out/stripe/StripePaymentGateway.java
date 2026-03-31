@@ -48,6 +48,7 @@ public class StripePaymentGateway implements PaymentGateway, PaymentCatalogGatew
     public PaymentSessionResult createCheckoutSession(Order order, String successUrl, String cancelUrl) {
         SessionCreateParams.Builder paramsBuilder = SessionCreateParams.builder()
                 .setMode(SessionCreateParams.Mode.PAYMENT)
+                .setAutomaticTax(SessionCreateParams.AutomaticTax.builder().setEnabled(true).build())
                 .setSuccessUrl(successUrl)
                 .setCancelUrl(cancelUrl)
                 .putMetadata("order_id", order.id().toString())

@@ -35,6 +35,14 @@ Fonctionnalité: Import en masse de produits (admin)
     Et je clique sur le bouton "Importer"
     Alors je vois un toast d'erreur d'import
 
+  Scénario: Import CSV avec descriptions multi-lignes entre guillemets
+    Quand je navigue vers la page admin produits
+    Et je clique sur "Importer des produits"
+    Et j'uploade le fichier CSV "csv/valid-products-multiline.csv"
+    Et je clique sur le bouton "Importer"
+    Alors je vois un toast de succès d'import
+    Et la liste des produits est rafraîchie
+
   Scénario: Import fichier au format non-CSV
     Quand je navigue vers la page admin produits
     Et je clique sur "Importer des produits"
