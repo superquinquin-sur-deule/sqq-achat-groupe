@@ -73,8 +73,23 @@ const slotDatesText = computed(() => {
       :style="{ backgroundImage: `url('/bg-pattern.png')` }"
     />
     <div class="relative mx-auto max-w-5xl px-4 py-8 md:py-12">
-      <div class="flex flex-col items-center">
-        <img src="/banner-title.svg" alt="Achats Groupés" class="w-full max-w-2xl" />
+      <div class="flex flex-col items-center text-center">
+        <!-- Titre en texte réel : éditable, sélectionnable et lu par les lecteurs d'écran
+             (l'ancien bandeau était une image dont le sous-titre n'apparaissait pas dans le alt). -->
+        <h1 class="-rotate-[3deg]">
+          <span
+            class="inline-block rounded-2xl bg-primary px-6 py-2 font-display text-4xl leading-tight tracking-wide text-brown sm:px-10 sm:py-3 sm:text-6xl md:text-7xl"
+          >
+            <!-- Le cadre reste un rectangle (simplement tourné) ; seules les lettres sont obliques. -->
+            <span class="inline-block" style="transform: skewX(-8deg)">PRÉ-COMMANDES</span>
+          </span>
+        </h1>
+        <p
+          class="mt-5 max-w-md -rotate-[3deg] text-balance text-lg text-brown sm:mt-6 sm:text-2xl"
+          data-testid="hero-subtitle"
+        >
+          Réserve tes produits SuperQuinquin
+        </p>
       </div>
 
       <div
@@ -90,7 +105,7 @@ const slotDatesText = computed(() => {
         <template v-if="!venteUsesTimeSlots">
           <p
             v-if="pickupRangeText"
-            class="mt-2 text-sm font-bold capitalize text-dark"
+            class="mt-2 text-sm font-bold text-dark first-letter:uppercase"
             data-testid="hero-pickup-range"
           >
             {{ pickupRangeText }}
@@ -102,7 +117,7 @@ const slotDatesText = computed(() => {
           Chargement des créneaux...
         </div>
         <template v-else-if="timeSlots.length > 0">
-          <p class="mt-2 text-sm font-bold capitalize text-dark">
+          <p class="mt-2 text-sm font-bold text-dark first-letter:uppercase">
             {{ slotDatesText }}
           </p>
           <p class="mt-1 text-sm text-dark">
