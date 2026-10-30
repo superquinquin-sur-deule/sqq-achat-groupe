@@ -196,7 +196,7 @@ public class BackofficePreparationSteps {
         String missingText = missingSection.first().textContent();
         assertTrue(missingText.contains("Produits manquants"),
                 "La section doit contenir le titre 'Produits manquants'");
-        assertTrue(missingText.contains("Un remboursement sera émis"),
-                "La section doit contenir le message de remboursement");
+        assertTrue(missingText.contains("déduit de la somme à régler en magasin"),
+                "La section doit contenir le message de déduction du montant à régler");
     }
 }

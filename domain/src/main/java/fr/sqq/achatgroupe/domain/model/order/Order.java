@@ -1,6 +1,5 @@
 package fr.sqq.achatgroupe.domain.model.order;
 
-import fr.sqq.achatgroupe.domain.exception.OrderAlreadyPaidException;
 import fr.sqq.achatgroupe.domain.model.shared.Money;
 
 import java.time.Instant;
@@ -52,42 +51,27 @@ public class Order {
         Money total = items.stream()
                 .map(OrderItem::subtotal)
                 .reduce(Money.ZERO, Money::add);
-        return new Order(UUID.randomUUID(), venteId, number, customer, timeSlotId, items, OrderStatus.PENDING, total, Instant.now(), idempotencyKey, null);
-    }
-
-    public void markAsPaid() {
-        if (this.status != OrderStatus.PENDING) {
-            throw new OrderAlreadyPaidException(this.id);
-        }
-        this.status = OrderStatus.PAID;
+        return new Order(UUID.randomUUID(), venteId, number, customer, timeSlotId, items, OrderStatus.CONFIRMED, total, Instant.now(), idempotencyKey, null);
     }
 
     public void markAsPickedUp() {
-        if (this.status != OrderStatus.PAID) {
-            throw new IllegalStateException("Seule une commande payée peut être marquée retirée");
+        if (this.status != OrderStatus.CONFIRMED) {
+            throw new IllegalStateException("Seule une commande confirmée peut être marquée retirée");
         }
         this.status = OrderStatus.PICKED_UP;
     }
 
     public void cancel(String reason) {
-        if (this.status == OrderStatus.PAID || this.status == OrderStatus.PICKED_UP) {
+        if (this.status == OrderStatus.PICKED_UP) {
             throw new IllegalStateException("Impossible d'annuler une commande en statut " + this.status);
         }
         this.status = OrderStatus.CANCELLED;
         this.cancellationReason = reason;
     }
 
-    public void reactivateAfterPayment() {
-        if (this.status != OrderStatus.CANCELLED) {
-            throw new IllegalStateException("Seule une commande annulée peut être réactivée après paiement");
-        }
-        this.status = OrderStatus.PAID;
-        this.cancellationReason = null;
-    }
-
     public void cancelDueToShortage() {
-        if (this.status != OrderStatus.PAID) {
-            throw new IllegalStateException("Seule une commande payée peut être annulée pour rupture");
+        if (this.status != OrderStatus.CONFIRMED) {
+            throw new IllegalStateException("Seule une commande confirmée peut être annulée pour rupture");
         }
         if (!isFullyCancelled()) {
             throw new IllegalStateException("Seule une commande entièrement annulée peut être marquée annulée");
@@ -102,7 +86,7 @@ public class Order {
                 .reduce(Money.ZERO, Money::add);
     }
 
-    public Money refundAmount() {
+    public Money adjustmentAmount() {
         return totalAmount.subtract(effectiveTotalAmount());
     }
 

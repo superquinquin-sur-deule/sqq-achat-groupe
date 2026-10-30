@@ -96,12 +96,12 @@ public class AdminProductSteps {
                 .setTimeout(10000));
         slots.first().click();
         page().locator("button:has-text('Continuer')").first().click();
-        page().waitForSelector("button:has-text('Payer ma commande')", new Page.WaitForSelectorOptions()
+        page().waitForSelector("button:has-text('Valider ma commande')", new Page.WaitForSelectorOptions()
                 .setState(WaitForSelectorState.VISIBLE)
                 .setTimeout(5000));
 
         // Click pay (creates the order server-side)
-        page().locator("button:has-text('Payer ma commande')").click();
+        page().locator("button:has-text('Valider ma commande')").click();
         page().waitForTimeout(3000);
     }
 
@@ -150,9 +150,6 @@ public class AdminProductSteps {
         page().locator("#product-reference").fill(values.get("référence"));
         page().locator("#product-category").fill(values.get("catégorie"));
         page().locator("#product-brand").fill(values.get("marque"));
-        if (values.containsKey("stripe tax code")) {
-            page().locator("#product-stripe-tax-code").fill(values.get("stripe tax code"));
-        }
     }
 
     @Et("je soumets le formulaire produit")
@@ -265,7 +262,6 @@ public class AdminProductSteps {
         assertTrue(page().locator("#product-taux-tva").isDisabled(), "Le champ TVA doit être désactivé");
         assertTrue(page().locator("#product-supplier").isDisabled(), "Le champ fournisseur doit être désactivé");
         assertTrue(page().locator("#product-colisage").isDisabled(), "Le champ colisage doit être désactivé");
-        assertTrue(page().locator("#product-stripe-tax-code").isDisabled(), "Le champ stripe tax code doit être désactivé");
     }
 
     @Et("les champs description et stock sont activés")

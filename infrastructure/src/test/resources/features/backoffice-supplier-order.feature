@@ -7,9 +7,9 @@ Fonctionnalité: Bon de commande fournisseur
   Contexte:
     Étant donné qu'une vente existe avec des produits et des créneaux
     Et les commandes suivantes existent
-      | prénom | nom    | email         | téléphone  | créneau | produits | statut |
-      | Alice  | Durand | alice@test.fr | 0601020304 | 0       | 0:3,1:2  | PAID   |
-      | Bob    | Martin | bob@test.fr   | 0605060708 | 0       | 0:1,2:4  | PAID   |
+      | prénom | nom    | email         | téléphone  | créneau | produits | statut    |
+      | Alice  | Durand | alice@test.fr | 0601020304 | 0       | 0:3,1:2  | CONFIRMED |
+      | Bob    | Martin | bob@test.fr   | 0605060708 | 0       | 0:1,2:4  | CONFIRMED |
 
   Scénario: Affichage du bon fournisseur agrégé groupé par fournisseur
     Quand je navigue vers la page bon fournisseur

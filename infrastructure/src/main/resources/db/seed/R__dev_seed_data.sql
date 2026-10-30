@@ -2,7 +2,7 @@
 -- This file is reloaded on every dev restart (Flyway repeatable migration)
 
 -- Clear existing data (order matters due to FK constraints)
-TRUNCATE payments, order_items, orders, time_slots, products, ventes RESTART IDENTITY CASCADE;
+TRUNCATE order_items, orders, time_slots, products, ventes RESTART IDENTITY CASCADE;
 
 -- ============================================================================
 -- VENTES (Sales Events)
@@ -104,14 +104,14 @@ SELECT setval('time_slots_id_seq', 22);
 -- ============================================================================
 -- Orders for Vente 1 (Active sale) - Various statuses
 INSERT INTO orders (id, vente_id, order_number, customer_first_name, customer_last_name, customer_email, customer_phone, time_slot_id, status, total_amount, created_at) VALUES
--- PENDING orders (awaiting payment) - for past time slots
-('a1b2c3d4-e5f6-7890-abcd-ef1234567890', 1, 'AG-2024-00001', 'Marie', 'Dupont', 'marie.dupont@email.fr', '0612345678', 1, 'PENDING', 44.00, CURRENT_TIMESTAMP - INTERVAL '5 days'),
-('b2c3d4e5-f6a7-8901-bcde-f12345678901', 1, 'AG-2024-00002', 'Jean', 'Martin', 'jean.martin@email.fr', '0623456789', 1, 'PENDING', 31.40, CURRENT_TIMESTAMP - INTERVAL '4 days'),
+-- CONFIRMED orders - for past time slots
+('a1b2c3d4-e5f6-7890-abcd-ef1234567890', 1, 'AG-2024-00001', 'Marie', 'Dupont', 'marie.dupont@email.fr', '0612345678', 1, 'CONFIRMED', 44.00, CURRENT_TIMESTAMP - INTERVAL '5 days'),
+('b2c3d4e5-f6a7-8901-bcde-f12345678901', 1, 'AG-2024-00002', 'Jean', 'Martin', 'jean.martin@email.fr', '0623456789', 1, 'CONFIRMED', 31.40, CURRENT_TIMESTAMP - INTERVAL '4 days'),
 
--- PAID orders (payment received, awaiting pickup)
-('c3d4e5f6-a7b8-9012-cdef-123456789012', 1, 'AG-2024-00003', 'Sophie', 'Bernard', 'sophie.bernard@email.fr', '0634567890', 2, 'PAID', 56.50, CURRENT_TIMESTAMP - INTERVAL '4 days'),
-('d4e5f6a7-b8c9-0123-def0-234567890123', 1, 'AG-2024-00004', 'Pierre', 'Dubois', 'pierre.dubois@email.fr', '0645678901', 2, 'PAID', 25.00, CURRENT_TIMESTAMP - INTERVAL '4 days'),
-('e5f6a7b8-c9d0-1234-ef01-345678901234', 1, 'AG-2024-00005', 'Isabelle', 'Moreau', 'isabelle.moreau@email.fr', '0656789012', 3, 'PAID', 68.90, CURRENT_TIMESTAMP - INTERVAL '3 days'),
+-- CONFIRMED orders (awaiting pickup, paid in store)
+('c3d4e5f6-a7b8-9012-cdef-123456789012', 1, 'AG-2024-00003', 'Sophie', 'Bernard', 'sophie.bernard@email.fr', '0634567890', 2, 'CONFIRMED', 56.50, CURRENT_TIMESTAMP - INTERVAL '4 days'),
+('d4e5f6a7-b8c9-0123-def0-234567890123', 1, 'AG-2024-00004', 'Pierre', 'Dubois', 'pierre.dubois@email.fr', '0645678901', 2, 'CONFIRMED', 25.00, CURRENT_TIMESTAMP - INTERVAL '4 days'),
+('e5f6a7b8-c9d0-1234-ef01-345678901234', 1, 'AG-2024-00005', 'Isabelle', 'Moreau', 'isabelle.moreau@email.fr', '0656789012', 3, 'CONFIRMED', 68.90, CURRENT_TIMESTAMP - INTERVAL '3 days'),
 
 -- PICKED_UP orders (completed)
 ('f6a7b8c9-d0e1-2345-f012-456789012345', 1, 'AG-2024-00006', 'Francois', 'Petit', 'francois.petit@email.fr', '0667890123', 4, 'PICKED_UP', 37.50, CURRENT_TIMESTAMP - INTERVAL '3 days'),
@@ -121,8 +121,8 @@ INSERT INTO orders (id, vente_id, order_number, customer_first_name, customer_la
 ('b8c9d0e1-f2a3-4567-1234-678901234567', 1, 'AG-2024-00008', 'Michel', 'Roux', 'michel.roux@email.fr', '0689012345', 5, 'CANCELLED', 25.00, CURRENT_TIMESTAMP - INTERVAL '2 days'),
 
 -- New orders for future time slots (for demo purposes)
-('11111111-1111-1111-1111-111111111111', 1, 'AG-2024-00009', 'Claire', 'Fontaine', 'claire.fontaine@email.fr', '0611111111', 8, 'PAID', 37.00, CURRENT_TIMESTAMP - INTERVAL '1 day'),
-('22222222-2222-2222-2222-222222222222', 1, 'AG-2024-00010', 'Marc', 'Riviere', 'marc.riviere@email.fr', '0622222222', 8, 'PENDING', 29.50, CURRENT_TIMESTAMP - INTERVAL '12 hours');
+('11111111-1111-1111-1111-111111111111', 1, 'AG-2024-00009', 'Claire', 'Fontaine', 'claire.fontaine@email.fr', '0611111111', 8, 'CONFIRMED', 37.00, CURRENT_TIMESTAMP - INTERVAL '1 day'),
+('22222222-2222-2222-2222-222222222222', 1, 'AG-2024-00010', 'Marc', 'Riviere', 'marc.riviere@email.fr', '0622222222', 8, 'CONFIRMED', 29.50, CURRENT_TIMESTAMP - INTERVAL '12 hours');
 
 -- Orders for Vente 2 (Closed sale) - All picked up
 INSERT INTO orders (id, vente_id, order_number, customer_first_name, customer_last_name, customer_email, customer_phone, time_slot_id, status, total_amount, created_at) VALUES
@@ -133,30 +133,30 @@ INSERT INTO orders (id, vente_id, order_number, customer_first_name, customer_la
 -- ============================================================================
 -- ORDER ITEMS
 -- ============================================================================
--- Items for Order AG-2024-00001 (Marie Dupont - PENDING)
+-- Items for Order AG-2024-00001 (Marie Dupont - CONFIRMED)
 INSERT INTO order_items (id, order_id, product_id, quantity, unit_price) VALUES
 (1, 'a1b2c3d4-e5f6-7890-abcd-ef1234567890', 1, 1, 25.00),
 (2, 'a1b2c3d4-e5f6-7890-abcd-ef1234567890', 3, 2, 6.50),
 (3, 'a1b2c3d4-e5f6-7890-abcd-ef1234567890', 6, 1, 5.50);
 
--- Items for Order AG-2024-00002 (Jean Martin - PENDING)
+-- Items for Order AG-2024-00002 (Jean Martin - CONFIRMED)
 INSERT INTO order_items (id, order_id, product_id, quantity, unit_price) VALUES
 (4, 'b2c3d4e5-f6a7-8901-bcde-f12345678901', 2, 1, 12.50),
 (5, 'b2c3d4e5-f6a7-8901-bcde-f12345678901', 4, 1, 8.90),
 (6, 'b2c3d4e5-f6a7-8901-bcde-f12345678901', 7, 2, 4.50);
 
--- Items for Order AG-2024-00003 (Sophie Bernard - PAID)
+-- Items for Order AG-2024-00003 (Sophie Bernard - CONFIRMED)
 INSERT INTO order_items (id, order_id, product_id, quantity, unit_price) VALUES
 (7, 'c3d4e5f6-a7b8-9012-cdef-123456789012', 1, 1, 25.00),
 (8, 'c3d4e5f6-a7b8-9012-cdef-123456789012', 5, 1, 14.00),
 (9, 'c3d4e5f6-a7b8-9012-cdef-123456789012', 8, 2, 4.20),
 (10, 'c3d4e5f6-a7b8-9012-cdef-123456789012', 7, 2, 4.50);
 
--- Items for Order AG-2024-00004 (Pierre Dubois - PAID)
+-- Items for Order AG-2024-00004 (Pierre Dubois - CONFIRMED)
 INSERT INTO order_items (id, order_id, product_id, quantity, unit_price) VALUES
 (11, 'd4e5f6a7-b8c9-0123-def0-234567890123', 1, 1, 25.00);
 
--- Items for Order AG-2024-00005 (Isabelle Moreau - PAID)
+-- Items for Order AG-2024-00005 (Isabelle Moreau - CONFIRMED)
 INSERT INTO order_items (id, order_id, product_id, quantity, unit_price) VALUES
 (12, 'e5f6a7b8-c9d0-1234-ef01-345678901234', 1, 1, 25.00),
 (13, 'e5f6a7b8-c9d0-1234-ef01-345678901234', 4, 2, 8.90),
@@ -208,34 +208,3 @@ INSERT INTO order_items (id, order_id, product_id, quantity, unit_price) VALUES
 
 SELECT setval('order_items_id_seq', 37);
 
--- ============================================================================
--- PAYMENTS
--- Uses dynamic dates
--- ============================================================================
-INSERT INTO payments (id, order_id, amount, stripe_payment_id, status, attempts, created_at, updated_at, version) VALUES
--- PAID orders - successful payments
-(1, 'c3d4e5f6-a7b8-9012-cdef-123456789012', 56.50, 'pi_3Oabc123def456', 'SUCCEEDED', 1, CURRENT_TIMESTAMP - INTERVAL '4 days', CURRENT_TIMESTAMP - INTERVAL '4 days', 0),
-(2, 'd4e5f6a7-b8c9-0123-def0-234567890123', 25.00, 'pi_3Oabc123def457', 'SUCCEEDED', 1, CURRENT_TIMESTAMP - INTERVAL '4 days', CURRENT_TIMESTAMP - INTERVAL '4 days', 0),
-(3, 'e5f6a7b8-c9d0-1234-ef01-345678901234', 68.90, 'pi_3Oabc123def458', 'SUCCEEDED', 1, CURRENT_TIMESTAMP - INTERVAL '3 days', CURRENT_TIMESTAMP - INTERVAL '3 days', 0),
-
--- PICKED_UP orders - successful payments
-(4, 'f6a7b8c9-d0e1-2345-f012-456789012345', 37.50, 'pi_3Oabc123def459', 'SUCCEEDED', 1, CURRENT_TIMESTAMP - INTERVAL '3 days', CURRENT_TIMESTAMP - INTERVAL '3 days', 0),
-(5, 'a7b8c9d0-e1f2-3456-0123-567890123456', 49.40, 'pi_3Oabc123def460', 'SUCCEEDED', 1, CURRENT_TIMESTAMP - INTERVAL '3 days', CURRENT_TIMESTAMP - INTERVAL '3 days', 0),
-
--- PENDING orders - pending payments
-(6, 'a1b2c3d4-e5f6-7890-abcd-ef1234567890', 44.00, NULL, 'PENDING', 0, CURRENT_TIMESTAMP - INTERVAL '5 days', CURRENT_TIMESTAMP - INTERVAL '5 days', 0),
-(7, 'b2c3d4e5-f6a7-8901-bcde-f12345678901', 31.40, NULL, 'PENDING', 0, CURRENT_TIMESTAMP - INTERVAL '4 days', CURRENT_TIMESTAMP - INTERVAL '4 days', 0),
-
--- CANCELLED order - failed payment
-(8, 'b8c9d0e1-f2a3-4567-1234-678901234567', 25.00, NULL, 'FAILED', 3, CURRENT_TIMESTAMP - INTERVAL '2 days', CURRENT_TIMESTAMP - INTERVAL '2 days', 0),
-
--- Closed sale orders (Vente 2) - all successful
-(9, 'c9d0e1f2-a3b4-5678-2345-789012345678', 84.50, 'pi_3Noel123def461', 'SUCCEEDED', 1, CURRENT_TIMESTAMP - INTERVAL '40 days', CURRENT_TIMESTAMP - INTERVAL '40 days', 0),
-(10, 'd0e1f2a3-b4c5-6789-3456-890123456789', 118.50, 'pi_3Noel123def462', 'SUCCEEDED', 1, CURRENT_TIMESTAMP - INTERVAL '39 days', CURRENT_TIMESTAMP - INTERVAL '39 days', 0),
-(11, 'e1f2a3b4-c5d6-7890-4567-901234567890', 56.00, 'pi_3Noel123def463', 'SUCCEEDED', 1, CURRENT_TIMESTAMP - INTERVAL '38 days', CURRENT_TIMESTAMP - INTERVAL '38 days', 0),
-
--- New orders for future time slots (Vente 1)
-(12, '11111111-1111-1111-1111-111111111111', 37.00, 'pi_3New123def464', 'SUCCEEDED', 1, CURRENT_TIMESTAMP - INTERVAL '1 day', CURRENT_TIMESTAMP - INTERVAL '1 day', 0),
-(13, '22222222-2222-2222-2222-222222222222', 29.50, NULL, 'PENDING', 0, CURRENT_TIMESTAMP - INTERVAL '12 hours', CURRENT_TIMESTAMP - INTERVAL '12 hours', 0);
-
-SELECT setval('payments_id_seq', 13);

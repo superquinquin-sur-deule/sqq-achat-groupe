@@ -28,7 +28,6 @@ const emit = defineEmits<{
       category: string
       brand: string
       colisage?: number
-      stripeTaxCode?: string
       imageFile?: File
     },
   ]
@@ -72,7 +71,6 @@ const schema = toTypedSchema(
         (v) => v === '' || (!isNaN(Number(v)) && Number(v) >= 1 && Number.isInteger(Number(v))),
         'Le colisage doit être un entier supérieur ou égal à 1',
       ),
-    stripeTaxCode: z.string().optional().default(''),
   }),
 )
 
@@ -90,7 +88,6 @@ const { handleSubmit } = useForm({
         category: props.product.category ?? '',
         brand: props.product.brand ?? '',
         colisage: props.product.colisage != null ? String(props.product.colisage) : '',
-        stripeTaxCode: props.product.stripeTaxCode ?? '',
       }
     : {
         name: '',
@@ -103,7 +100,6 @@ const { handleSubmit } = useForm({
         category: '',
         brand: '',
         colisage: '',
-        stripeTaxCode: '',
       },
 })
 
@@ -145,7 +141,6 @@ const {
   errorMessage: colisageError,
   handleBlur: colisageBlur,
 } = useField<string>('colisage')
-const { value: stripeTaxCode } = useField<string>('stripeTaxCode')
 
 const imageFile = ref<File | undefined>(undefined)
 const imagePreview = ref<string | undefined>(props.product?.imageUrl ?? undefined)
@@ -199,7 +194,6 @@ const onSubmit = handleSubmit((values) => {
     category: values.category,
     brand: values.brand,
     colisage: values.colisage ? Number(values.colisage) : undefined,
-    stripeTaxCode: values.stripeTaxCode || undefined,
     imageFile: imageFile.value,
   })
 })
@@ -379,13 +373,6 @@ const onSubmit = handleSubmit((values) => {
           :error="colisageError ?? ''"
           :disabled="fieldsLocked"
           @blur="colisageBlur"
-        />
-        <Input
-          id="product-stripe-tax-code"
-          v-model="stripeTaxCode"
-          label="Stripe Tax Code"
-          type="text"
-          :disabled="fieldsLocked"
         />
       </div>
       <div class="mt-2 flex gap-2">

@@ -7,7 +7,6 @@ export const queryKeys = {
   },
   orders: {
     detail: (orderId: string) => ['orders', orderId] as const,
-    paymentStatus: (orderId: string) => ['orders', orderId, 'payment-status'] as const,
   },
   admin: {
     ventes: {

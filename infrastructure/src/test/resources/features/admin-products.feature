@@ -27,23 +27,6 @@ Fonctionnalité: Gestion des produits (CRUD admin)
     Alors je vois un toast de succès
     Et le produit "Carottes bio" apparaît dans le tableau
 
-  Scénario: Créer un produit avec un stripe tax code
-    Quand je navigue vers la page admin des produits
-    Et je clique sur le bouton ajouter un produit
-    Et je remplis le formulaire produit avec les valeurs
-      | nom              | Beurre fermier    |
-      | prix HT          | 3.80              |
-      | TVA              | 5.50              |
-      | fournisseur      | Ferme du Soleil   |
-      | stock            | 20                |
-      | référence        | BEU-001           |
-      | catégorie        | Crèmerie          |
-      | marque           | Ferme du Soleil   |
-      | stripe tax code  | txcd_99999999     |
-    Et je soumets le formulaire produit
-    Alors je vois un toast de succès
-    Et le produit "Beurre fermier" apparaît dans le tableau
-
   Scénario: Modifier un produit existant
     Quand je navigue vers la page admin des produits
     Et je clique sur le bouton modifier du premier produit
@@ -106,13 +89,3 @@ Fonctionnalité: Gestion des produits (CRUD admin)
     Étant donné qu'une commande existe sur la vente via le navigateur
     Quand je navigue vers la page admin ventes
     Alors le bouton supprimer de la vente n'est pas visible
-
-  Scénario: Le stripeProductId est préservé après modification d'un produit via l'API
-    Étant donné que le premier produit possède un stripeProductId en base
-    Quand je modifie le premier produit via l'API
-    Alors le stripeProductId du premier produit est inchangé en base
-
-  Scénario: Le stripeProductId est préservé après upload d'image via l'API
-    Étant donné que le premier produit possède un stripeProductId en base
-    Quand j'uploade une image PNG sur le premier produit via l'API
-    Alors le stripeProductId du premier produit est inchangé en base

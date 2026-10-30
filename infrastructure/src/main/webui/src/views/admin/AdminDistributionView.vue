@@ -47,7 +47,7 @@ const filteredOrders = computed(() => {
   let result = orders.value ?? []
 
   if (showUnpickedOnly.value) {
-    result = result.filter((o) => o.status === 'PAID')
+    result = result.filter((o) => o.status === 'CONFIRMED')
   } else if (selectedSlot.value) {
     result = result.filter((o) => o.timeSlotLabel === selectedSlot.value)
   }
@@ -240,7 +240,7 @@ async function handlePickup(orderId: string) {
               {{ statusLabel(order.status) }}
             </span>
             <button
-              v-if="order.status === 'PAID'"
+              v-if="order.status === 'CONFIRMED'"
               class="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-dark shadow-sm transition-colors hover:bg-primary/90"
               data-testid="distribution-pickup-btn"
               @click="handlePickup(order.id)"

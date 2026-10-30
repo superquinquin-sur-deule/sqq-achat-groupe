@@ -48,9 +48,6 @@ public class OrderSetupSteps {
                     venteId, prenom, nom, email, telephone, timeSlotId, null, items
             ));
 
-            if ("PAID".equals(statut) || "PICKED_UP".equals(statut)) {
-                order.markAsPaid();
-            }
             if ("PICKED_UP".equals(statut)) {
                 order.markAsPickedUp();
             }

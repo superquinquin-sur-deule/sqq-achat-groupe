@@ -17,6 +17,5 @@ public record CreateProductRequest(
         @NotBlank(message = "La référence est requise") String reference,
         @NotBlank(message = "La catégorie est requise") String category,
         @NotBlank(message = "La marque est requise") String brand,
-        @Min(value = 1, message = "Le colisage doit être supérieur à 0") Integer colisage,
-        String stripeTaxCode
+        @Min(value = 1, message = "Le colisage doit être supérieur à 0") Integer colisage
 ) {}

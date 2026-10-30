@@ -2,15 +2,15 @@
 @browser @backoffice-reception
 Fonctionnalité: Réception des fournisseurs et ajustements
   En tant qu'administrateur, je veux enregistrer les réceptions fournisseurs,
-  visualiser les manques et lancer les remboursements si nécessaire.
+  visualiser les manques et appliquer les ajustements si nécessaire.
 
   Contexte:
     Étant donné qu'une vente existe avec des produits et des créneaux
     Et les commandes suivantes existent
-      | prénom | nom    | email            | téléphone  | créneau | produits | statut |
-      | Alice  | Durand | alice@test.fr    | 0601020304 | 0       | 0:3,1:2  | PAID   |
-      | Bob    | Martin | bob@test.fr      | 0605060708 | 0       | 0:1,2:4  | PAID   |
-      | Claire | Petit  | claire@test.fr   | 0609101112 | 1       | 1:1,2:2  | PAID   |
+      | prénom | nom    | email            | téléphone  | créneau | produits | statut    |
+      | Alice  | Durand | alice@test.fr    | 0601020304 | 0       | 0:3,1:2  | CONFIRMED |
+      | Bob    | Martin | bob@test.fr      | 0605060708 | 0       | 0:1,2:4  | CONFIRMED |
+      | Claire | Petit  | claire@test.fr   | 0609101112 | 1       | 1:1,2:2  | CONFIRMED |
 
   Scénario: Afficher le statut des réceptions pour une vente
     Quand je navigue vers la page réception

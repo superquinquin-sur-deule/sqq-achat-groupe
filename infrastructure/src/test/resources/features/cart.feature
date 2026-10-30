@@ -3,7 +3,7 @@
 Fonctionnalité: Panier d'achat
   En tant que coopérateur,
   Je veux ajouter des produits à mon panier et gérer mes quantités,
-  Afin de constituer ma commande avant de passer au paiement.
+  Afin de constituer ma commande avant de la valider.
 
   Scénario: Ajouter un produit au panier depuis le catalogue
     Étant donné qu'une vente existe avec des produits et des créneaux

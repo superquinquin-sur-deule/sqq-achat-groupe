@@ -37,9 +37,9 @@ class GenerateSupplierOrderHandlerTest {
     void should_aggregate_quantities_by_product_and_sort_by_supplier_then_name() {
         Long venteId = 1L;
 
-        Product tomatoes = new Product(10L, venteId, "Tomates", "Bio", Money.eur(new BigDecimal("3.50")), BigDecimal.ZERO, "Ferme A", 100, true, "TOM-001", "Legumes", "Ferme A", null, null, false);
-        Product carrots = new Product(20L, venteId, "Carottes", "Bio", Money.eur(new BigDecimal("2.00")), BigDecimal.ZERO, "Ferme A", 100, true, "CAR-001", "Legumes", "Ferme A", null, null, false);
-        Product cheese = new Product(30L, venteId, "Fromage", "Comté", Money.eur(new BigDecimal("8.00")), BigDecimal.ZERO, "Ferme B", 50, true, "FRO-001", "Fromage", "Ferme B", null, null, false);
+        Product tomatoes = new Product(10L, venteId, "Tomates", "Bio", Money.eur(new BigDecimal("3.50")), BigDecimal.ZERO, "Ferme A", 100, true, "TOM-001", "Legumes", "Ferme A", null, false);
+        Product carrots = new Product(20L, venteId, "Carottes", "Bio", Money.eur(new BigDecimal("2.00")), BigDecimal.ZERO, "Ferme A", 100, true, "CAR-001", "Legumes", "Ferme A", null, false);
+        Product cheese = new Product(30L, venteId, "Fromage", "Comté", Money.eur(new BigDecimal("8.00")), BigDecimal.ZERO, "Ferme B", 50, true, "FRO-001", "Fromage", "Ferme B", null, false);
 
         Order order1 = Order.create(venteId, OrderNumber.generate(),
                 new CustomerInfo("Alice", "Dupont", "alice@test.com", "0601020304"), 1L,
@@ -47,7 +47,6 @@ class GenerateSupplierOrderHandlerTest {
                         OrderItem.create(10L, 3, Money.eur(new BigDecimal("3.50"))),
                         OrderItem.create(30L, 1, Money.eur(new BigDecimal("8.00")))
                 ), null);
-        order1.markAsPaid();
 
         Order order2 = Order.create(venteId, OrderNumber.generate(),
                 new CustomerInfo("Bob", "Martin", "bob@test.com", "0605060708"), 1L,
@@ -55,9 +54,8 @@ class GenerateSupplierOrderHandlerTest {
                         OrderItem.create(10L, 2, Money.eur(new BigDecimal("3.50"))),
                         OrderItem.create(20L, 5, Money.eur(new BigDecimal("2.00")))
                 ), null);
-        order2.markAsPaid();
 
-        when(orderRepository.findPaidByVenteId(venteId)).thenReturn(List.of(order1, order2));
+        when(orderRepository.findConfirmedByVenteId(venteId)).thenReturn(List.of(order1, order2));
         when(productRepository.findAllByVenteId(venteId)).thenReturn(List.of(tomatoes, carrots, cheese));
 
         List<SupplierOrderLine> result = handler.handle(new GenerateSupplierOrderQuery(venteId));
@@ -73,14 +71,13 @@ class GenerateSupplierOrderHandlerTest {
     void should_calculate_nombre_colis_when_colisage_is_set() {
         Long venteId = 1L;
 
-        Product tomatoes = new Product(10L, venteId, "Tomates", "Bio", Money.eur(new BigDecimal("3.50")), BigDecimal.ZERO, "Ferme A", 100, true, "TOM-001", "Legumes", "Ferme A", 6, null, false);
+        Product tomatoes = new Product(10L, venteId, "Tomates", "Bio", Money.eur(new BigDecimal("3.50")), BigDecimal.ZERO, "Ferme A", 100, true, "TOM-001", "Legumes", "Ferme A", 6, false);
 
         Order order1 = Order.create(venteId, OrderNumber.generate(),
                 new CustomerInfo("Alice", "Dupont", "alice@test.com", "0601020304"), 1L,
                 List.of(OrderItem.create(10L, 10, Money.eur(new BigDecimal("3.50")))), null);
-        order1.markAsPaid();
 
-        when(orderRepository.findPaidByVenteId(venteId)).thenReturn(List.of(order1));
+        when(orderRepository.findConfirmedByVenteId(venteId)).thenReturn(List.of(order1));
         when(productRepository.findAllByVenteId(venteId)).thenReturn(List.of(tomatoes));
 
         List<SupplierOrderLine> result = handler.handle(new GenerateSupplierOrderQuery(venteId));

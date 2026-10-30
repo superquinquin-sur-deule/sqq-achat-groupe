@@ -33,11 +33,6 @@ const router = createRouter({
           name: 'confirmation',
           component: () => import('@/views/ConfirmationView.vue'),
         },
-        {
-          path: 'payment-error',
-          name: 'payment-error',
-          component: () => import('@/views/PaymentErrorView.vue'),
-        },
       ],
     },
     {

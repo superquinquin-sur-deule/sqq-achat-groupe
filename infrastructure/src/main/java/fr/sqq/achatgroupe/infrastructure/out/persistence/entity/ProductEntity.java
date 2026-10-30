@@ -62,12 +62,6 @@ public class ProductEntity {
     @Column(name = "colisage")
     private Integer colisage;
 
-    @Column(name = "stripe_tax_code")
-    private String stripeTaxCode;
-
-    @Column(name = "stripe_product_id")
-    private String stripeProductId;
-
     public Long getId() {
         return id;
     }
@@ -150,9 +144,5 @@ public class ProductEntity {
     public Integer getColisage() { return colisage; }
     public void setColisage(Integer colisage) { this.colisage = colisage; }
 
-    public String getStripeTaxCode() { return stripeTaxCode; }
-    public void setStripeTaxCode(String stripeTaxCode) { this.stripeTaxCode = stripeTaxCode; }
 
-    public String getStripeProductId() { return stripeProductId; }
-    public void setStripeProductId(String stripeProductId) { this.stripeProductId = stripeProductId; }
 }

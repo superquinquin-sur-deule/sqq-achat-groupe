@@ -88,7 +88,7 @@ public class BackofficeDistributionSteps {
         assertTrue(allText.contains("Petit Claire"), "Petit Claire doit apparaître");
         assertTrue(allText.contains("Lopez Diana"), "Lopez Diana doit apparaître");
 
-        // Vérifier les badges de statut (mix PAID et PICKED_UP)
+        // Vérifier les badges de statut (mix CONFIRMED et PICKED_UP)
         Locator statuses = page().locator("[data-testid='distribution-order-status']");
         assertTrue(statuses.count() >= 4, "Il doit y avoir au moins 4 badges de statut");
     }
@@ -137,7 +137,7 @@ public class BackofficeDistributionSteps {
         }
     }
 
-    @Et("je clique sur \"Marquer récupéré\" pour la première commande payée")
+    @Et("je clique sur \"Marquer récupéré\" pour la première commande confirmée")
     public void jeCliqueSurMarquerRecuperePourLaPremiereCommandePayee() {
         Locator pickupBtns = page().locator("[data-testid='distribution-pickup-btn']");
         assertTrue(pickupBtns.count() >= 1, "Il doit y avoir au moins 1 bouton 'Marquer récupéré'");

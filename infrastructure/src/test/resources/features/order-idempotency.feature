@@ -1,7 +1,7 @@
 # language: fr
 Fonctionnalité: Idempotence de création de commande
   En tant que coopérateur,
-  Je ne veux pas créer de commande en double si je clique deux fois sur "Payer",
+  Je ne veux pas créer de commande en double si je clique deux fois sur "Valider ma commande",
   Afin que mon stock et mon créneau ne soient pas impactés deux fois.
 
   Scénario: Soumettre deux fois la même commande avec la même clé d'idempotence retourne la même commande

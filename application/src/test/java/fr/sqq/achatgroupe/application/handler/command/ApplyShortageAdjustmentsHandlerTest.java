@@ -46,20 +46,19 @@ class ApplyShortageAdjustmentsHandlerTest {
 
     @Test
     void should_be_idempotent_when_called_twice() {
-        Product productA = new Product(PRODUCT_A, VENTE_ID, "Tomates", "Bio", Money.eur(new BigDecimal("3.50")), BigDecimal.ZERO, "Ferme A", 100, true, "TOM-001", "Legumes", "Ferme A", null, null, false);
+        Product productA = new Product(PRODUCT_A, VENTE_ID, "Tomates", "Bio", Money.eur(new BigDecimal("3.50")), BigDecimal.ZERO, "Ferme A", 100, true, "TOM-001", "Legumes", "Ferme A", null, false);
 
         // Order with 4x Product A
         Order order = Order.create(VENTE_ID, OrderNumber.generate(),
                 new CustomerInfo("Alice", "Dupont", "alice@test.com", "0601020304"), 1L,
                 List.of(OrderItem.create(PRODUCT_A, 4, Money.eur(new BigDecimal("3.50")))), null);
-        order.markAsPaid();
 
         // Reception: ordered 4, received 3 → shortage = 1
         Reception reception = Reception.create(VENTE_ID, "Ferme A",
                 List.of(ReceptionItem.create(PRODUCT_A, 4, 3)));
 
         when(receptionRepository.findAllByVenteId(VENTE_ID)).thenReturn(List.of(reception));
-        when(orderRepository.findPaidByVenteId(VENTE_ID)).thenReturn(List.of(order));
+        when(orderRepository.findConfirmedByVenteId(VENTE_ID)).thenReturn(List.of(order));
         when(productRepository.findAllByVenteId(VENTE_ID)).thenReturn(List.of(productA));
         when(orderRepository.save(any(Order.class))).thenAnswer(inv -> inv.getArgument(0));
 
@@ -78,20 +77,20 @@ class ApplyShortageAdjustmentsHandlerTest {
 
     @Test
     void should_not_save_orders_when_already_adjusted() {
-        Product productA = new Product(PRODUCT_A, VENTE_ID, "Tomates", "Bio", Money.eur(new BigDecimal("3.50")), BigDecimal.ZERO, "Ferme A", 100, true, "TOM-001", "Legumes", "Ferme A", null, null, false);
+        Product productA = new Product(PRODUCT_A, VENTE_ID, "Tomates", "Bio", Money.eur(new BigDecimal("3.50")), BigDecimal.ZERO, "Ferme A", 100, true, "TOM-001", "Legumes", "Ferme A", null, false);
 
         // Order already adjusted: 4 ordered, 1 cancelled
         OrderItem adjustedItem = new OrderItem(1L, PRODUCT_A, 4, Money.eur(new BigDecimal("3.50")), 1);
         Order order = new Order(java.util.UUID.randomUUID(), VENTE_ID, OrderNumber.generate(),
                 new CustomerInfo("Alice", "Dupont", "alice@test.com", "0601020304"), 1L,
-                List.of(adjustedItem), fr.sqq.achatgroupe.domain.model.order.OrderStatus.PAID,
+                List.of(adjustedItem), fr.sqq.achatgroupe.domain.model.order.OrderStatus.CONFIRMED,
                 Money.eur(new BigDecimal("14.00")), java.time.Instant.now(), null, null);
 
         Reception reception = Reception.create(VENTE_ID, "Ferme A",
                 List.of(ReceptionItem.create(PRODUCT_A, 4, 3)));
 
         when(receptionRepository.findAllByVenteId(VENTE_ID)).thenReturn(List.of(reception));
-        when(orderRepository.findPaidByVenteId(VENTE_ID)).thenReturn(List.of(order));
+        when(orderRepository.findConfirmedByVenteId(VENTE_ID)).thenReturn(List.of(order));
         when(productRepository.findAllByVenteId(VENTE_ID)).thenReturn(List.of(productA));
 
         handler.handle(new ApplyShortageAdjustmentsCommand(VENTE_ID));
@@ -102,19 +101,18 @@ class ApplyShortageAdjustmentsHandlerTest {
 
     @Test
     void should_apply_partial_remaining_shortage() {
-        Product productA = new Product(PRODUCT_A, VENTE_ID, "Tomates", "Bio", Money.eur(new BigDecimal("3.50")), BigDecimal.ZERO, "Ferme A", 100, true, "TOM-001", "Legumes", "Ferme A", null, null, false);
+        Product productA = new Product(PRODUCT_A, VENTE_ID, "Tomates", "Bio", Money.eur(new BigDecimal("3.50")), BigDecimal.ZERO, "Ferme A", 100, true, "TOM-001", "Legumes", "Ferme A", null, false);
 
         // Two orders with Product A
         Order order1 = Order.create(VENTE_ID, OrderNumber.generate(),
                 new CustomerInfo("Alice", "Dupont", "alice@test.com", "0601020304"), 1L,
                 List.of(OrderItem.create(PRODUCT_A, 3, Money.eur(new BigDecimal("3.50")))), null);
-        order1.markAsPaid();
 
         // Order2 already has 1 cancelled (from a previous partial run)
         OrderItem partiallyAdjustedItem = new OrderItem(2L, PRODUCT_A, 2, Money.eur(new BigDecimal("3.50")), 1);
         Order order2 = new Order(java.util.UUID.randomUUID(), VENTE_ID, OrderNumber.generate(),
                 new CustomerInfo("Bob", "Martin", "bob@test.com", "0605060708"), 1L,
-                List.of(partiallyAdjustedItem), fr.sqq.achatgroupe.domain.model.order.OrderStatus.PAID,
+                List.of(partiallyAdjustedItem), fr.sqq.achatgroupe.domain.model.order.OrderStatus.CONFIRMED,
                 Money.eur(new BigDecimal("7.00")), java.time.Instant.now(), null, null);
 
         // Shortage = 3, already cancelled = 1, remaining = 2
@@ -122,7 +120,7 @@ class ApplyShortageAdjustmentsHandlerTest {
                 List.of(ReceptionItem.create(PRODUCT_A, 5, 2)));
 
         when(receptionRepository.findAllByVenteId(VENTE_ID)).thenReturn(List.of(reception));
-        when(orderRepository.findPaidByVenteId(VENTE_ID)).thenReturn(List.of(order1, order2));
+        when(orderRepository.findConfirmedByVenteId(VENTE_ID)).thenReturn(List.of(order1, order2));
         when(productRepository.findAllByVenteId(VENTE_ID)).thenReturn(List.of(productA));
         when(orderRepository.save(any(Order.class))).thenAnswer(inv -> inv.getArgument(0));
 

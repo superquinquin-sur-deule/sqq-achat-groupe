@@ -1,7 +1,7 @@
 import { ref } from 'vue'
 import { defineStore } from 'pinia'
 import type { OrderResponse } from '@/api/generated/model'
-import { postApiVentesVenteIdOrders, postApiOrdersIdPayment } from '@/api/generated/orders/orders'
+import { postApiVentesVenteIdOrders } from '@/api/generated/orders/orders'
 import { useCartStore } from '@/stores/cartStore'
 
 interface CustomerInfo {
@@ -51,34 +51,27 @@ export const useCheckoutStore = defineStore('checkout', () => {
     return order
   }
 
-  async function initiatePayment(venteId: number): Promise<void> {
-    if (isSubmitting.value) return
+  let pendingConfirmation: Promise<OrderResponse> | null = null
+
+  async function confirmOrder(venteId: number): Promise<OrderResponse> {
+    if (pendingConfirmation) return pendingConfirmation
 
     isSubmitting.value = true
     error.value = null
 
-    try {
-      const order = await submitOrder(venteId)
-
-      const baseUrl = window.location.origin
-      const successUrl = `${baseUrl}/confirmation?orderId=${order.id}&session_id={CHECKOUT_SESSION_ID}`
-      const cancelUrl = `${baseUrl}/payment-error?orderId=${order.id}`
-
-      const paymentResponse = await postApiOrdersIdPayment(String(order.id), {
-        successUrl,
-        cancelUrl,
+    pendingConfirmation = submitOrder(venteId)
+      .catch((e: unknown) => {
+        if (e instanceof Error) {
+          error.value = e.message
+        }
+        throw e
+      })
+      .finally(() => {
+        isSubmitting.value = false
+        pendingConfirmation = null
       })
 
-      window.location.href = (
-        paymentResponse.data as { data: { checkoutUrl: string } }
-      ).data.checkoutUrl
-    } catch (e: unknown) {
-      isSubmitting.value = false
-      if (e instanceof Error) {
-        error.value = e.message
-      }
-      throw e
-    }
+    return pendingConfirmation
   }
 
   function reset() {
@@ -102,7 +95,7 @@ export const useCheckoutStore = defineStore('checkout', () => {
     setCustomerInfo,
     selectTimeSlot,
     submitOrder,
-    initiatePayment,
+    confirmOrder,
     reset,
   }
 })

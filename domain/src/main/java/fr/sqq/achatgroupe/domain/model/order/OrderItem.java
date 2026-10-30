@@ -46,10 +46,6 @@ public class OrderItem {
         return unitPrice.multiply(effectiveQuantity());
     }
 
-    public void resetCancellation() {
-        this.cancelledQuantity = 0;
-    }
-
     public boolean isFullyCancelled() {
         return cancelledQuantity == quantity;
     }

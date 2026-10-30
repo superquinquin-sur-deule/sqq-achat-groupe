@@ -73,16 +73,9 @@ public class OrderPanacheRepository implements OrderRepository, PanacheRepositor
     }
 
     @Override
-    public List<Order> findPendingOrdersBefore(Instant cutoff) {
-        return list("status = ?1 and createdAt < ?2", "PENDING", cutoff).stream()
-                .map(mapper::toDomain)
-                .toList();
-    }
-
-    @Override
     public OrderAggregates getOrderAggregates(Long venteId) {
         Object[] row = getEntityManager()
-                .createQuery("SELECT COUNT(o), COALESCE(SUM(o.totalAmount), 0), COALESCE(SUM(CASE WHEN o.status = 'PICKED_UP' THEN 1 ELSE 0 END), 0) FROM OrderEntity o WHERE o.venteId = ?1 AND o.status IN ('PAID', 'PICKED_UP')", Object[].class)
+                .createQuery("SELECT COUNT(o), COALESCE(SUM(o.totalAmount), 0), COALESCE(SUM(CASE WHEN o.status = 'PICKED_UP' THEN 1 ELSE 0 END), 0) FROM OrderEntity o WHERE o.venteId = ?1 AND o.status IN ('CONFIRMED', 'PICKED_UP')", Object[].class)
                 .setParameter(1, venteId)
                 .getSingleResult();
         return new OrderAggregates(
@@ -93,21 +86,21 @@ public class OrderPanacheRepository implements OrderRepository, PanacheRepositor
     }
 
     @Override
-    public List<Order> findPaidByVenteId(Long venteId) {
+    public List<Order> findConfirmedByVenteId(Long venteId) {
         return list("venteId = ?1 AND status IN ?2 ORDER BY createdAt DESC",
-                venteId, List.of("PAID", "PICKED_UP")).stream()
+                venteId, List.of("CONFIRMED", "PICKED_UP")).stream()
                 .map(mapper::toDomain)
                 .toList();
     }
 
     @Override
-    public CursorPage<Order> findPaidByVenteId(Long venteId, CursorPageRequest pageRequest, String searchName, Long timeSlotId) {
-        return findByVenteIdWithStatuses(venteId, pageRequest, searchName, timeSlotId, List.of("PAID", "PICKED_UP"));
+    public CursorPage<Order> findConfirmedByVenteId(Long venteId, CursorPageRequest pageRequest, String searchName, Long timeSlotId) {
+        return findByVenteIdWithStatuses(venteId, pageRequest, searchName, timeSlotId, List.of("CONFIRMED", "PICKED_UP"));
     }
 
     @Override
     public CursorPage<Order> findByVenteId(Long venteId, CursorPageRequest pageRequest, String searchName, Long timeSlotId) {
-        return findByVenteIdWithStatuses(venteId, pageRequest, searchName, timeSlotId, List.of("PAID", "PICKED_UP", "CANCELLED"));
+        return findByVenteIdWithStatuses(venteId, pageRequest, searchName, timeSlotId, List.of("CONFIRMED", "PICKED_UP", "CANCELLED"));
     }
 
     private CursorPage<Order> findByVenteIdWithStatuses(Long venteId, CursorPageRequest pageRequest, String searchName, Long timeSlotId, List<String> statuses) {
@@ -159,7 +152,7 @@ public class OrderPanacheRepository implements OrderRepository, PanacheRepositor
     @Override
     public List<SlotOrderCount> countByTimeSlotForVente(Long venteId) {
         List<Object[]> rows = getEntityManager()
-                .createQuery("SELECT o.timeSlotId, COUNT(o) FROM OrderEntity o WHERE o.venteId = ?1 AND o.status IN ('PAID', 'PICKED_UP') GROUP BY o.timeSlotId", Object[].class)
+                .createQuery("SELECT o.timeSlotId, COUNT(o) FROM OrderEntity o WHERE o.venteId = ?1 AND o.status IN ('CONFIRMED', 'PICKED_UP') GROUP BY o.timeSlotId", Object[].class)
                 .setParameter(1, venteId)
                 .getResultList();
         return rows.stream()
@@ -185,7 +178,7 @@ public class OrderPanacheRepository implements OrderRepository, PanacheRepositor
     @Override
     public List<DailyOrderCount> countByDayForVente(Long venteId) {
         List<Object[]> rows = getEntityManager()
-                .createQuery("SELECT CAST(o.createdAt AS LocalDate), COUNT(o) FROM OrderEntity o WHERE o.venteId = ?1 AND o.status IN ('PAID', 'PICKED_UP') GROUP BY CAST(o.createdAt AS LocalDate) ORDER BY CAST(o.createdAt AS LocalDate)", Object[].class)
+                .createQuery("SELECT CAST(o.createdAt AS LocalDate), COUNT(o) FROM OrderEntity o WHERE o.venteId = ?1 AND o.status IN ('CONFIRMED', 'PICKED_UP') GROUP BY CAST(o.createdAt AS LocalDate) ORDER BY CAST(o.createdAt AS LocalDate)", Object[].class)
                 .setParameter(1, venteId)
                 .getResultList();
         return rows.stream()
@@ -207,7 +200,7 @@ public class OrderPanacheRepository implements OrderRepository, PanacheRepositor
     @Override
     public List<ProductStats> findProductStats(Long venteId) {
         List<Object[]> rows = getEntityManager()
-                .createQuery("SELECT oi.productId, SUM(oi.quantity), SUM(oi.unitPrice * oi.quantity) FROM OrderItemEntity oi JOIN oi.order o WHERE o.venteId = ?1 AND o.status IN ('PAID', 'PICKED_UP') GROUP BY oi.productId", Object[].class)
+                .createQuery("SELECT oi.productId, SUM(oi.quantity), SUM(oi.unitPrice * oi.quantity) FROM OrderItemEntity oi JOIN oi.order o WHERE o.venteId = ?1 AND o.status IN ('CONFIRMED', 'PICKED_UP') GROUP BY oi.productId", Object[].class)
                 .setParameter(1, venteId)
                 .getResultList();
         return rows.stream()
