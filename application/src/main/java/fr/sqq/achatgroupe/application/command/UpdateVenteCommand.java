@@ -1,16 +1,21 @@
 package fr.sqq.achatgroupe.application.command;
 
+import fr.sqq.achatgroupe.domain.model.vente.PickupMode;
 import fr.sqq.achatgroupe.domain.model.vente.Vente;
 import fr.sqq.achatgroupe.domain.model.vente.VenteId;
 import fr.sqq.mediator.Command;
 
 import java.time.Instant;
+import java.time.LocalDate;
 
 public record UpdateVenteCommand(
         VenteId id,
         String name,
         String description,
         Instant startDate,
-        Instant endDate
+        Instant endDate,
+        PickupMode pickupMode,
+        LocalDate pickupStartDate,
+        LocalDate pickupEndDate
 ) implements Command<Vente> {
 }

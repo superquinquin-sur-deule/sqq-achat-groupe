@@ -2,6 +2,7 @@ package fr.sqq.achatgroupe.acceptance.support;
 
 import io.quarkiverse.cucumber.ScenarioScope;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @ScenarioScope
@@ -11,6 +12,8 @@ public class TestContext {
     private Long emptyVenteId;
     private List<Long> productIds;
     private List<Long> timeSlotIds;
+    private LocalDate pickupStartDate;
+    private LocalDate pickupEndDate;
 
     public Long venteId() {
         return venteId;
@@ -44,10 +47,25 @@ public class TestContext {
         this.timeSlotIds = timeSlotIds;
     }
 
+    public LocalDate pickupStartDate() {
+        return pickupStartDate;
+    }
+
+    public LocalDate pickupEndDate() {
+        return pickupEndDate;
+    }
+
+    public void setPickupRange(LocalDate pickupStartDate, LocalDate pickupEndDate) {
+        this.pickupStartDate = pickupStartDate;
+        this.pickupEndDate = pickupEndDate;
+    }
+
     public void reset() {
         venteId = null;
         emptyVenteId = null;
         productIds = null;
         timeSlotIds = null;
+        pickupStartDate = null;
+        pickupEndDate = null;
     }
 }

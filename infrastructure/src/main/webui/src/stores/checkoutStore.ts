@@ -20,9 +20,13 @@ export const useCheckoutStore = defineStore('checkout', () => {
   const lastOrder = ref<OrderResponse | null>(null)
   const idempotencyKey = ref(crypto.randomUUID())
 
-  function setCustomerInfo(info: CustomerInfo) {
+  /**
+   * `skipTimeSlot` : vente en plage de dates — on saute l'étape créneau (3)
+   * et on va directement au récapitulatif (4).
+   */
+  function setCustomerInfo(info: CustomerInfo, skipTimeSlot = false) {
     customerInfo.value = info
-    currentStep.value = 3
+    currentStep.value = skipTimeSlot ? 4 : 3
   }
 
   function selectTimeSlot(slotId: number) {
@@ -38,7 +42,7 @@ export const useCheckoutStore = defineStore('checkout', () => {
       customerLastName: customerInfo.value.lastName,
       email: customerInfo.value.email,
       phone: customerInfo.value.phone,
-      timeSlotId: selectedTimeSlotId.value!,
+      timeSlotId: selectedTimeSlotId.value ?? undefined,
       idempotencyKey: idempotencyKey.value,
       items: cartStore.items.map((item) => ({
         productId: item.productId,

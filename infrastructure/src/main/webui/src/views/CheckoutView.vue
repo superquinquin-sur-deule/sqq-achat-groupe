@@ -6,6 +6,7 @@ import { useCheckoutStore } from '@/stores/checkoutStore'
 import { useToast } from '@/composables/useToast'
 import { useVenteTimeslotsQuery } from '@/composables/api/useTimeslotsApi'
 import { useVenteExpiredRedirect } from '@/composables/useVenteExpiredRedirect'
+import { useCheckoutSteps } from '@/composables/useCheckoutSteps'
 import { ApiError } from '@/api/mutator/custom-fetch'
 import Stepper from '@/components/ui/Stepper.vue'
 import CheckoutForm from '@/components/checkout/CheckoutForm.vue'
@@ -21,18 +22,24 @@ const venteId = Number(route.params.venteId)
 
 useVenteExpiredRedirect(venteId)
 
+// Vente en plage de dates : aucun créneau à choisir, l'étape 3 disparaît du tunnel.
+const { vente, venteUsesTimeSlots, steps } = useCheckoutSteps(venteId)
+
 const { data: timeSlots, isLoading: isLoadingTimeSlots } = useVenteTimeslotsQuery(venteId)
 
 const selectedTimeSlot = computed(
   () => (timeSlots.value ?? []).find((s) => s.id === checkoutStore.selectedTimeSlotId) ?? null,
 )
 
-const steps = [
-  { label: 'Panier' },
-  { label: 'Coordonnées' },
-  { label: 'Créneau' },
-  { label: 'Récapitulatif' },
-]
+// Le store conserve ses numéros d'étape (2 = coordonnées, 4 = récapitulatif) ;
+// seul l'affichage est compacté quand l'étape créneau n'existe pas.
+const displayStep = computed(() =>
+  venteUsesTimeSlots.value
+    ? checkoutStore.currentStep
+    : checkoutStore.currentStep === 4
+      ? 3
+      : checkoutStore.currentStep,
+)
 
 onMounted(() => {
   if (cartStore.isEmpty) {
@@ -48,13 +55,17 @@ function handleCustomerSubmit(info: {
   email: string
   phone: string
 }) {
-  checkoutStore.setCustomerInfo(info)
+  checkoutStore.setCustomerInfo(info, !venteUsesTimeSlots.value)
 }
 
 function handleTimeSlotContinue() {
   if (checkoutStore.selectedTimeSlotId !== null) {
     checkoutStore.currentStep = 4
   }
+}
+
+function handleSummaryBack() {
+  checkoutStore.currentStep = venteUsesTimeSlots.value ? 3 : 2
 }
 
 async function handleConfirm() {
@@ -75,7 +86,7 @@ async function handleConfirm() {
   <div class="mx-auto max-w-7xl px-4 py-8">
     <h1 class="mb-6 text-2xl font-bold text-dark">Commande</h1>
 
-    <Stepper :steps="steps" :current-step="checkoutStore.currentStep" class="mb-8" />
+    <Stepper :steps="steps" :current-step="displayStep" class="mb-8" />
 
     <CheckoutForm
       v-if="checkoutStore.currentStep === 2"
@@ -84,7 +95,7 @@ async function handleConfirm() {
     />
 
     <TimeSlotPicker
-      v-else-if="checkoutStore.currentStep === 3"
+      v-else-if="checkoutStore.currentStep === 3 && venteUsesTimeSlots"
       :time-slots="timeSlots ?? []"
       :selected-id="checkoutStore.selectedTimeSlotId"
       :is-loading="isLoadingTimeSlots"
@@ -94,14 +105,16 @@ async function handleConfirm() {
     />
 
     <OrderSummary
-      v-else-if="checkoutStore.currentStep === 4 && selectedTimeSlot"
+      v-else-if="checkoutStore.currentStep === 4 && (selectedTimeSlot || !venteUsesTimeSlots)"
       :customer-info="checkoutStore.customerInfo"
       :time-slot="selectedTimeSlot"
+      :pickup-start-date="vente?.pickupStartDate ?? null"
+      :pickup-end-date="vente?.pickupEndDate ?? null"
       :items="cartStore.items"
       :total="cartStore.total"
       :is-submitting="checkoutStore.isSubmitting"
       @confirm="handleConfirm"
-      @back="checkoutStore.currentStep = 3"
+      @back="handleSummaryBack"
     />
   </div>
 </template>

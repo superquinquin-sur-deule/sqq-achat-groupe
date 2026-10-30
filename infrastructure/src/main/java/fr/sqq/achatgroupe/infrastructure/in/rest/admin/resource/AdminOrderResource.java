@@ -6,6 +6,7 @@ import fr.sqq.achatgroupe.application.query.CursorPageRequest;
 import fr.sqq.achatgroupe.application.query.GenerateDistributionListQuery;
 import fr.sqq.achatgroupe.application.query.GenerateDistributionListQuery.DistributionOrder;
 import fr.sqq.achatgroupe.application.query.GetOrderDetailsQuery;
+import fr.sqq.achatgroupe.application.query.GetVenteQuery;
 import fr.sqq.achatgroupe.application.query.ListAllProductsQuery;
 import fr.sqq.achatgroupe.application.query.ListAllTimeSlotsQuery;
 import fr.sqq.achatgroupe.application.query.ListOrdersQuery;
@@ -13,6 +14,8 @@ import fr.sqq.achatgroupe.application.port.out.DistributionPdfGenerator;
 import fr.sqq.achatgroupe.domain.model.catalog.Product;
 import fr.sqq.achatgroupe.domain.model.order.Order;
 import fr.sqq.achatgroupe.domain.model.planning.TimeSlot;
+import fr.sqq.achatgroupe.domain.model.vente.Vente;
+import fr.sqq.achatgroupe.domain.model.vente.VenteId;
 import fr.sqq.achatgroupe.infrastructure.in.rest.admin.mapper.AdminOrderRestMapper;
 import fr.sqq.achatgroupe.infrastructure.in.rest.admin.dto.AdminOrderDetailResponse;
 import fr.sqq.achatgroupe.infrastructure.in.rest.admin.dto.AdminOrderResponse;
@@ -64,7 +67,8 @@ public class AdminOrderResource {
         List<TimeSlot> timeSlots = mediator.send(ListAllTimeSlotsQuery.all(venteId)).items();
         Map<Long, TimeSlot> timeSlotsById = timeSlots.stream()
                 .collect(Collectors.toMap(TimeSlot::id, Function.identity()));
-        List<AdminOrderResponse> responses = mapper.toListResponse(page.items(), timeSlotsById);
+        Vente vente = mediator.send(new GetVenteQuery(new VenteId(venteId)));
+        List<AdminOrderResponse> responses = mapper.toListResponse(page.items(), timeSlotsById, vente);
         return new CursorPageResponse<>(responses, new CursorPageResponse.PageInfo(page.endCursor(), page.hasNext()));
     }
 

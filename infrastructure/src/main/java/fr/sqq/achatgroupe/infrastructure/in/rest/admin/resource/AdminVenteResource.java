@@ -9,6 +9,7 @@ import fr.sqq.achatgroupe.application.query.CheckVenteHasOrdersQuery;
 import fr.sqq.achatgroupe.application.query.CursorPage;
 import fr.sqq.achatgroupe.application.query.CursorPageRequest;
 import fr.sqq.achatgroupe.application.query.ListAllVentesQuery;
+import fr.sqq.achatgroupe.domain.model.vente.PickupMode;
 import fr.sqq.achatgroupe.domain.model.vente.Vente;
 import fr.sqq.achatgroupe.domain.model.vente.VenteId;
 import fr.sqq.achatgroupe.infrastructure.in.rest.admin.mapper.AdminVenteRestMapper;
@@ -56,7 +57,8 @@ public class AdminVenteResource {
     @POST
     public RestResponse<DataResponse<AdminVenteResponse>> createVente(@Valid CreateAdminVenteRequest request) {
         var cmd = new CreateAdminVenteCommand(
-                request.name(), request.description(), request.startDate(), request.endDate());
+                request.name(), request.description(), request.startDate(), request.endDate(),
+                parsePickupMode(request.pickupMode()), request.pickupStartDate(), request.pickupEndDate());
         Vente vente = mediator.send(cmd);
         return RestResponse.status(RestResponse.Status.CREATED, new DataResponse<>(mapper.toResponse(vente, false)));
     }
@@ -65,7 +67,8 @@ public class AdminVenteResource {
     @Path("/{id}")
     public DataResponse<AdminVenteResponse> updateVente(@PathParam("id") Long id, @Valid UpdateAdminVenteRequest request) {
         var cmd = new UpdateVenteCommand(
-                new VenteId(id), request.name(), request.description(), request.startDate(), request.endDate());
+                new VenteId(id), request.name(), request.description(), request.startDate(), request.endDate(),
+                parsePickupMode(request.pickupMode()), request.pickupStartDate(), request.pickupEndDate());
         Vente vente = mediator.send(cmd);
         return new DataResponse<>(toResponseWithHasOrders(vente));
     }
@@ -89,6 +92,18 @@ public class AdminVenteResource {
     public DataResponse<AdminVenteResponse> deactivateVente(@PathParam("id") Long id) {
         Vente vente = mediator.send(new DeactivateVenteCommand(new VenteId(id)));
         return new DataResponse<>(toResponseWithHasOrders(vente));
+    }
+
+    /** Absent ou vide => mode créneaux, pour rester compatible avec les clients existants. */
+    private static PickupMode parsePickupMode(String raw) {
+        if (raw == null || raw.isBlank()) {
+            return PickupMode.TIME_SLOTS;
+        }
+        try {
+            return PickupMode.valueOf(raw);
+        } catch (IllegalArgumentException e) {
+            throw new BadRequestException("Mode de retrait inconnu : " + raw);
+        }
     }
 
     private AdminVenteResponse toResponseWithHasOrders(Vente vente) {

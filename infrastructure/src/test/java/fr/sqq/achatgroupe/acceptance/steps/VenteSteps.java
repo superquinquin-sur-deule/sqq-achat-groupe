@@ -29,6 +29,11 @@ public class VenteSteps {
         createVenteWithLimitedStock(stock);
     }
 
+    @Étantdonnéque("une vente sans créneau existe avec des produits")
+    public void uneVenteSansCreneauExisteAvecDesProduits() {
+        createVenteSansCreneau();
+    }
+
     @Étantdonnéque("une vente sans commande existe")
     public void uneVenteSansCommandeExiste() {
         Instant startDate = Instant.now().minus(1, ChronoUnit.DAYS);
@@ -207,6 +212,76 @@ public class VenteSteps {
         testContext.setTimeSlotIds(timeSlotIds);
 
         // 4. Activate the vente
+        RestAssured.given()
+                .contentType(ContentType.JSON)
+                .when()
+                .put("/api/admin/ventes/" + venteId + "/activate")
+                .then()
+                .statusCode(200);
+    }
+
+    /**
+     * Vente en mode plage de dates : mêmes produits que createVente(), mais aucun créneau —
+     * le retrait se fait librement entre pickupStartDate et pickupEndDate.
+     */
+    private void createVenteSansCreneau() {
+        Instant startDate = Instant.now().minus(1, ChronoUnit.DAYS);
+        Instant endDate = Instant.now().plus(60, ChronoUnit.DAYS);
+        LocalDate pickupStartDate = LocalDate.now().plusDays(30);
+        LocalDate pickupEndDate = LocalDate.now().plusDays(33);
+
+        String venteBody = """
+                {
+                    "name": "Vente Sans Créneau %d",
+                    "description": "Vente de test sans créneau",
+                    "startDate": "%s",
+                    "endDate": "%s",
+                    "pickupMode": "DATE_RANGE",
+                    "pickupStartDate": "%s",
+                    "pickupEndDate": "%s"
+                }
+                """.formatted(System.nanoTime(), startDate, endDate, pickupStartDate, pickupEndDate);
+
+        Long venteId = RestAssured.given()
+                .contentType(ContentType.JSON)
+                .body(venteBody)
+                .when()
+                .post("/api/admin/ventes")
+                .then()
+                .statusCode(201)
+                .extract()
+                .jsonPath()
+                .getLong("data.id");
+
+        testContext.setVenteId(venteId);
+        testContext.setPickupRange(pickupStartDate, pickupEndDate);
+
+        List<String> products = List.of(
+                """
+                {"name": "Tomates bio", "description": "Tomates grappe biologiques cultivées localement", "prixHt": 3.32, "tauxTva": 5.50, "supplier": "Ferme du Soleil", "stock": 25, "reference": "TOM-001", "category": "Légumes", "brand": "Ferme du Soleil", "colisage": 6}
+                """,
+                """
+                {"name": "Pain de campagne", "description": "Pain artisanal au levain naturel, 500g", "prixHt": 3.98, "tauxTva": 5.50, "supplier": "Boulangerie Martin", "stock": 15, "reference": "PAI-001", "category": "Boulangerie", "brand": "Boulangerie Martin"}
+                """
+        );
+
+        List<Long> productIds = new ArrayList<>();
+        for (String productBody : products) {
+            Long productId = RestAssured.given()
+                    .contentType(ContentType.JSON)
+                    .body(productBody)
+                    .when()
+                    .post("/api/admin/ventes/" + venteId + "/products")
+                    .then()
+                    .statusCode(200)
+                    .extract()
+                    .jsonPath()
+                    .getLong("data.id");
+            productIds.add(productId);
+        }
+        testContext.setProductIds(productIds);
+        testContext.setTimeSlotIds(List.of());
+
         RestAssured.given()
                 .contentType(ContentType.JSON)
                 .when()

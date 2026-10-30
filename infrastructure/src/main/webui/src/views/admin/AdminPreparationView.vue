@@ -7,6 +7,7 @@ import { useAdminTimeslotsQuery } from '@/composables/api/useAdminTimeslotsApi'
 import { useCursorPagination } from '@/composables/useCursorPagination'
 import EmptyState from '@/components/ui/EmptyState.vue'
 import Pagination from '@/components/ui/Pagination.vue'
+import { useSelectedVente } from '@/composables/useSelectedVente'
 
 const venteStore = useVenteStore()
 const { selectedVenteId } = storeToRefs(venteStore)
@@ -33,6 +34,9 @@ const pageInfo = computed(() => pageData.value?.pageInfo ?? { endCursor: null, h
 
 // Fetch timeslots for the filter dropdown
 const { data: timeslotsPageData } = useAdminTimeslotsQuery(selectedVenteId)
+
+// Les écrans créneaux n'ont pas de sens pour une vente en plage de dates.
+const { venteUsesTimeSlots } = useSelectedVente()
 const timeSlots = computed(() => timeslotsPageData.value?.data ?? [])
 
 const groupedBySlot = computed(() => {
@@ -115,6 +119,7 @@ function handlePrint() {
       </h1>
       <div class="flex items-center gap-3">
         <select
+          v-if="venteUsesTimeSlots"
           v-model="selectedTimeSlotId"
           class="rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-dark shadow-sm"
           data-testid="preparation-slot-filter"

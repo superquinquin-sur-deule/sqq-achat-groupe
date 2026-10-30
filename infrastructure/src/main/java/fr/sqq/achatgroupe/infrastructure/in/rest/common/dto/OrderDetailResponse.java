@@ -16,6 +16,9 @@ public record OrderDetailResponse(
         String customerLastName,
         String customerEmail,
         TimeSlotInfo timeSlot,
+        String pickupMode,
+        LocalDate pickupStartDate,
+        LocalDate pickupEndDate,
         List<OrderItemInfo> items,
         Instant createdAt
 ) {

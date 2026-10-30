@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import type { VenteResponse, TimeSlotResponse } from '@/api/generated/model'
+import { formatPickupRange, usesTimeSlots } from '@/utils/pickup-formatters'
 
 const props = defineProps<{
   vente: VenteResponse | null
@@ -50,6 +51,12 @@ const formattedSlotDates = computed(() => {
   })
 })
 
+// Vente sans créneau : le retrait se fait librement sur la plage configurée.
+const venteUsesTimeSlots = computed(() => usesTimeSlots(props.vente))
+const pickupRangeText = computed(() =>
+  formatPickupRange(props.vente?.pickupStartDate, props.vente?.pickupEndDate, false),
+)
+
 const slotDatesText = computed(() => {
   if (formattedSlotDates.value.length === 0) return ''
   if (formattedSlotDates.value.length === 1) return formattedSlotDates.value[0]
@@ -79,11 +86,23 @@ const slotDatesText = computed(() => {
           {{ orderPeriod }}
         </p>
         <p class="mt-4 text-sm uppercase">Récupère-la :</p>
-        <div v-if="timeSlotsLoading" class="mt-2 text-sm text-gray-500">
+
+        <template v-if="!venteUsesTimeSlots">
+          <p
+            v-if="pickupRangeText"
+            class="mt-2 text-sm font-bold capitalize text-dark"
+            data-testid="hero-pickup-range"
+          >
+            {{ pickupRangeText }}
+          </p>
+          <p class="mt-1 text-sm text-dark">au magasin, sans réservation de créneau</p>
+        </template>
+
+        <div v-else-if="timeSlotsLoading" class="mt-2 text-sm text-gray-500">
           Chargement des créneaux...
         </div>
         <template v-else-if="timeSlots.length > 0">
-          <p class="mt-2 text-sm capitalize text-dark font-bold">
+          <p class="mt-2 text-sm font-bold capitalize text-dark">
             {{ slotDatesText }}
           </p>
           <p class="mt-1 text-sm text-dark">

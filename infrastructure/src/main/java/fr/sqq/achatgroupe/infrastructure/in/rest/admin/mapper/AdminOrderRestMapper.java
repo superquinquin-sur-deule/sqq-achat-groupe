@@ -4,6 +4,7 @@ import fr.sqq.achatgroupe.domain.model.catalog.Product;
 import fr.sqq.achatgroupe.domain.model.order.Order;
 import fr.sqq.achatgroupe.domain.model.order.OrderItem;
 import fr.sqq.achatgroupe.domain.model.planning.TimeSlot;
+import fr.sqq.achatgroupe.domain.model.vente.Vente;
 import fr.sqq.achatgroupe.infrastructure.in.rest.admin.dto.AdminOrderDetailResponse;
 import fr.sqq.achatgroupe.infrastructure.in.rest.admin.dto.AdminOrderResponse;
 import org.mapstruct.Mapper;
@@ -16,12 +17,25 @@ import java.util.Map;
 public interface AdminOrderRestMapper {
 
     DateTimeFormatter TIME_FORMAT = DateTimeFormatter.ofPattern("HH:mm");
+    DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
-    default AdminOrderResponse toListResponse(Order order, Map<Long, TimeSlot> timeSlotsById) {
-        TimeSlot slot = timeSlotsById.get(order.timeSlotId());
-        String timeSlotLabel = slot != null
-                ? slot.date() + " " + slot.startTime().format(TIME_FORMAT) + "-" + slot.endTime().format(TIME_FORMAT)
-                : "Créneau inconnu";
+    /**
+     * Libellé de retrait : le créneau quand la vente en utilise, sinon la plage de dates
+     * configurée sur la vente (une commande sans créneau y est alors tout à fait normale).
+     */
+    private static String pickupLabel(Order order, Map<Long, TimeSlot> timeSlotsById, Vente vente) {
+        TimeSlot slot = order.timeSlotId() != null ? timeSlotsById.get(order.timeSlotId()) : null;
+        if (slot != null) {
+            return slot.date() + " " + slot.startTime().format(TIME_FORMAT) + "-" + slot.endTime().format(TIME_FORMAT);
+        }
+        if (vente != null && !vente.usesTimeSlots()) {
+            return vente.pickupStartDate().format(DATE_FORMAT) + " – " + vente.pickupEndDate().format(DATE_FORMAT);
+        }
+        return "Créneau inconnu";
+    }
+
+    default AdminOrderResponse toListResponse(Order order, Map<Long, TimeSlot> timeSlotsById, Vente vente) {
+        String timeSlotLabel = pickupLabel(order, timeSlotsById, vente);
         return new AdminOrderResponse(
                 order.id(),
                 order.orderNumber().value(),
@@ -36,14 +50,14 @@ public interface AdminOrderRestMapper {
         );
     }
 
-    default List<AdminOrderResponse> toListResponse(List<Order> orders, Map<Long, TimeSlot> timeSlotsById) {
+    default List<AdminOrderResponse> toListResponse(List<Order> orders, Map<Long, TimeSlot> timeSlotsById, Vente vente) {
         return orders.stream()
-                .map(order -> toListResponse(order, timeSlotsById))
+                .map(order -> toListResponse(order, timeSlotsById, vente))
                 .toList();
     }
 
     default AdminOrderDetailResponse toDetailResponse(Order order, Map<Long, TimeSlot> timeSlotsById, Map<Long, Product> productsById) {
-        TimeSlot slot = timeSlotsById.get(order.timeSlotId());
+        TimeSlot slot = order.timeSlotId() != null ? timeSlotsById.get(order.timeSlotId()) : null;
         AdminOrderDetailResponse.TimeSlotInfo timeSlotInfo = slot != null
                 ? new AdminOrderDetailResponse.TimeSlotInfo(slot.date(), slot.startTime(), slot.endTime())
                 : null;

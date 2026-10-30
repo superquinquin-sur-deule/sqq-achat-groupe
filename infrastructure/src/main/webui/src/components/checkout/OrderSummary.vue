@@ -3,6 +3,8 @@ import type { CartItem } from '@/types/cart'
 import type { TimeSlotResponse } from '@/api/generated/model'
 import Card from '@/components/ui/Card.vue'
 import Button from '@/components/ui/Button.vue'
+import { formatPickupRange } from '@/utils/pickup-formatters'
+import { computed } from 'vue'
 
 interface CustomerInfo {
   firstName: string
@@ -11,13 +13,20 @@ interface CustomerInfo {
   phone: string
 }
 
-defineProps<{
+const props = defineProps<{
   customerInfo: CustomerInfo
-  timeSlot: TimeSlotResponse
+  /** Null quand la vente fonctionne en plage de dates. */
+  timeSlot: TimeSlotResponse | null
+  pickupStartDate?: string | null
+  pickupEndDate?: string | null
   items: CartItem[]
   total: number
   isSubmitting: boolean
 }>()
+
+const pickupRangeLabel = computed(() =>
+  formatPickupRange(props.pickupStartDate, props.pickupEndDate),
+)
 
 const emit = defineEmits<{
   confirm: []
@@ -64,10 +73,19 @@ function formatDate(dateStr: string): string {
     </Card>
 
     <Card>
-      <h3 class="mb-3 text-base font-semibold text-dark">Votre créneau</h3>
-      <div class="rounded-lg bg-primary px-4 py-3 text-sm font-semibold text-dark">
+      <h3 class="mb-3 text-base font-semibold text-dark">
+        {{ timeSlot ? 'Votre créneau' : 'Votre retrait' }}
+      </h3>
+      <div v-if="timeSlot" class="rounded-lg bg-primary px-4 py-3 text-sm font-semibold text-dark">
         {{ formatDate(timeSlot.date) }} · {{ formatTime(timeSlot.startTime) }} —
         {{ formatTime(timeSlot.endTime) }}
+      </div>
+      <div
+        v-else
+        class="rounded-lg bg-primary px-4 py-3 text-sm font-semibold text-dark"
+        data-testid="order-summary-pickup-range"
+      >
+        Retrait {{ pickupRangeLabel }}
       </div>
     </Card>
 

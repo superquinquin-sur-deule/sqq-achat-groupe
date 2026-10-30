@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { watch } from 'vue'
+import { computed, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useOrderDetailQuery } from '@/composables/api/useOrdersApi'
 import { useCartStore } from '@/stores/cartStore'
 import Card from '@/components/ui/Card.vue'
 import Button from '@/components/ui/Button.vue'
+import { formatPickupRange } from '@/utils/pickup-formatters'
 
 const route = useRoute()
 const router = useRouter()
@@ -28,6 +29,10 @@ watch(isError, (error) => {
     router.replace({ name: 'ventes' })
   }
 })
+
+const pickupRangeLabel = computed(() =>
+  formatPickupRange(order.value?.pickupStartDate, order.value?.pickupEndDate),
+)
 
 function formatPrice(price: number): string {
   return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(price)
@@ -119,6 +124,18 @@ function formatDate(dateStr: string): string {
         </p>
         <p class="mt-1 text-sm text-dark">
           Présentez-vous au créneau indiqué pour récupérer et régler votre commande.
+        </p>
+      </div>
+
+      <!-- Pickup date range (vente sans créneau) -->
+      <div
+        v-else-if="pickupRangeLabel"
+        class="w-full rounded-xl bg-primary px-6 py-4"
+        data-testid="confirmation-pickup-range"
+      >
+        <p class="text-lg font-semibold text-dark">Retrait {{ pickupRangeLabel }}</p>
+        <p class="mt-1 text-sm text-dark">
+          Présentez-vous en magasin pendant cette période pour récupérer et régler votre commande.
         </p>
       </div>
 

@@ -8,6 +8,9 @@ import fr.sqq.achatgroupe.domain.model.planning.TimeSlot;
 import fr.sqq.achatgroupe.application.port.out.OrderRepository;
 import fr.sqq.achatgroupe.application.port.out.ProductRepository;
 import fr.sqq.achatgroupe.application.port.out.TimeSlotRepository;
+import fr.sqq.achatgroupe.application.port.out.VenteRepository;
+import fr.sqq.achatgroupe.domain.model.vente.Vente;
+import fr.sqq.achatgroupe.domain.model.vente.VenteId;
 import fr.sqq.achatgroupe.infrastructure.in.rest.common.dto.DataResponse;
 import fr.sqq.achatgroupe.infrastructure.in.rest.common.dto.OrderDetailResponse;
 import jakarta.ws.rs.Consumes;
@@ -29,13 +32,16 @@ public class OrderResource {
     private final OrderRepository orderRepository;
     private final TimeSlotRepository timeSlotRepository;
     private final ProductRepository productRepository;
+    private final VenteRepository venteRepository;
 
     public OrderResource(OrderRepository orderRepository,
                          TimeSlotRepository timeSlotRepository,
-                         ProductRepository productRepository) {
+                         ProductRepository productRepository,
+                         VenteRepository venteRepository) {
         this.orderRepository = orderRepository;
         this.timeSlotRepository = timeSlotRepository;
         this.productRepository = productRepository;
+        this.venteRepository = venteRepository;
     }
 
     @GET
@@ -44,8 +50,11 @@ public class OrderResource {
         Order order = orderRepository.findOrderById(id)
                 .orElseThrow(() -> new OrderNotFoundException(id));
 
-        TimeSlot timeSlot = timeSlotRepository.findSlotById(order.timeSlotId())
-                .orElse(null);
+        TimeSlot timeSlot = order.timeSlotId() != null
+                ? timeSlotRepository.findSlotById(order.timeSlotId()).orElse(null)
+                : null;
+
+        Vente vente = venteRepository.findById(new VenteId(order.venteId())).orElse(null);
 
         var items = order.items().stream()
                 .map(item -> {
@@ -70,6 +79,9 @@ public class OrderResource {
                 order.customer().lastName(),
                 order.customer().email(),
                 timeSlotInfo,
+                vente != null ? vente.pickupMode().name() : null,
+                vente != null ? vente.pickupStartDate() : null,
+                vente != null ? vente.pickupEndDate() : null,
                 items,
                 order.createdAt()
         );

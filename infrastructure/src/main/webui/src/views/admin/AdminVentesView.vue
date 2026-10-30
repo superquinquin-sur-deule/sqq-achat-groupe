@@ -16,6 +16,7 @@ import {
 } from '@/composables/api/useAdminVentesApi'
 import AdminTable from '@/components/admin/AdminTable.vue'
 import type { AdminVenteResponse } from '@/api/generated/model'
+import { ApiError } from '@/api/mutator/custom-fetch'
 
 const toast = useToast()
 const pagination = useCursorPagination()
@@ -62,6 +63,9 @@ async function onSubmit(data: {
   description: string
   startDate: string
   endDate: string
+  pickupMode: string
+  pickupStartDate: string
+  pickupEndDate: string
 }) {
   submitting.value = true
   try {
@@ -70,6 +74,10 @@ async function onSubmit(data: {
       description: data.description,
       startDate: toInstantOrUndefined(data.startDate),
       endDate: toInstantOrUndefined(data.endDate),
+      pickupMode: data.pickupMode,
+      // Dates nues (YYYY-MM-DD) : aucun passage par un Instant ici.
+      pickupStartDate: data.pickupStartDate || undefined,
+      pickupEndDate: data.pickupEndDate || undefined,
     }
     if (editingVente.value) {
       await updateMutation.mutateAsync({ id: editingVente.value.id, data: payload })
@@ -79,8 +87,10 @@ async function onSubmit(data: {
       toast.success('Vente créée')
     }
     closeForm()
-  } catch {
-    toast.error('Erreur lors de la sauvegarde de la vente')
+  } catch (e: unknown) {
+    // Le backend refuse en 409 le changement de mode sur une vente déjà commandée :
+    // son message est plus utile que le libellé générique.
+    toast.error(e instanceof ApiError ? e.message : 'Erreur lors de la sauvegarde de la vente')
   } finally {
     submitting.value = false
   }

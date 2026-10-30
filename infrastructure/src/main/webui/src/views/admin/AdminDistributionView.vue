@@ -7,6 +7,7 @@ import { useAdminOrdersQuery, usePickupMutation } from '@/composables/api/useAdm
 import { statusLabel, statusClasses } from '@/utils/order-formatters'
 import EmptyState from '@/components/ui/EmptyState.vue'
 import type { AdminOrderResponse } from '@/api/generated/model'
+import { useSelectedVente } from '@/composables/useSelectedVente'
 
 const toast = useToast()
 const venteStore = useVenteStore()
@@ -21,6 +22,9 @@ const { data: pageData, isLoading: loading } = useAdminOrdersQuery(
 )
 const orders = computed(() => pageData.value?.data ?? [])
 const pickupMutation = usePickupMutation(selectedVenteId)
+
+// Les écrans créneaux n'ont pas de sens pour une vente en plage de dates.
+const { venteUsesTimeSlots } = useSelectedVente()
 
 const searchQuery = ref('')
 const selectedSlot = ref('')
@@ -140,7 +144,11 @@ async function handlePickup(orderId: string) {
     </div>
 
     <!-- Slot Filter -->
-    <div class="mb-4 flex flex-wrap gap-2" data-testid="distribution-slot-filter">
+    <div
+      v-if="venteUsesTimeSlots"
+      class="mb-4 flex flex-wrap gap-2"
+      data-testid="distribution-slot-filter"
+    >
       <button
         :class="[
           'rounded-lg px-3 py-2 text-sm font-medium transition-colors',

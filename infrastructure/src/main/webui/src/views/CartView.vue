@@ -5,6 +5,7 @@ import { useVenteExpiredRedirect } from '@/composables/useVenteExpiredRedirect'
 import CartSummary from '@/components/cart/CartSummary.vue'
 import Button from '@/components/ui/Button.vue'
 import Stepper from '@/components/ui/Stepper.vue'
+import { useCheckoutSteps } from '@/composables/useCheckoutSteps'
 
 const cartStore = useCartStore()
 const route = useRoute()
@@ -13,12 +14,7 @@ const venteId = Number(route.params.venteId)
 
 useVenteExpiredRedirect(venteId)
 
-const steps = [
-  { label: 'Panier' },
-  { label: 'Coordonnées' },
-  { label: 'Créneau' },
-  { label: 'Récapitulatif' },
-]
+const { steps } = useCheckoutSteps(venteId)
 
 function goToCatalogue() {
   router.push({ name: 'home', params: { venteId } })

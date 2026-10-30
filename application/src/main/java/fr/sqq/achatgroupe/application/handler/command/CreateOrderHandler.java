@@ -4,8 +4,11 @@ import fr.sqq.achatgroupe.application.command.CreateOrderCommand;
 import fr.sqq.achatgroupe.application.port.out.OrderRepository;
 import fr.sqq.achatgroupe.application.port.out.ProductRepository;
 import fr.sqq.achatgroupe.application.port.out.TimeSlotRepository;
+import fr.sqq.achatgroupe.application.port.out.VenteRepository;
 import fr.sqq.achatgroupe.domain.exception.ProductNotFoundException;
 import fr.sqq.achatgroupe.domain.exception.TimeSlotNotFoundException;
+import fr.sqq.achatgroupe.domain.exception.TimeSlotRequiredException;
+import fr.sqq.achatgroupe.domain.exception.VenteNotFoundException;
 import fr.sqq.achatgroupe.domain.model.catalog.Product;
 import fr.sqq.achatgroupe.domain.model.catalog.ProductId;
 import fr.sqq.achatgroupe.domain.model.order.CustomerInfo;
@@ -13,6 +16,8 @@ import fr.sqq.achatgroupe.domain.model.order.Order;
 import fr.sqq.achatgroupe.domain.model.order.OrderItem;
 import fr.sqq.achatgroupe.domain.model.order.OrderNumber;
 import fr.sqq.achatgroupe.domain.model.planning.TimeSlot;
+import fr.sqq.achatgroupe.domain.model.vente.Vente;
+import fr.sqq.achatgroupe.domain.model.vente.VenteId;
 import fr.sqq.mediator.CommandHandler;
 import io.quarkus.logging.Log;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -28,11 +33,14 @@ public class CreateOrderHandler implements CommandHandler<CreateOrderCommand, Or
     private final OrderRepository orderRepository;
     private final ProductRepository productRepository;
     private final TimeSlotRepository timeSlotRepository;
+    private final VenteRepository venteRepository;
 
-    public CreateOrderHandler(OrderRepository orderRepository, ProductRepository productRepository, TimeSlotRepository timeSlotRepository) {
+    public CreateOrderHandler(OrderRepository orderRepository, ProductRepository productRepository,
+                              TimeSlotRepository timeSlotRepository, VenteRepository venteRepository) {
         this.orderRepository = orderRepository;
         this.productRepository = productRepository;
         this.timeSlotRepository = timeSlotRepository;
+        this.venteRepository = venteRepository;
     }
 
     @Override
@@ -46,10 +54,21 @@ public class CreateOrderHandler implements CommandHandler<CreateOrderCommand, Or
             }
         }
 
-        TimeSlot timeSlot = timeSlotRepository.findSlotById(command.timeSlotId())
-                .orElseThrow(() -> new TimeSlotNotFoundException(command.timeSlotId()));
+        VenteId venteId = new VenteId(command.venteId());
+        Vente vente = venteRepository.findById(venteId)
+                .orElseThrow(() -> new VenteNotFoundException(venteId));
 
-        timeSlot.reserveOnePlace();
+        // En mode plage de dates, aucun créneau n'est réservé : le retrait se fait
+        // librement pendant la période configurée sur la vente.
+        TimeSlot timeSlot = null;
+        if (vente.usesTimeSlots()) {
+            if (command.timeSlotId() == null) {
+                throw new TimeSlotRequiredException();
+            }
+            timeSlot = timeSlotRepository.findSlotById(command.timeSlotId())
+                    .orElseThrow(() -> new TimeSlotNotFoundException(command.timeSlotId()));
+            timeSlot.reserveOnePlace();
+        }
 
         List<OrderItem> orderItems = new ArrayList<>();
         for (CreateOrderCommand.OrderItemCommand itemCmd : command.items()) {
@@ -66,11 +85,15 @@ public class CreateOrderHandler implements CommandHandler<CreateOrderCommand, Or
             orderItems.add(OrderItem.create(itemCmd.productId(), itemCmd.quantity(), product.prixTtc()));
         }
 
-        timeSlotRepository.save(timeSlot);
+        if (timeSlot != null) {
+            timeSlotRepository.save(timeSlot);
+        }
 
         CustomerInfo customer = new CustomerInfo(command.customerFirstName(), command.customerLastName(), command.email(), command.phone());
         OrderNumber orderNumber = OrderNumber.generate();
-        Order order = Order.create(command.venteId(), orderNumber, customer, command.timeSlotId(), orderItems, command.idempotencyKey());
+        Order order = vente.usesTimeSlots()
+                ? Order.create(command.venteId(), orderNumber, customer, command.timeSlotId(), orderItems, command.idempotencyKey())
+                : Order.createWithoutTimeSlot(command.venteId(), orderNumber, customer, orderItems, command.idempotencyKey());
 
         return orderRepository.save(order);
     }

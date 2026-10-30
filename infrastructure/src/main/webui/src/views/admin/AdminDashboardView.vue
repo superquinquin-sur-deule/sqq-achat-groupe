@@ -7,11 +7,15 @@ import BarChart from '@/components/admin/BarChart.vue'
 import { useVenteStore } from '@/stores/venteStore'
 import { storeToRefs } from 'pinia'
 import { useAdminDashboardQuery } from '@/composables/api/useAdminDashboardApi'
+import { useSelectedVente } from '@/composables/useSelectedVente'
 
 const venteStore = useVenteStore()
 const { selectedVenteId } = storeToRefs(venteStore)
 
 const { data: stats, isLoading: loading } = useAdminDashboardQuery(selectedVenteId)
+
+// Une vente en plage de dates n'a aucun créneau : le camembert serait vide.
+const { venteUsesTimeSlots } = useSelectedVente()
 
 function formatCurrency(value: number): string {
   return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(value)
@@ -189,7 +193,7 @@ const daySegments = computed(() => {
       </Card>
 
       <div class="mb-8 grid gap-6 md:grid-cols-2">
-        <Card data-testid="pie-chart-slot">
+        <Card v-if="venteUsesTimeSlots" data-testid="pie-chart-slot">
           <h2 class="mb-4 text-center text-lg font-semibold text-dark">
             Répartition par créneau
           </h2>

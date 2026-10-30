@@ -6,6 +6,7 @@ import { useAuth } from '@/composables/useAuth'
 import { useVenteStore } from '@/stores/venteStore'
 import { storeToRefs } from 'pinia'
 import { useAdminVentesQuery } from '@/composables/api/useAdminVentesApi'
+import { usesTimeSlots } from '@/utils/pickup-formatters'
 
 defineProps<{ modelValue: boolean }>()
 const emit = defineEmits<{ 'update:modelValue': [value: boolean] }>()
@@ -76,6 +77,19 @@ const sidebarVariants = cva(
   },
 )
 
+const selectedVente = computed(() => ventes.value.find((v) => v.id === selectedVenteId.value))
+
+/** Une vente en plage de dates n'a pas de créneaux : l'entrée reste visible mais inerte. */
+function isLinkDisabled(link: { testid: string }) {
+  return link.testid === 'sidenav-timeslots' && !usesTimeSlots(selectedVente.value)
+}
+
+function onLinkClick(link: { testid: string }) {
+  if (!isLinkDisabled(link)) {
+    close()
+  }
+}
+
 function isActive(to: string) {
   return route.path === to || route.path.startsWith(to + '/')
 }
@@ -131,12 +145,25 @@ function onVenteChange(event: Event) {
       </p>
       <ul class="mb-6 space-y-1">
         <li v-for="link in adminLinks" :key="link.to">
-          <RouterLink
-            :to="link.to"
+          <component
+            :is="isLinkDisabled(link) ? 'span' : RouterLink"
+            v-bind="
+              isLinkDisabled(link)
+                ? { 'aria-disabled': 'true' }
+                : { to: link.to, 'aria-current': isActive(link.to) ? 'page' : undefined }
+            "
             :data-testid="link.testid"
-            :class="navLinkVariants({ active: isActive(link.to) })"
-            :aria-current="isActive(link.to) ? 'page' : undefined"
-            @click="close"
+            :class="
+              isLinkDisabled(link)
+                ? 'flex cursor-not-allowed items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-white/30'
+                : navLinkVariants({ active: isActive(link.to) })
+            "
+            :title="
+              isLinkDisabled(link)
+                ? 'Cette vente fonctionne en plage de dates, sans créneau'
+                : undefined
+            "
+            @click="onLinkClick(link)"
           >
             <!-- Dashboard -->
             <svg
@@ -286,7 +313,7 @@ function onVenteChange(event: Event) {
               />
             </svg>
             {{ link.label }}
-          </RouterLink>
+          </component>
         </li>
       </ul>
       <p class="mb-2 px-3 text-xs font-semibold uppercase tracking-wider text-white/40">

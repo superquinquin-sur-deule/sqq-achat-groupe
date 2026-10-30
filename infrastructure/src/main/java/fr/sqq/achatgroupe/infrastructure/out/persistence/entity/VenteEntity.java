@@ -8,6 +8,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
 import java.time.Instant;
+import java.time.LocalDate;
 
 @Entity
 @Table(name = "ventes")
@@ -33,6 +34,15 @@ public class VenteEntity {
     @Column(name = "end_date")
     private Instant endDate;
 
+    @Column(name = "pickup_mode", nullable = false)
+    private String pickupMode;
+
+    @Column(name = "pickup_start_date")
+    private LocalDate pickupStartDate;
+
+    @Column(name = "pickup_end_date")
+    private LocalDate pickupEndDate;
+
     @Column(name = "created_at", nullable = false)
     private Instant createdAt;
 
@@ -53,6 +63,15 @@ public class VenteEntity {
 
     public Instant getEndDate() { return endDate; }
     public void setEndDate(Instant endDate) { this.endDate = endDate; }
+
+    public String getPickupMode() { return pickupMode; }
+    public void setPickupMode(String pickupMode) { this.pickupMode = pickupMode; }
+
+    public LocalDate getPickupStartDate() { return pickupStartDate; }
+    public void setPickupStartDate(LocalDate pickupStartDate) { this.pickupStartDate = pickupStartDate; }
+
+    public LocalDate getPickupEndDate() { return pickupEndDate; }
+    public void setPickupEndDate(LocalDate pickupEndDate) { this.pickupEndDate = pickupEndDate; }
 
     public Instant getCreatedAt() { return createdAt; }
     public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }

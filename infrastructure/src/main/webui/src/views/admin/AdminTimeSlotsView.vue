@@ -15,6 +15,8 @@ import {
   useDeleteTimeslotMutation,
 } from '@/composables/api/useAdminTimeslotsApi'
 import AdminTable from '@/components/admin/AdminTable.vue'
+import { useSelectedVente } from '@/composables/useSelectedVente'
+import { formatPickupRange } from '@/utils/pickup-formatters'
 import type {
   TimeSlotResponse,
   CreateTimeSlotRequest,
@@ -37,6 +39,12 @@ const pageInfo = computed(() => pageData.value?.pageInfo ?? { endCursor: null, h
 const createMutation = useCreateTimeslotMutation(selectedVenteId)
 const updateMutation = useUpdateTimeslotMutation(selectedVenteId)
 const deleteMutationHook = useDeleteTimeslotMutation(selectedVenteId)
+
+// Une vente en plage de dates ne gère aucun créneau : on explique plutôt que d'afficher un tableau vide.
+const { selectedVente, venteUsesTimeSlots } = useSelectedVente()
+const pickupRangeLabel = computed(() =>
+  formatPickupRange(selectedVente.value?.pickupStartDate, selectedVente.value?.pickupEndDate),
+)
 
 const showForm = ref(false)
 const editingTimeSlot = ref<TimeSlotResponse | undefined>(undefined)
@@ -129,116 +137,139 @@ function formatTime(startTime: string, endTime: string): string {
   <div>
     <div class="mb-6 flex items-center justify-between">
       <h1 class="text-2xl font-bold text-dark">Créneaux de retrait</h1>
-      <Button variant="primary" data-testid="add-timeslot-btn" @click="openCreateForm">
+      <Button
+        v-if="venteUsesTimeSlots"
+        variant="primary"
+        data-testid="add-timeslot-btn"
+        @click="openCreateForm"
+      >
         Ajouter un créneau
       </Button>
     </div>
 
-    <TimeSlotForm
-      v-if="showForm"
-      :time-slot="editingTimeSlot"
-      :loading="submitting"
-      class="mb-6"
-      @submit="onSubmit"
-      @cancel="closeForm"
-    />
-
-    <div v-if="loading" class="py-12 text-center text-brown">Chargement des créneaux...</div>
-
-    <EmptyState
-      v-else-if="(!timeSlots || timeSlots.length === 0) && !showForm"
-      message="Aucun créneau. Ajoutez votre premier créneau de retrait."
-      action-label="Ajouter un créneau"
-      @action="openCreateForm"
-    />
-
-    <AdminTable
-      v-else-if="timeSlots && timeSlots.length > 0"
-      :columns="['Date', 'Horaire', 'Capacité', 'Réservations', 'Actions']"
-      caption="Liste des créneaux de retrait"
-      dataTestid="timeslot-table"
+    <div
+      v-if="!venteUsesTimeSlots"
+      class="rounded-xl border border-gray-200 bg-white p-6"
+      data-testid="timeslots-date-range-notice"
     >
-      <tr
-        v-for="slot in timeSlots"
-        :key="slot.id"
-        class="border-t border-gray-100 transition-colors hover:bg-surface"
-        data-testid="timeslot-row"
-      >
-        <td class="px-4 py-3 font-medium text-dark">{{ formatDate(slot.date) }}</td>
-        <td class="px-4 py-3 text-dark">{{ formatTime(slot.startTime, slot.endTime) }}</td>
-        <td class="px-4 py-3 text-dark">{{ slot.capacity }}</td>
-        <td class="px-4 py-3">
-          <span
-            :class="[
-              'inline-block rounded-full px-2 py-0.5 text-xs font-medium',
-              slot.reserved > 0 ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600',
-            ]"
-          >
-            {{ slot.reserved }} / {{ slot.capacity }}
-          </span>
-        </td>
-        <td class="px-4 py-3">
-          <div class="flex flex-col gap-2">
-            <template v-if="confirmingDeleteId === slot.id">
-              <p v-if="slot.reserved > 0" class="text-sm text-error">
-                Ce créneau a {{ slot.reserved }} réservation(s). La suppression est irréversible.
-              </p>
-              <div class="flex gap-2">
-                <Button
-                  variant="danger"
-                  size="md"
-                  :aria-label="
-                    'Confirmer la suppression du créneau de ' +
-                    slot.startTime +
-                    ' à ' +
-                    slot.endTime
-                  "
-                  @click="confirmDeleteAction(slot)"
-                >
-                  Supprimer
-                </Button>
-                <Button variant="ghost" size="md" @click="cancelDelete"> Annuler </Button>
-              </div>
-            </template>
-            <template v-else>
-              <div class="flex gap-2">
-                <Button
-                  variant="secondary"
-                  size="md"
-                  :aria-label="'Modifier le créneau de ' + slot.startTime + ' à ' + slot.endTime"
-                  @click="openEditForm(slot)"
-                >
-                  Modifier
-                </Button>
-                <Button
-                  variant="danger"
-                  size="md"
-                  :disabled="slot.reserved > 0"
-                  :aria-label="'Supprimer le créneau de ' + slot.startTime + ' à ' + slot.endTime"
-                  :title="
-                    slot.reserved > 0
-                      ? 'Impossible de supprimer un créneau avec des réservations'
-                      : undefined
-                  "
-                  @click="startDelete(slot.id)"
-                >
-                  Supprimer
-                </Button>
-              </div>
-            </template>
-          </div>
-        </td>
-      </tr>
-    </AdminTable>
+      <h2 class="text-lg font-semibold text-dark">Cette vente fonctionne en plage de dates</h2>
+      <p class="mt-2 text-sm text-brown">
+        Les coopérateurs n'ont pas de créneau à choisir : ils peuvent venir récupérer leur commande
+        <template v-if="pickupRangeLabel">{{ pickupRangeLabel }}</template
+        ><template v-else>pendant la période de retrait configurée</template>.
+      </p>
+      <p class="mt-2 text-sm text-brown">
+        Pour gérer des créneaux, modifiez le mode de retrait depuis la page Ventes.
+      </p>
+    </div>
 
-    <Pagination
-      v-if="timeSlots && timeSlots.length > 0"
-      :has-next="pageInfo.hasNext"
-      :has-previous="pagination.hasPrevious.value"
-      :page-number="pagination.pageNumber.value"
-      :loading="loading"
-      @next="pagination.goToNext(pageInfo.endCursor!)"
-      @previous="pagination.goToPrevious()"
-    />
+    <template v-else>
+      <TimeSlotForm
+        v-if="showForm"
+        :time-slot="editingTimeSlot"
+        :loading="submitting"
+        class="mb-6"
+        @submit="onSubmit"
+        @cancel="closeForm"
+      />
+
+      <div v-if="loading" class="py-12 text-center text-brown">Chargement des créneaux...</div>
+
+      <EmptyState
+        v-else-if="(!timeSlots || timeSlots.length === 0) && !showForm"
+        message="Aucun créneau. Ajoutez votre premier créneau de retrait."
+        action-label="Ajouter un créneau"
+        @action="openCreateForm"
+      />
+
+      <AdminTable
+        v-else-if="timeSlots && timeSlots.length > 0"
+        :columns="['Date', 'Horaire', 'Capacité', 'Réservations', 'Actions']"
+        caption="Liste des créneaux de retrait"
+        dataTestid="timeslot-table"
+      >
+        <tr
+          v-for="slot in timeSlots"
+          :key="slot.id"
+          class="border-t border-gray-100 transition-colors hover:bg-surface"
+          data-testid="timeslot-row"
+        >
+          <td class="px-4 py-3 font-medium text-dark">{{ formatDate(slot.date) }}</td>
+          <td class="px-4 py-3 text-dark">{{ formatTime(slot.startTime, slot.endTime) }}</td>
+          <td class="px-4 py-3 text-dark">{{ slot.capacity }}</td>
+          <td class="px-4 py-3">
+            <span
+              :class="[
+                'inline-block rounded-full px-2 py-0.5 text-xs font-medium',
+                slot.reserved > 0 ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600',
+              ]"
+            >
+              {{ slot.reserved }} / {{ slot.capacity }}
+            </span>
+          </td>
+          <td class="px-4 py-3">
+            <div class="flex flex-col gap-2">
+              <template v-if="confirmingDeleteId === slot.id">
+                <p v-if="slot.reserved > 0" class="text-sm text-error">
+                  Ce créneau a {{ slot.reserved }} réservation(s). La suppression est irréversible.
+                </p>
+                <div class="flex gap-2">
+                  <Button
+                    variant="danger"
+                    size="md"
+                    :aria-label="
+                      'Confirmer la suppression du créneau de ' +
+                      slot.startTime +
+                      ' à ' +
+                      slot.endTime
+                    "
+                    @click="confirmDeleteAction(slot)"
+                  >
+                    Supprimer
+                  </Button>
+                  <Button variant="ghost" size="md" @click="cancelDelete"> Annuler </Button>
+                </div>
+              </template>
+              <template v-else>
+                <div class="flex gap-2">
+                  <Button
+                    variant="secondary"
+                    size="md"
+                    :aria-label="'Modifier le créneau de ' + slot.startTime + ' à ' + slot.endTime"
+                    @click="openEditForm(slot)"
+                  >
+                    Modifier
+                  </Button>
+                  <Button
+                    variant="danger"
+                    size="md"
+                    :disabled="slot.reserved > 0"
+                    :aria-label="'Supprimer le créneau de ' + slot.startTime + ' à ' + slot.endTime"
+                    :title="
+                      slot.reserved > 0
+                        ? 'Impossible de supprimer un créneau avec des réservations'
+                        : undefined
+                    "
+                    @click="startDelete(slot.id)"
+                  >
+                    Supprimer
+                  </Button>
+                </div>
+              </template>
+            </div>
+          </td>
+        </tr>
+      </AdminTable>
+
+      <Pagination
+        v-if="timeSlots && timeSlots.length > 0"
+        :has-next="pageInfo.hasNext"
+        :has-previous="pagination.hasPrevious.value"
+        :page-number="pagination.pageNumber.value"
+        :loading="loading"
+        @next="pagination.goToNext(pageInfo.endCursor!)"
+        @previous="pagination.goToPrevious()"
+      />
+    </template>
   </div>
 </template>

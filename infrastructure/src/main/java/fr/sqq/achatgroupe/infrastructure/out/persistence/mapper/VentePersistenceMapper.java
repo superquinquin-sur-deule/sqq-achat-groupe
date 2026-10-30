@@ -1,5 +1,6 @@
 package fr.sqq.achatgroupe.infrastructure.out.persistence.mapper;
 
+import fr.sqq.achatgroupe.domain.model.vente.PickupMode;
 import fr.sqq.achatgroupe.domain.model.vente.Vente;
 import fr.sqq.achatgroupe.domain.model.vente.VenteStatus;
 import fr.sqq.achatgroupe.infrastructure.out.persistence.entity.VenteEntity;
@@ -17,6 +18,9 @@ public interface VentePersistenceMapper {
                 VenteStatus.valueOf(entity.getStatus()),
                 entity.getStartDate(),
                 entity.getEndDate(),
+                PickupMode.valueOf(entity.getPickupMode()),
+                entity.getPickupStartDate(),
+                entity.getPickupEndDate(),
                 entity.getCreatedAt()
         );
     }
@@ -27,6 +31,9 @@ public interface VentePersistenceMapper {
     @Mapping(target = "status", expression = "java(domain.status().name())")
     @Mapping(target = "startDate", expression = "java(domain.startDate())")
     @Mapping(target = "endDate", expression = "java(domain.endDate())")
+    @Mapping(target = "pickupMode", expression = "java(domain.pickupMode().name())")
+    @Mapping(target = "pickupStartDate", expression = "java(domain.pickupStartDate())")
+    @Mapping(target = "pickupEndDate", expression = "java(domain.pickupEndDate())")
     @Mapping(target = "createdAt", expression = "java(domain.createdAt())")
     VenteEntity toEntity(Vente domain);
 }

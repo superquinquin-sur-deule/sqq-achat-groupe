@@ -1,6 +1,7 @@
 package fr.sqq.achatgroupe.infrastructure.in.rest.coop.dto;
 
 import java.time.Instant;
+import java.time.LocalDate;
 
 public record VenteResponse(
         Long id,
@@ -9,6 +10,9 @@ public record VenteResponse(
         String status,
         Instant startDate,
         Instant endDate,
+        String pickupMode,
+        LocalDate pickupStartDate,
+        LocalDate pickupEndDate,
         Instant createdAt
 ) {
 }

@@ -5,4 +5,8 @@ public class VenteHasOrdersException extends DomainException {
     public VenteHasOrdersException() {
         super("Impossible de supprimer la vente car elle contient des commandes.");
     }
+
+    public VenteHasOrdersException(String message) {
+        super(message);
+    }
 }

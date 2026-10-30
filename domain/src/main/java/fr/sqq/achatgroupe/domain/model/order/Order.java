@@ -54,6 +54,17 @@ public class Order {
         return new Order(UUID.randomUUID(), venteId, number, customer, timeSlotId, items, OrderStatus.CONFIRMED, total, Instant.now(), idempotencyKey, null);
     }
 
+    public static Order createWithoutTimeSlot(Long venteId, OrderNumber number, CustomerInfo customer,
+                                              List<OrderItem> items, String idempotencyKey) {
+        if (items == null || items.isEmpty()) {
+            throw new IllegalArgumentException("La commande doit contenir au moins un article");
+        }
+        Money total = items.stream()
+                .map(OrderItem::subtotal)
+                .reduce(Money.ZERO, Money::add);
+        return new Order(UUID.randomUUID(), venteId, number, customer, null, items, OrderStatus.CONFIRMED, total, Instant.now(), idempotencyKey, null);
+    }
+
     public void markAsPickedUp() {
         if (this.status != OrderStatus.CONFIRMED) {
             throw new IllegalStateException("Seule une commande confirmée peut être marquée retirée");

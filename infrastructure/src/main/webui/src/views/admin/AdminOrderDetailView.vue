@@ -4,6 +4,8 @@ import { storeToRefs } from 'pinia'
 import { useAdminOrderDetailQuery } from '@/composables/api/useAdminOrdersApi'
 import { useVenteStore } from '@/stores/venteStore'
 import { formatPrice, formatDateTime, statusLabel, statusClasses } from '@/utils/order-formatters'
+import { useSelectedVente } from '@/composables/useSelectedVente'
+import { formatPickupRangeShort } from '@/utils/pickup-formatters'
 
 const route = useRoute()
 const orderId = route.params.id as string
@@ -12,9 +14,18 @@ const { selectedVenteId } = storeToRefs(venteStore)
 
 const { data: order, isLoading: loading } = useAdminOrderDetailQuery(selectedVenteId, orderId)
 
+const { selectedVente, venteUsesTimeSlots } = useSelectedVente()
+
 function formatSlot(slot: { date: string; startTime: string; endTime: string } | null): string {
-  if (!slot) return 'Créneau inconnu'
-  return `${slot.date} ${slot.startTime}-${slot.endTime}`
+  if (slot) return `${slot.date} ${slot.startTime}-${slot.endTime}`
+  // Vente en plage de dates : l'absence de créneau est normale.
+  if (!venteUsesTimeSlots.value) {
+    return formatPickupRangeShort(
+      selectedVente.value?.pickupStartDate,
+      selectedVente.value?.pickupEndDate,
+    )
+  }
+  return 'Créneau inconnu'
 }
 </script>
 
@@ -71,7 +82,9 @@ function formatSlot(slot: { date: string; startTime: string; endTime: string } |
         class="rounded-xl border border-gray-200 bg-white p-6"
         data-testid="order-detail-timeslot"
       >
-        <h2 class="mb-4 text-lg font-semibold text-dark">Créneau de retrait</h2>
+        <h2 class="mb-4 text-lg font-semibold text-dark">
+          {{ venteUsesTimeSlots ? 'Créneau de retrait' : 'Période de retrait' }}
+        </h2>
         <p class="font-medium text-dark">{{ formatSlot(order.timeSlot) }}</p>
       </div>
 

@@ -14,6 +14,9 @@ public interface AdminVenteRestMapper {
     @Mapping(target = "status", expression = "java(vente.status().name())")
     @Mapping(target = "startDate", expression = "java(vente.startDate())")
     @Mapping(target = "endDate", expression = "java(vente.endDate())")
+    @Mapping(target = "pickupMode", expression = "java(vente.pickupMode().name())")
+    @Mapping(target = "pickupStartDate", expression = "java(vente.pickupStartDate())")
+    @Mapping(target = "pickupEndDate", expression = "java(vente.pickupEndDate())")
     @Mapping(target = "createdAt", expression = "java(vente.createdAt())")
     AdminVenteResponse toResponse(Vente vente, boolean hasOrders);
 }
