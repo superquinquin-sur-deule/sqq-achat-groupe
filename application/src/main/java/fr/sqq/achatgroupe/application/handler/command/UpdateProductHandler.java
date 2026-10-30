@@ -42,8 +42,7 @@ public class UpdateProductHandler implements CommandHandler<UpdateProductCommand
                     || !Objects.equals(existing.reference(), command.reference())
                     || !Objects.equals(existing.category(), command.category())
                     || !Objects.equals(existing.brand(), command.brand())
-                    || !Objects.equals(existing.colisage(), command.colisage())
-                    || !Objects.equals(existing.stripeTaxCode(), command.stripeTaxCode());
+                    || !Objects.equals(existing.colisage(), command.colisage());
             if (lockedFieldChanged) {
                 throw new ProductModificationForbiddenException();
             }
@@ -75,10 +74,8 @@ public class UpdateProductHandler implements CommandHandler<UpdateProductCommand
                 command.category(),
                 command.brand(),
                 command.colisage(),
-                command.stripeTaxCode(),
                 existing.hasImage()
         );
-        updated.assignStripeProductId(existing.stripeProductId());
         productRepository.save(updated);
         return updated;
     }

@@ -153,7 +153,7 @@ public class BackofficeReceptionSteps {
     public void toutesLesReceptionsSontEnregistreesAvecUneRupture() {
         Long venteId = testContext.venteId();
         List<Product> products = productRepository.findAllByVenteId(venteId);
-        List<Order> paidOrders = orderRepository.findPaidByVenteId(venteId);
+        List<Order> confirmedOrders = orderRepository.findConfirmedByVenteId(venteId);
 
         // Group products by supplier
         Map<String, List<Product>> productsBySupplier = products.stream()
@@ -161,7 +161,7 @@ public class BackofficeReceptionSteps {
 
         // Compute ordered quantities per product from paid orders
         Map<Long, Integer> orderedQuantities = new HashMap<>();
-        for (Order order : paidOrders) {
+        for (Order order : confirmedOrders) {
             for (OrderItem item : order.items()) {
                 orderedQuantities.merge(item.productId(), item.quantity(), Integer::sum);
             }

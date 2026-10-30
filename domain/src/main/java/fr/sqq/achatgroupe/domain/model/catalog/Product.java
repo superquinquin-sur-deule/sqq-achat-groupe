@@ -20,12 +20,10 @@ public class Product {
     private final String category;
     private final String brand;
     private final Integer colisage;
-    private final String stripeTaxCode;
     private final boolean hasImage;
-    private String stripeProductId;
 
     public Product(Long id, Long venteId, String name, String description, Money prixHt, BigDecimal tauxTva, String supplier, int stock, boolean active,
-                   String reference, String category, String brand, Integer colisage, String stripeTaxCode, boolean hasImage) {
+                   String reference, String category, String brand, Integer colisage, boolean hasImage) {
         if (name == null || name.isBlank()) {
             throw new IllegalArgumentException("Product name must not be blank");
         }
@@ -66,7 +64,6 @@ public class Product {
         this.category = category;
         this.brand = brand;
         this.colisage = colisage;
-        this.stripeTaxCode = stripeTaxCode;
         this.hasImage = hasImage;
     }
 
@@ -141,19 +138,7 @@ public class Product {
         return colisage;
     }
 
-    public String stripeTaxCode() {
-        return stripeTaxCode;
-    }
-
     public boolean hasImage() {
         return hasImage;
-    }
-
-    public String stripeProductId() {
-        return stripeProductId;
-    }
-
-    public void assignStripeProductId(String stripeProductId) {
-        this.stripeProductId = stripeProductId;
     }
 }

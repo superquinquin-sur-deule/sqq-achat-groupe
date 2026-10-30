@@ -2,14 +2,14 @@
 @browser @backoffice-orders
 Fonctionnalité: Liste des commandes back-office
   En tant que membre de l'équipe logistique, je veux consulter la liste
-  des commandes payées et leurs détails afin de préparer la distribution.
+  des commandes confirmées et leurs détails afin de préparer la distribution.
 
   Contexte:
     Étant donné qu'une vente existe avec des produits et des créneaux
     Et les commandes suivantes existent
       | prénom | nom    | email            | téléphone  | créneau | produits | statut    | raison              |
-      | Marie  | Dupont | marie@exemple.fr | 0612345678 | 0       | 0:2      | PAID      |                     |
-      | Jean   | Martin | jean@exemple.fr  | 0698765432 | 1       | 0:1      | PAID      |                     |
+      | Marie  | Dupont | marie@exemple.fr | 0612345678 | 0       | 0:2      | CONFIRMED |                     |
+      | Jean   | Martin | jean@exemple.fr  | 0698765432 | 1       | 0:1      | CONFIRMED |                     |
       | Paul   | Durand | paul@exemple.fr  | 0611223344 | 0       | 0:1      | CANCELLED | Commande abandonnée |
 
   Scénario: Affichage de la sidenav d'administration unifiée avec sélecteur de vente

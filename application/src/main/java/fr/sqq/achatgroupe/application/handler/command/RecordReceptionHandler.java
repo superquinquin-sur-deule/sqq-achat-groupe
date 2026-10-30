@@ -5,7 +5,6 @@ import fr.sqq.achatgroupe.application.command.RecordReceptionCommand.ReceptionLi
 import fr.sqq.achatgroupe.application.port.out.OrderRepository;
 import fr.sqq.achatgroupe.application.port.out.ProductRepository;
 import fr.sqq.achatgroupe.application.port.out.ReceptionRepository;
-import fr.sqq.achatgroupe.application.port.out.RefundRepository;
 import fr.sqq.achatgroupe.domain.model.catalog.Product;
 import fr.sqq.achatgroupe.domain.model.order.Order;
 import fr.sqq.achatgroupe.domain.model.order.OrderItem;
@@ -32,16 +31,13 @@ public class RecordReceptionHandler implements CommandHandler<RecordReceptionCom
     private final ReceptionRepository receptionRepository;
     private final OrderRepository orderRepository;
     private final ProductRepository productRepository;
-    private final RefundRepository refundRepository;
 
     public RecordReceptionHandler(ReceptionRepository receptionRepository,
                                   OrderRepository orderRepository,
-                                  ProductRepository productRepository,
-                                  RefundRepository refundRepository) {
+                                  ProductRepository productRepository) {
         this.receptionRepository = receptionRepository;
         this.orderRepository = orderRepository;
         this.productRepository = productRepository;
-        this.refundRepository = refundRepository;
     }
 
     @Override
@@ -50,17 +46,17 @@ public class RecordReceptionHandler implements CommandHandler<RecordReceptionCom
         Log.infof("Recording reception for vente %d, fournisseur %s", command.venteId(), command.supplier());
         Optional<Reception> existingReception = receptionRepository.findByVenteIdAndSupplier(command.venteId(), command.supplier());
 
+        List<Order> confirmedOrders = orderRepository.findConfirmedByVenteId(command.venteId());
+
         if (existingReception.isPresent()) {
-            if (!refundRepository.findAllByVenteId(command.venteId()).isEmpty()) {
-                throw new IllegalStateException("Impossible de modifier les réceptions après le lancement des remboursements");
+            if (confirmedOrders.stream().anyMatch(Order::hasAdjustments)) {
+                throw new IllegalStateException("Impossible de modifier les réceptions après l'application des ajustements");
             }
             receptionRepository.delete(existingReception.get());
-            resetAdjustments(command.venteId());
             LOG.infof("Réception existante supprimée pour vente %d, fournisseur %s — mise à jour en cours",
                     command.venteId(), command.supplier());
         }
 
-        List<Order> paidOrders = orderRepository.findPaidByVenteId(command.venteId());
         List<Product> products = productRepository.findAllByVenteId(command.venteId());
 
         Map<Long, Product> productsById = products.stream()
@@ -68,7 +64,7 @@ public class RecordReceptionHandler implements CommandHandler<RecordReceptionCom
                 .collect(Collectors.toMap(Product::id, Function.identity()));
 
         Map<Long, Integer> orderedQuantities = new HashMap<>();
-        for (Order order : paidOrders) {
+        for (Order order : confirmedOrders) {
             for (OrderItem item : order.items()) {
                 if (productsById.containsKey(item.productId())) {
                     orderedQuantities.merge(item.productId(), item.quantity(), Integer::sum);
@@ -92,17 +88,5 @@ public class RecordReceptionHandler implements CommandHandler<RecordReceptionCom
         LOG.infof("Réception enregistrée pour vente %d, fournisseur %s : %d produits",
                 command.venteId(), command.supplier(), items.size());
         return saved;
-    }
-
-    private void resetAdjustments(Long venteId) {
-        List<Order> paidOrders = orderRepository.findPaidByVenteId(venteId);
-        for (Order order : paidOrders) {
-            if (order.hasAdjustments()) {
-                for (OrderItem item : order.items()) {
-                    item.resetCancellation();
-                }
-                orderRepository.save(order);
-            }
-        }
     }
 }

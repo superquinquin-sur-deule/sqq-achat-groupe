@@ -46,12 +46,12 @@ public class ApplyShortageAdjustmentsHandler implements CommandHandler<ApplyShor
         Log.infof("Applying shortage adjustements for vente %d", command.venteId());
         List<Reception> receptions = receptionRepository.findAllByVenteId(command.venteId());
 
-        List<Order> paidOrders = orderRepository.findPaidByVenteId(command.venteId());
+        List<Order> confirmedOrders = orderRepository.findConfirmedByVenteId(command.venteId());
         List<Product> products = productRepository.findAllByVenteId(command.venteId());
 
         // Only suppliers that have ordered products need a reception
         Map<Long, Integer> orderedQtys = new HashMap<>();
-        for (Order order : paidOrders) {
+        for (Order order : confirmedOrders) {
             for (OrderItem item : order.items()) {
                 orderedQtys.merge(item.productId(), item.quantity(), Integer::sum);
             }
@@ -85,7 +85,7 @@ public class ApplyShortageAdjustmentsHandler implements CommandHandler<ApplyShor
         }
 
         // Subtract already-cancelled quantities to make idempotent
-        for (Order order : paidOrders) {
+        for (Order order : confirmedOrders) {
             for (OrderItem item : order.items()) {
                 if (item.cancelledQuantity() > 0 && shortageByProduct.containsKey(item.productId())) {
                     shortageByProduct.merge(item.productId(), -item.cancelledQuantity(), Integer::sum);
@@ -99,7 +99,7 @@ public class ApplyShortageAdjustmentsHandler implements CommandHandler<ApplyShor
             return null;
         }
 
-        List<Order> shuffled = new ArrayList<>(paidOrders);
+        List<Order> shuffled = new ArrayList<>(confirmedOrders);
         Collections.shuffle(shuffled);
 
         for (Map.Entry<Long, Integer> entry : shortageByProduct.entrySet()) {

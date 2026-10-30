@@ -31,7 +31,7 @@ public class GenerateDistributionListHandler implements QueryHandler<GenerateDis
     @Override
     @Transactional
     public List<DistributionOrder> handle(GenerateDistributionListQuery query) {
-        List<Order> orders = orderRepository.findPaidByVenteId(query.venteId());
+        List<Order> orders = orderRepository.findConfirmedByVenteId(query.venteId());
 
         List<TimeSlot> timeSlots = timeSlotRepository.findAllByVenteId(query.venteId());
         Map<Long, TimeSlot> timeSlotsById = timeSlots.stream()

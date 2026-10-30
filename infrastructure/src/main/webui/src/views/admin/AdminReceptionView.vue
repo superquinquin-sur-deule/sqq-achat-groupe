@@ -28,7 +28,7 @@ interface SupplierStatus {
 interface ReceptionStatus {
   suppliers: SupplierStatus[]
   allReceived: boolean
-  hasRefunds: boolean
+  hasAdjustments: boolean
 }
 interface ShortageItem {
   productId: number
@@ -39,28 +39,20 @@ interface ShortageItem {
   shortage: number
   affectedOrderCount: number
 }
-interface RefundOrder {
+interface AdjustedOrder {
   orderId: string
   orderNumber: string
   customerName: string
   originalAmount: number
   adjustedAmount: number
-  refundAmount: number
-  refundStatus: string
-}
-interface RefundResult {
-  totalProcessed: number
-  totalSucceeded: number
-  totalFailed: number
-  totalAmountRefunded: number
+  adjustmentAmount: number
 }
 
 // State
 const loading = ref(false)
 const receptionStatus = ref<ReceptionStatus | null>(null)
 const shortagePreview = ref<ShortageItem[]>([])
-const refundPreview = ref<RefundOrder[]>([])
-const refundResult = ref<RefundResult | null>(null)
+const adjustedOrders = ref<AdjustedOrder[]>([])
 
 const submitting = ref(false)
 
@@ -96,16 +88,16 @@ async function fetchShortagePreview() {
   }
 }
 
-async function fetchRefundPreview() {
+async function fetchAdjustedOrders() {
   if (!selectedVenteId.value) return
   try {
     const res: any = await customFetch(
-      `/api/admin/ventes/${selectedVenteId.value}/receptions/refunds`,
+      `/api/admin/ventes/${selectedVenteId.value}/receptions/adjustments`,
       { method: 'GET' },
     )
-    refundPreview.value = res.data.data.orders
+    adjustedOrders.value = res.data.data.orders
   } catch {
-    toast.error('Erreur lors du chargement des remboursements')
+    toast.error('Erreur lors du chargement des commandes ajustées')
   }
 }
 
@@ -124,32 +116,11 @@ async function applyAdjustments() {
       headers: { 'Content-Type': 'application/json' },
     })
     toast.success('Ajustements appliqués')
+    await fetchReceptionStatus()
     await fetchShortagePreview()
-    await fetchRefundPreview()
+    await fetchAdjustedOrders()
   } catch {
     toast.error("Erreur lors de l'application des ajustements")
-  } finally {
-    submitting.value = false
-  }
-}
-
-async function processRefunds() {
-  if (!selectedVenteId.value || submitting.value) return
-  if (!confirm('Voulez-vous vraiment lancer les remboursements Stripe ?')) return
-  submitting.value = true
-  try {
-    const res: any = await customFetch(
-      `/api/admin/ventes/${selectedVenteId.value}/receptions/refunds`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-      },
-    )
-    refundResult.value = res.data.data
-    toast.success(`${res.data.data.totalSucceeded} remboursement(s) effectué(s)`)
-    await fetchRefundPreview()
-  } catch {
-    toast.error('Erreur lors des remboursements')
   } finally {
     submitting.value = false
   }
@@ -167,7 +138,7 @@ watch(
       await fetchReceptionStatus()
       if (receptionStatus.value?.allReceived) {
         await fetchShortagePreview()
-        await fetchRefundPreview()
+        await fetchAdjustedOrders()
       }
     }
   },
@@ -233,7 +204,7 @@ watch(
                   Saisir réception
                 </RouterLink>
                 <RouterLink
-                  v-if="supplier.status === 'COMPLETED' && !receptionStatus?.hasRefunds"
+                  v-if="supplier.status === 'COMPLETED' && !receptionStatus?.hasAdjustments"
                   :to="{ name: 'admin-reception-form', params: { supplier: supplier.supplier } }"
                   class="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-dark hover:bg-gray-50"
                   data-testid="reception-edit-btn"
@@ -329,96 +300,52 @@ watch(
         </template>
       </div>
 
-      <!-- Step 3: Refund preview -->
+      <!-- Step 3: Adjusted orders -->
       <div
-        v-if="receptionStatus.allReceived && refundPreview.length > 0"
+        v-if="receptionStatus.allReceived && adjustedOrders.length > 0"
         class="mb-8"
-        data-testid="reception-refunds"
+        data-testid="reception-adjusted-orders"
       >
-        <h2 class="mb-4 text-lg font-semibold text-dark">Remboursements</h2>
+        <h2 class="mb-4 text-lg font-semibold text-dark">Commandes ajustées</h2>
 
-        <!-- Refund result summary -->
-        <div
-          v-if="refundResult"
-          class="mb-4 rounded-lg border border-green-200 bg-green-50 p-4"
-          data-testid="refund-result"
-        >
-          <p class="font-medium text-green-800">
-            {{ refundResult.totalSucceeded }} remboursement(s) réussi(s) sur
-            {{ refundResult.totalProcessed }} traité(s)
-          </p>
-          <p class="text-sm text-green-700">
-            Montant total remboursé : {{ formatAmount(refundResult.totalAmountRefunded) }}
-          </p>
-          <p v-if="refundResult.totalFailed > 0" class="text-sm text-red-600">
-            {{ refundResult.totalFailed }} remboursement(s) échoué(s)
-          </p>
-        </div>
+        <p class="mb-4 text-sm text-brown">
+          Ces commandes ont été réduites suite aux manques. Le montant à encaisser en magasin est le
+          montant ajusté.
+        </p>
 
         <div class="mb-4 rounded-lg border border-gray-200 bg-white overflow-hidden">
-          <table class="w-full text-sm" data-testid="refund-table">
+          <table class="w-full text-sm" data-testid="adjusted-orders-table">
             <thead>
               <tr class="border-b border-gray-200 bg-gray-50 text-left">
                 <th class="px-4 py-2 font-medium text-dark">Commande</th>
                 <th class="px-4 py-2 font-medium text-dark">Client</th>
                 <th class="px-4 py-2 text-right font-medium text-dark">Montant initial</th>
-                <th class="px-4 py-2 text-right font-medium text-dark">Montant ajusté</th>
-                <th class="px-4 py-2 text-right font-medium text-dark">Remboursement</th>
-                <th class="px-4 py-2 font-medium text-dark">Statut</th>
+                <th class="px-4 py-2 text-right font-medium text-dark">Montant à encaisser</th>
+                <th class="px-4 py-2 text-right font-medium text-dark">Écart</th>
               </tr>
             </thead>
             <tbody>
               <tr
-                v-for="order in refundPreview"
+                v-for="order in adjustedOrders"
                 :key="order.orderId"
                 class="border-b border-gray-100"
-                data-testid="refund-row"
+                data-testid="adjusted-order-row"
               >
                 <td class="px-4 py-2 text-dark">{{ order.orderNumber }}</td>
                 <td class="px-4 py-2 text-dark">{{ order.customerName }}</td>
                 <td class="px-4 py-2 text-right text-dark">
                   {{ formatAmount(order.originalAmount) }}
                 </td>
-                <td class="px-4 py-2 text-right text-dark">
+                <td class="px-4 py-2 text-right font-medium text-dark">
                   {{ formatAmount(order.adjustedAmount) }}
                 </td>
                 <td class="px-4 py-2 text-right font-medium text-red-600">
-                  {{ formatAmount(order.refundAmount) }}
-                </td>
-                <td class="px-4 py-2">
-                  <span
-                    :class="[
-                      'inline-block rounded-full px-2 py-0.5 text-xs font-medium',
-                      order.refundStatus === 'SUCCEEDED'
-                        ? 'bg-green-100 text-green-800'
-                        : order.refundStatus === 'FAILED'
-                          ? 'bg-red-100 text-red-800'
-                          : 'bg-yellow-100 text-yellow-800',
-                    ]"
-                    data-testid="refund-status"
-                  >
-                    {{
-                      order.refundStatus === 'SUCCEEDED'
-                        ? 'Remboursé'
-                        : order.refundStatus === 'FAILED'
-                          ? 'Échoué'
-                          : 'En attente'
-                    }}
-                  </span>
+                  −{{ formatAmount(order.adjustmentAmount) }}
                 </td>
               </tr>
             </tbody>
           </table>
         </div>
-
-        <button
-          class="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-dark shadow-sm transition-colors hover:bg-primary/90 disabled:opacity-50"
-          :disabled="submitting"
-          data-testid="process-refunds-btn"
-          @click="processRefunds"
-        >
-          {{ submitting ? 'Traitement...' : 'Lancer les remboursements' }}
-        </button>
       </div>
     </template>
   </div>

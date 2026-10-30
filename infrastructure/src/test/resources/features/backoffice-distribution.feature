@@ -8,9 +8,9 @@ Fonctionnalité: Distribution et suivi des retraits
     Étant donné qu'une vente existe avec des produits et des créneaux
     Et les commandes suivantes existent
       | prénom | nom    | email            | téléphone  | créneau | produits | statut    |
-      | Alice  | Durand | alice@test.fr    | 0601020304 | 0       | 0:3,1:2  | PAID      |
-      | Bob    | Martin | bob@test.fr      | 0605060708 | 0       | 0:1,2:4  | PAID      |
-      | Claire | Petit  | claire@test.fr   | 0609101112 | 1       | 1:1,2:2  | PAID      |
+      | Alice  | Durand | alice@test.fr    | 0601020304 | 0       | 0:3,1:2  | CONFIRMED |
+      | Bob    | Martin | bob@test.fr      | 0605060708 | 0       | 0:1,2:4  | CONFIRMED |
+      | Claire | Petit  | claire@test.fr   | 0609101112 | 1       | 1:1,2:2  | CONFIRMED |
       | Diana  | Lopez  | diana@test.fr    | 0610111213 | 1       | 0:2      | PICKED_UP |
 
   Scénario: Affichage de la page distribution avec filtres par créneau
@@ -31,14 +31,14 @@ Fonctionnalité: Distribution et suivi des retraits
 
   Scénario: Marquer une commande comme récupérée
     Quand je navigue vers la page distribution
-    Et je clique sur "Marquer récupéré" pour la première commande payée
+    Et je clique sur "Marquer récupéré" pour la première commande confirmée
     Alors le statut de la commande distribution passe à "Récupéré"
     Et le bouton "Marquer récupéré" disparaît pour cette commande distribution
 
   Scénario: Filtre non récupérées
     Quand je navigue vers la page distribution
     Et je clique sur le bouton "Non récupérées" dans la distribution
-    Alors seules les commandes en statut "Payé" sont affichées dans la distribution
+    Alors seules les commandes en statut "Confirmé" sont affichées dans la distribution
 
   Scénario: Bouton imprimer PDF visible
     Quand je navigue vers la page distribution

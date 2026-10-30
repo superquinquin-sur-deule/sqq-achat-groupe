@@ -37,7 +37,7 @@ public class ListPreparationOrdersHandler implements QueryHandler<ListPreparatio
     @Override
     @Transactional
     public CursorPage<PreparationOrder> handle(ListPreparationOrdersQuery query) {
-        CursorPage<Order> page = orderRepository.findPaidByVenteId(
+        CursorPage<Order> page = orderRepository.findConfirmedByVenteId(
                 query.venteId(), query.pageRequest(), null, query.timeSlotId());
 
         List<Product> products = productRepository.findAllByVenteId(query.venteId());

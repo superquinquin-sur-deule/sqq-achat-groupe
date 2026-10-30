@@ -90,6 +90,13 @@ function formatDate(dateStr: string): string {
       </div>
     </Card>
 
+    <Card>
+      <h3 class="mb-2 text-base font-semibold text-dark">Règlement</h3>
+      <p class="text-sm text-dark" data-testid="in-store-payment-notice">
+        Le règlement se fait en magasin, lors du retrait de votre commande.
+      </p>
+    </Card>
+
     <div class="flex flex-col gap-2 sm:flex-row-reverse">
       <Button
         variant="primary"
@@ -99,7 +106,7 @@ function formatDate(dateStr: string): string {
         class="w-full sm:w-auto sm:min-w-[200px]"
         @click="emit('confirm')"
       >
-        {{ isSubmitting ? 'Redirection vers le paiement...' : 'Payer ma commande' }}
+        {{ isSubmitting ? 'Validation en cours...' : 'Valider ma commande' }}
       </Button>
       <Button
         variant="secondary"

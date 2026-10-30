@@ -3,7 +3,6 @@ package fr.sqq.achatgroupe.application.handler.query;
 import fr.sqq.achatgroupe.application.port.out.OrderRepository;
 import fr.sqq.achatgroupe.application.port.out.ProductRepository;
 import fr.sqq.achatgroupe.application.port.out.ReceptionRepository;
-import fr.sqq.achatgroupe.application.port.out.RefundRepository;
 import fr.sqq.achatgroupe.application.query.GetReceptionStatusQuery;
 import fr.sqq.achatgroupe.application.query.GetReceptionStatusQuery.ReceptionLineStatus;
 import fr.sqq.achatgroupe.application.query.GetReceptionStatusQuery.ReceptionStatusResult;
@@ -29,16 +28,13 @@ public class GetReceptionStatusHandler implements QueryHandler<GetReceptionStatu
     private final ReceptionRepository receptionRepository;
     private final ProductRepository productRepository;
     private final OrderRepository orderRepository;
-    private final RefundRepository refundRepository;
 
     public GetReceptionStatusHandler(ReceptionRepository receptionRepository,
                                      ProductRepository productRepository,
-                                     OrderRepository orderRepository,
-                                     RefundRepository refundRepository) {
+                                     OrderRepository orderRepository) {
         this.receptionRepository = receptionRepository;
         this.productRepository = productRepository;
         this.orderRepository = orderRepository;
-        this.refundRepository = refundRepository;
     }
 
     @Override
@@ -55,10 +51,10 @@ public class GetReceptionStatusHandler implements QueryHandler<GetReceptionStatu
         Map<String, Reception> receptionBySupplier = receptions.stream()
                 .collect(Collectors.toMap(Reception::supplier, Function.identity()));
 
-        // Compute ordered quantities per product from paid orders
-        List<Order> paidOrders = orderRepository.findPaidByVenteId(query.venteId());
+        // Compute ordered quantities per product from confirmed orders
+        List<Order> confirmedOrders = orderRepository.findConfirmedByVenteId(query.venteId());
         Map<Long, Integer> orderedQuantities = new HashMap<>();
-        for (Order order : paidOrders) {
+        for (Order order : confirmedOrders) {
             for (OrderItem item : order.items()) {
                 orderedQuantities.merge(item.productId(), item.quantity(), Integer::sum);
             }
@@ -101,7 +97,7 @@ public class GetReceptionStatusHandler implements QueryHandler<GetReceptionStatu
 
         boolean allReceived = !suppliersWithOrders.isEmpty()
                 && suppliersWithOrders.stream().allMatch(receptionBySupplier::containsKey);
-        boolean hasRefunds = !refundRepository.findAllByVenteId(query.venteId()).isEmpty();
-        return new ReceptionStatusResult(suppliers, allReceived, hasRefunds);
+        boolean hasAdjustments = confirmedOrders.stream().anyMatch(Order::hasAdjustments);
+        return new ReceptionStatusResult(suppliers, allReceived, hasAdjustments);
     }
 }

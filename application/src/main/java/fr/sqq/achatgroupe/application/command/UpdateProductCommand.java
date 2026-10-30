@@ -20,7 +20,6 @@ public record UpdateProductCommand(
         String reference,
         String category,
         String brand,
-        Integer colisage,
-        String stripeTaxCode
+        Integer colisage
 ) implements Command<Product> {
 }

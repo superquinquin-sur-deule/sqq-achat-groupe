@@ -32,7 +32,7 @@ public class GenerateSupplierOrderHandler implements QueryHandler<GenerateSuppli
     @Override
     @Transactional
     public List<SupplierOrderLine> handle(GenerateSupplierOrderQuery query) {
-        List<Order> orders = orderRepository.findPaidByVenteId(query.venteId());
+        List<Order> orders = orderRepository.findConfirmedByVenteId(query.venteId());
 
         List<Product> products = productRepository.findAllByVenteId(query.venteId());
         Map<Long, Product> productsById = products.stream()

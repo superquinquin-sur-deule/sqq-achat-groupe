@@ -202,7 +202,7 @@ public class PdfBoxPreparationPdfGenerator implements PreparationPdfGenerator {
             }
 
             y -= LINE_HEIGHT * 0.3f;
-            drawText(cs, "Un remboursement sera émis pour le montant de ces produits.",
+            drawText(cs, "Le montant de ces produits est déduit de la somme à régler en magasin.",
                     fontOblique, TABLE_FONT_SIZE, MARGIN, y);
         }
 

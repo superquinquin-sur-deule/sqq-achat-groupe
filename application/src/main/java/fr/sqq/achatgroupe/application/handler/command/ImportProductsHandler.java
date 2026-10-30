@@ -2,7 +2,6 @@ package fr.sqq.achatgroupe.application.handler.command;
 
 import fr.sqq.achatgroupe.application.command.ImportProductsCommand;
 import fr.sqq.achatgroupe.application.command.ImportResult;
-import fr.sqq.achatgroupe.application.port.out.PaymentCatalogGateway;
 import fr.sqq.achatgroupe.application.port.out.ProductRepository;
 import fr.sqq.achatgroupe.domain.model.catalog.Product;
 import fr.sqq.mediator.CommandHandler;
@@ -17,11 +16,9 @@ import java.util.List;
 public class ImportProductsHandler implements CommandHandler<ImportProductsCommand, ImportResult> {
 
     private final ProductRepository productRepository;
-    private final PaymentCatalogGateway paymentCatalogGateway;
 
-    public ImportProductsHandler(ProductRepository productRepository, PaymentCatalogGateway paymentCatalogGateway) {
+    public ImportProductsHandler(ProductRepository productRepository) {
         this.productRepository = productRepository;
-        this.paymentCatalogGateway = paymentCatalogGateway;
     }
 
     @Override
@@ -49,16 +46,9 @@ public class ImportProductsHandler implements CommandHandler<ImportProductsComma
                         row.category(),
                         row.brand(),
                         row.colisage(),
-                        row.stripeTaxCode(),
                         false
                 );
-                Product saved = productRepository.saveNew(product);
-                String stripeProductId = paymentCatalogGateway.registerProduct(
-                        saved.id(), saved.name(), saved.description(),
-                        saved.prixHt().amount(), saved.tauxTva(), saved.prixTtc().amount(), saved.reference(),
-                        saved.stripeTaxCode());
-                saved.assignStripeProductId(stripeProductId);
-                productRepository.save(saved);
+                productRepository.saveNew(product);
                 imported++;
             } catch (IllegalArgumentException e) {
                 errors.add(new ImportResult.ImportError(lineNumber, e.getMessage()));

@@ -118,9 +118,14 @@ function formatDate(dateStr: string): string {
           {{ formatTime(order.timeSlot.endTime) }}
         </p>
         <p class="mt-1 text-sm text-dark">
-          Présentez-vous au créneau indiqué pour récupérer votre commande.
+          Présentez-vous au créneau indiqué pour récupérer et régler votre commande.
         </p>
       </div>
+
+      <!-- In-store payment -->
+      <p class="text-sm text-brown" data-testid="in-store-payment-notice">
+        Le règlement se fait en magasin, au moment du retrait.
+      </p>
 
       <!-- Email message -->
       <p class="text-sm text-brown">Un email de confirmation vous a été envoyé.</p>

@@ -5,15 +5,13 @@ export function formatPrice(amount: number): string {
 }
 
 const STATUS_LABELS: Record<string, string> = {
-  PENDING: 'En attente',
-  PAID: 'Payé',
+  CONFIRMED: 'Confirmé',
   PICKED_UP: 'Récupéré',
   CANCELLED: 'Annulé',
 }
 
 const STATUS_CLASSES: Record<string, string> = {
-  PENDING: 'bg-yellow-100 text-yellow-800',
-  PAID: 'bg-green-100 text-green-800',
+  CONFIRMED: 'bg-green-100 text-green-800',
   PICKED_UP: 'bg-blue-100 text-blue-800',
   CANCELLED: 'bg-red-100 text-red-800',
 }

@@ -52,12 +52,12 @@ public class GetShortagePreviewHandler implements QueryHandler<GetShortagePrevie
             return new ShortagePreviewResult(List.of());
         }
 
-        List<Order> paidOrders = orderRepository.findPaidByVenteId(query.venteId());
+        List<Order> confirmedOrders = orderRepository.findConfirmedByVenteId(query.venteId());
 
         Map<Long, Long> affectedOrderCounts = shortageItems.keySet().stream()
                 .collect(Collectors.toMap(
                         productId -> productId,
-                        productId -> paidOrders.stream()
+                        productId -> confirmedOrders.stream()
                                 .filter(order -> order.items().stream()
                                         .anyMatch(item -> item.productId().equals(productId)))
                                 .count()));

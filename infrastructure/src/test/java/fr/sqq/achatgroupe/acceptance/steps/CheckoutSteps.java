@@ -93,7 +93,7 @@ public class CheckoutSteps {
     public void jAiSelectionneUnCreneauDisponible() {
         selectFirstAvailableSlot();
         PlaywrightHooks.page().locator("button:has-text('Continuer')").first().click();
-        PlaywrightHooks.page().waitForSelector("button:has-text('Payer ma commande')", new Page.WaitForSelectorOptions()
+        PlaywrightHooks.page().waitForSelector("button:has-text('Valider ma commande')", new Page.WaitForSelectorOptions()
                 .setState(WaitForSelectorState.VISIBLE)
                 .setTimeout(5000));
     }
@@ -150,7 +150,7 @@ public class CheckoutSteps {
 
     @Quand("je confirme ma commande")
     public void jeConfirmeMaCommande() {
-        PlaywrightHooks.page().locator("button:has-text('Payer ma commande')").click();
+        PlaywrightHooks.page().locator("button:has-text('Valider ma commande')").click();
     }
 
     @Quand("j'essaie d'accéder au checkout directement")
@@ -219,10 +219,7 @@ public class CheckoutSteps {
 
     @Et("je suis redirigé vers la confirmation")
     public void jeSuisRedirigeVersLaConfirmation() {
-        // With payment flow, the user is redirected to Stripe (fake URL in tests)
-        // Wait for the redirect to happen
-        PlaywrightHooks.page().waitForURL(url ->
-                url.contains("test-stripe-redirect") || url.contains("confirmation"),
+        PlaywrightHooks.page().waitForURL(url -> url.contains("confirmation"),
                 new Page.WaitForURLOptions().setTimeout(10000));
     }
 

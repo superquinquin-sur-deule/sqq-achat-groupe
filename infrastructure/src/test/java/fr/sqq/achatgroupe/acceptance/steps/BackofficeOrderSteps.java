@@ -89,8 +89,8 @@ public class BackofficeOrderSteps {
         assertTrue(cells.nth(5).textContent().contains("€"), "Le montant doit contenir '€'");
         // Colonne 7 : statut
         String statusText = cells.nth(6).textContent();
-        assertTrue(statusText.contains("Payé") || statusText.contains("Récupéré") || statusText.contains("Annulé"),
-                "Le statut doit être 'Payé', 'Récupéré' ou 'Annulé', got: " + statusText);
+        assertTrue(statusText.contains("Confirmé") || statusText.contains("Récupéré") || statusText.contains("Annulé"),
+                "Le statut doit être 'Confirmé', 'Récupéré' ou 'Annulé', got: " + statusText);
     }
 
     @Et("les badges de statut sont colorés correctement")
@@ -99,8 +99,8 @@ public class BackofficeOrderSteps {
         assertTrue(badges.count() > 0, "Il doit y avoir des badges de statut");
         Locator firstBadge = badges.first();
         String text = firstBadge.textContent();
-        assertTrue(text.contains("Payé") || text.contains("Récupéré") || text.contains("Annulé"),
-                "Le badge doit afficher 'Payé', 'Récupéré' ou 'Annulé', got: " + text);
+        assertTrue(text.contains("Confirmé") || text.contains("Récupéré") || text.contains("Annulé"),
+                "Le badge doit afficher 'Confirmé', 'Récupéré' ou 'Annulé', got: " + text);
     }
 
     @Et("je vois une commande annulée avec sa raison d'annulation")
@@ -169,7 +169,7 @@ public class BackofficeOrderSteps {
         Locator targetRow = null;
         for (int i = 0; i < rows.count(); i++) {
             String statusText = rows.nth(i).locator("[data-testid='backoffice-order-status']").textContent();
-            if (statusText.contains("Payé") || statusText.contains("Récupéré")) {
+            if (statusText.contains("Confirmé") || statusText.contains("Récupéré")) {
                 targetRow = rows.nth(i);
                 break;
             }

@@ -29,7 +29,7 @@ interface SupplierStatus {
 interface ReceptionStatus {
   suppliers: SupplierStatus[]
   allReceived: boolean
-  hasRefunds: boolean
+  hasAdjustments: boolean
 }
 
 const loading = ref(true)

@@ -59,7 +59,8 @@ function handleTimeSlotContinue() {
 
 async function handleConfirm() {
   try {
-    await checkoutStore.initiatePayment(venteId)
+    const order = await checkoutStore.confirmOrder(venteId)
+    router.push({ name: 'confirmation', query: { orderId: String(order.id) } })
   } catch (e: unknown) {
     if (e instanceof ApiError) {
       toast.error(e.message)

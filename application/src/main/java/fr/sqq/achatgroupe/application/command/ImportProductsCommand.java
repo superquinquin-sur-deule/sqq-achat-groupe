@@ -21,8 +21,7 @@ public record ImportProductsCommand(
             String reference,
             String category,
             String brand,
-            Integer colisage,
-            String stripeTaxCode
+            Integer colisage
     ) {
     }
 }

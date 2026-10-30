@@ -7,7 +7,6 @@ import fr.sqq.achatgroupe.domain.model.order.Order;
 import fr.sqq.achatgroupe.domain.model.shared.Money;
 
 import java.math.BigDecimal;
-import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -23,17 +22,15 @@ public interface OrderRepository {
 
     Optional<Order> findOrderByIdAndVenteId(UUID id, Long venteId);
 
-    List<Order> findPendingOrdersBefore(Instant cutoff);
-
     OrderAggregates getOrderAggregates(Long venteId);
 
     List<SlotOrderCount> countByTimeSlotForVente(Long venteId);
 
     List<DailyOrderCount> countByDayForVente(Long venteId);
 
-    List<Order> findPaidByVenteId(Long venteId);
+    List<Order> findConfirmedByVenteId(Long venteId);
 
-    CursorPage<Order> findPaidByVenteId(Long venteId, CursorPageRequest pageRequest, String searchName, Long timeSlotId);
+    CursorPage<Order> findConfirmedByVenteId(Long venteId, CursorPageRequest pageRequest, String searchName, Long timeSlotId);
 
     CursorPage<Order> findByVenteId(Long venteId, CursorPageRequest pageRequest, String searchName, Long timeSlotId);
 

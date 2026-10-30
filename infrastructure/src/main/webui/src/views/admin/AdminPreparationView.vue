@@ -249,7 +249,7 @@ function handlePrint() {
                 </ul>
               </template>
               <p class="mt-2 text-xs italic text-red-600 print:text-black">
-                Un remboursement sera émis pour le montant de ces produits.
+                Le montant de ces produits est déduit de la somme à régler en magasin.
               </p>
             </div>
           </div>

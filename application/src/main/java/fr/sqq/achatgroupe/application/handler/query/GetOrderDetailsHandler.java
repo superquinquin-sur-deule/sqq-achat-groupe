@@ -4,7 +4,6 @@ import fr.sqq.achatgroupe.application.port.out.OrderRepository;
 import fr.sqq.achatgroupe.application.query.GetOrderDetailsQuery;
 import fr.sqq.achatgroupe.domain.exception.OrderNotFoundException;
 import fr.sqq.achatgroupe.domain.model.order.Order;
-import fr.sqq.achatgroupe.domain.model.order.OrderStatus;
 import fr.sqq.mediator.QueryHandler;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
@@ -21,11 +20,7 @@ public class GetOrderDetailsHandler implements QueryHandler<GetOrderDetailsQuery
     @Override
     @Transactional
     public Order handle(GetOrderDetailsQuery query) {
-        Order order = orderRepository.findOrderByIdAndVenteId(query.orderId(), query.venteId())
+        return orderRepository.findOrderByIdAndVenteId(query.orderId(), query.venteId())
                 .orElseThrow(() -> new OrderNotFoundException(query.orderId()));
-        if (order.status() != OrderStatus.PAID && order.status() != OrderStatus.PICKED_UP && order.status() != OrderStatus.CANCELLED) {
-            throw new OrderNotFoundException(query.orderId());
-        }
-        return order;
     }
 }

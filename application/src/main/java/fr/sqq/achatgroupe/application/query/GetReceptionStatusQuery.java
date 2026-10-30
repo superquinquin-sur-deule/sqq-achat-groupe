@@ -6,7 +6,7 @@ import java.util.List;
 
 public record GetReceptionStatusQuery(Long venteId) implements Query<GetReceptionStatusQuery.ReceptionStatusResult> {
 
-    public record ReceptionStatusResult(List<SupplierReceptionStatus> suppliers, boolean allReceived, boolean hasRefunds) {}
+    public record ReceptionStatusResult(List<SupplierReceptionStatus> suppliers, boolean allReceived, boolean hasAdjustments) {}
 
     public record SupplierReceptionStatus(String supplier, Long receptionId, String status,
                                           List<ReceptionLineStatus> lines) {}

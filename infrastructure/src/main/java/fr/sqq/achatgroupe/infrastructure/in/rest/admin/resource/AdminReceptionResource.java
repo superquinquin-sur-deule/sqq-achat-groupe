@@ -1,22 +1,19 @@
 package fr.sqq.achatgroupe.infrastructure.in.rest.admin.resource;
 
 import fr.sqq.achatgroupe.application.command.ApplyShortageAdjustmentsCommand;
-import fr.sqq.achatgroupe.application.command.ProcessRefundsCommand;
-import fr.sqq.achatgroupe.application.command.ProcessRefundsCommand.RefundSummary;
 import fr.sqq.achatgroupe.application.command.RecordReceptionCommand;
 import fr.sqq.achatgroupe.application.command.RecordReceptionCommand.ReceptionLineCommand;
 import fr.sqq.achatgroupe.application.query.GetReceptionStatusQuery;
 import fr.sqq.achatgroupe.application.query.GetReceptionStatusQuery.ReceptionStatusResult;
-import fr.sqq.achatgroupe.application.query.GetRefundPreviewQuery;
-import fr.sqq.achatgroupe.application.query.GetRefundPreviewQuery.RefundPreviewResult;
+import fr.sqq.achatgroupe.application.query.GetAdjustedOrdersQuery;
+import fr.sqq.achatgroupe.application.query.GetAdjustedOrdersQuery.AdjustedOrdersResult;
 import fr.sqq.achatgroupe.application.query.GetShortagePreviewQuery;
 import fr.sqq.achatgroupe.application.query.GetShortagePreviewQuery.ShortagePreviewResult;
-import fr.sqq.achatgroupe.infrastructure.in.rest.admin.dto.ProcessRefundsResponse;
 import fr.sqq.achatgroupe.infrastructure.in.rest.admin.dto.RecordReceptionRequest;
 import fr.sqq.achatgroupe.infrastructure.in.rest.admin.dto.ReceptionStatusResponse;
 import fr.sqq.achatgroupe.infrastructure.in.rest.admin.dto.ReceptionStatusResponse.ReceptionLineResponse;
 import fr.sqq.achatgroupe.infrastructure.in.rest.admin.dto.ReceptionStatusResponse.SupplierReceptionStatus;
-import fr.sqq.achatgroupe.infrastructure.in.rest.admin.dto.RefundPreviewResponse;
+import fr.sqq.achatgroupe.infrastructure.in.rest.admin.dto.AdjustedOrdersResponse;
 import fr.sqq.achatgroupe.infrastructure.in.rest.admin.dto.ShortagePreviewResponse;
 import fr.sqq.achatgroupe.infrastructure.in.rest.common.dto.DataResponse;
 import fr.sqq.mediator.Mediator;
@@ -52,7 +49,7 @@ public class AdminReceptionResource {
                                 .toList()))
                 .toList();
 
-        return new DataResponse<>(new ReceptionStatusResponse(suppliers, result.allReceived(), result.hasRefunds()));
+        return new DataResponse<>(new ReceptionStatusResponse(suppliers, result.allReceived(), result.hasAdjustments()));
     }
 
     @POST
@@ -88,25 +85,16 @@ public class AdminReceptionResource {
     }
 
     @GET
-    @Path("/refunds")
-    public DataResponse<RefundPreviewResponse> getRefundPreview(@PathParam("venteId") Long venteId) {
-        RefundPreviewResult result = mediator.send(new GetRefundPreviewQuery(venteId));
+    @Path("/adjustments")
+    public DataResponse<AdjustedOrdersResponse> getAdjustedOrders(@PathParam("venteId") Long venteId) {
+        AdjustedOrdersResult result = mediator.send(new GetAdjustedOrdersQuery(venteId));
 
-        List<RefundPreviewResponse.RefundOrderItem> orders = result.orders().stream()
-                .map(o -> new RefundPreviewResponse.RefundOrderItem(
+        List<AdjustedOrdersResponse.AdjustedOrderItem> orders = result.orders().stream()
+                .map(o -> new AdjustedOrdersResponse.AdjustedOrderItem(
                         o.orderId(), o.orderNumber(), o.customerName(),
-                        o.originalAmount().amount(), o.adjustedAmount().amount(), o.refundAmount().amount(), o.refundStatus()))
+                        o.originalAmount().amount(), o.adjustedAmount().amount(), o.adjustmentAmount().amount()))
                 .toList();
 
-        return new DataResponse<>(new RefundPreviewResponse(orders));
-    }
-
-    @POST
-    @Path("/refunds")
-    public DataResponse<ProcessRefundsResponse> processRefunds(@PathParam("venteId") Long venteId) {
-        RefundSummary summary = mediator.send(new ProcessRefundsCommand(venteId));
-        return new DataResponse<>(new ProcessRefundsResponse(
-                summary.totalProcessed(), summary.totalSucceeded(),
-                summary.totalFailed(), summary.totalAmountRefunded().amount()));
+        return new DataResponse<>(new AdjustedOrdersResponse(orders));
     }
 }

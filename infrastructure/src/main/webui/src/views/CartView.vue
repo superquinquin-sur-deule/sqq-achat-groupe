@@ -17,7 +17,7 @@ const steps = [
   { label: 'Panier' },
   { label: 'Coordonnées' },
   { label: 'Créneau' },
-  { label: 'Paiement' },
+  { label: 'Récapitulatif' },
 ]
 
 function goToCatalogue() {
