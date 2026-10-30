@@ -7,6 +7,8 @@ import java.math.BigDecimal;
 
 public class Product {
 
+    public static final int MAX_IMPORTANT_NOTE_LENGTH = 500;
+
     private final Long id;
     private final Long venteId;
     private final String name;
@@ -20,10 +22,11 @@ public class Product {
     private final String category;
     private final String brand;
     private final Integer colisage;
+    private final String importantNote;
     private final boolean hasImage;
 
     public Product(Long id, Long venteId, String name, String description, Money prixHt, BigDecimal tauxTva, String supplier, int stock, boolean active,
-                   String reference, String category, String brand, Integer colisage, boolean hasImage) {
+                   String reference, String category, String brand, Integer colisage, String importantNote, boolean hasImage) {
         if (name == null || name.isBlank()) {
             throw new IllegalArgumentException("Product name must not be blank");
         }
@@ -51,6 +54,9 @@ public class Product {
         if (colisage != null && colisage <= 0) {
             throw new IllegalArgumentException("Product colisage must be positive");
         }
+        if (importantNote != null && importantNote.length() > MAX_IMPORTANT_NOTE_LENGTH) {
+            throw new IllegalArgumentException("Product important note must not exceed " + MAX_IMPORTANT_NOTE_LENGTH + " characters");
+        }
         this.id = id;
         this.venteId = venteId;
         this.name = name;
@@ -64,6 +70,7 @@ public class Product {
         this.category = category;
         this.brand = brand;
         this.colisage = colisage;
+        this.importantNote = normalizeImportantNote(importantNote);
         this.hasImage = hasImage;
     }
 
@@ -138,7 +145,18 @@ public class Product {
         return colisage;
     }
 
+    public String importantNote() {
+        return importantNote;
+    }
+
     public boolean hasImage() {
         return hasImage;
+    }
+
+    private static String normalizeImportantNote(String importantNote) {
+        if (importantNote == null || importantNote.isBlank()) {
+            return null;
+        }
+        return importantNote.strip();
     }
 }

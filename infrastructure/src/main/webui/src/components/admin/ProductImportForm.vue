@@ -132,6 +132,7 @@ defineExpose({ setResult })
           Format attendu : nom, description, prix_ht, taux_tva, fournisseur, stock, reference,
           categorie, marque
         </p>
+        <p class="text-sm text-brown/60">Colonnes optionnelles : colisage, mention importante</p>
       </template>
       <template v-else>
         <div class="flex items-center gap-2" @click.stop>

@@ -4,6 +4,7 @@ import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 import java.math.BigDecimal;
 
@@ -17,5 +18,6 @@ public record CreateProductRequest(
         @NotBlank(message = "La référence est requise") String reference,
         @NotBlank(message = "La catégorie est requise") String category,
         @NotBlank(message = "La marque est requise") String brand,
-        @Min(value = 1, message = "Le colisage doit être supérieur à 0") Integer colisage
+        @Min(value = 1, message = "Le colisage doit être supérieur à 0") Integer colisage,
+        @Size(max = 500, message = "La mention importante ne peut pas dépasser 500 caractères") String importantNote
 ) {}

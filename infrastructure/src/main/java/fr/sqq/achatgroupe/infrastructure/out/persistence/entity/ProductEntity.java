@@ -62,6 +62,9 @@ public class ProductEntity {
     @Column(name = "colisage")
     private Integer colisage;
 
+    @Column(name = "important_note", length = 500)
+    private String importantNote;
+
     public Long getId() {
         return id;
     }
@@ -143,6 +146,9 @@ public class ProductEntity {
 
     public Integer getColisage() { return colisage; }
     public void setColisage(Integer colisage) { this.colisage = colisage; }
+
+    public String getImportantNote() { return importantNote; }
+    public void setImportantNote(String importantNote) { this.importantNote = importantNote; }
 
 
 }

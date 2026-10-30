@@ -44,6 +44,7 @@ public class UploadProductImageHandler implements CommandHandler<UploadProductIm
                 existing.category(),
                 existing.brand(),
                 existing.colisage(),
+                existing.importantNote(),
                 true
         );
         productRepository.save(updated);

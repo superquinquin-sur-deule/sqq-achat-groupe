@@ -20,7 +20,7 @@ import java.util.Set;
 public class CsvProductParser {
 
     private static final Set<String> REQUIRED_COLUMNS = Set.of("nom", "prix vente ht", "tva", "fournisseur", "stock", "reference fournisseur", "categorie", "marque");
-    private static final Set<String> ALL_COLUMNS = Set.of("nom", "description", "prix vente ht", "tva", "fournisseur", "stock", "reference fournisseur", "categorie", "marque", "colisage");
+    private static final Set<String> ALL_COLUMNS = Set.of("nom", "description", "prix vente ht", "tva", "fournisseur", "stock", "reference fournisseur", "categorie", "marque", "colisage", "mention importante");
 
     public CsvParseResult parse(InputStream inputStream) {
         List<CsvProductRow> rows = new ArrayList<>();
@@ -125,6 +125,7 @@ public class CsvProductParser {
         String category = getColumn(values, columnIndex, "categorie");
         String brand = getColumn(values, columnIndex, "marque");
         String colisageStr = getColumn(values, columnIndex, "colisage");
+        String importantNote = getColumn(values, columnIndex, "mention importante");
 
         if (name == null || name.isBlank()) {
             throw new CsvLineParseException("Le nom est requis");
@@ -187,7 +188,7 @@ public class CsvProductParser {
             }
         }
 
-        return new CsvProductRow(name.strip(), description != null ? description.strip() : "", Money.eur(prixHt), tauxTva, supplier.strip(), stock, reference.strip(), category.strip(), brand.strip(), colisage);
+        return new CsvProductRow(name.strip(), description != null ? description.strip() : "", Money.eur(prixHt), tauxTva, supplier.strip(), stock, reference.strip(), category.strip(), brand.strip(), colisage, importantNote != null ? importantNote.strip() : null);
     }
 
     private String getColumn(String[] values, Map<String, Integer> columnIndex, String columnName) {

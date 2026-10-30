@@ -18,6 +18,12 @@ Fonctionnalité: Catalogue produits frontend
     Et chaque carte affiche la marque
     Et chaque carte affiche un bouton Ajouter
 
+  Scénario: Mention importante mise en avant sur la carte produit
+    Étant donné qu'une vente existe avec des produits et des créneaux
+    Quand j'accède à la page d'accueil
+    Alors la carte du produit "Tomates bio" affiche la mention importante "Le poids est approximatif et peut varier à la réception"
+    Et la carte du produit "Pain de campagne" n'affiche aucune mention importante
+
   Scénario: Navigation par rayon
     Étant donné qu'une vente existe avec des produits et des créneaux
     Quand j'accède à la page d'accueil

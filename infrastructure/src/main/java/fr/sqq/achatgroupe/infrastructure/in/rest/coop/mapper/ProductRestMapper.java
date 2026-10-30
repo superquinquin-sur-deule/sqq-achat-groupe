@@ -18,6 +18,7 @@ public interface ProductRestMapper {
     @Mapping(target = "stock", expression = "java(product.stock())")
     @Mapping(target = "category", expression = "java(product.category())")
     @Mapping(target = "brand", expression = "java(product.brand())")
+    @Mapping(target = "importantNote", expression = "java(product.importantNote())")
     @Mapping(target = "imageUrl", expression = "java(product.hasImage() ? \"/api/product-images/\" + product.id() : null)")
     ProductResponse toResponse(Product product);
 }

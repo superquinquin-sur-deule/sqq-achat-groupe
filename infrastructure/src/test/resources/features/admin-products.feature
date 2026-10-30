@@ -27,6 +27,25 @@ Fonctionnalité: Gestion des produits (CRUD admin)
     Alors je vois un toast de succès
     Et le produit "Carottes bio" apparaît dans le tableau
 
+  Scénario: Créer un produit avec une mention importante
+    Quand je navigue vers la page admin des produits
+    Et je clique sur le bouton ajouter un produit
+    Et je remplis le formulaire produit avec les valeurs
+      | nom                | Chapon de Noël                                              |
+      | prix HT            | 28.44                                                       |
+      | TVA                | 5.50                                                        |
+      | fournisseur        | Ferme des Volailles                                         |
+      | stock              | 20                                                          |
+      | référence          | CHA-001                                                     |
+      | catégorie          | Volailles                                                   |
+      | marque             | Ferme des Volailles                                         |
+      | mention importante | Le poids est approximatif et peut varier à la réception     |
+    Et je soumets le formulaire produit
+    Alors je vois un toast de succès
+    Et le produit "Chapon de Noël" apparaît dans le tableau
+    Quand je clique sur le bouton modifier du produit "Chapon de Noël"
+    Alors le champ mention importante contient "Le poids est approximatif et peut varier à la réception"
+
   Scénario: Modifier un produit existant
     Quand je navigue vers la page admin des produits
     Et je clique sur le bouton modifier du premier produit
