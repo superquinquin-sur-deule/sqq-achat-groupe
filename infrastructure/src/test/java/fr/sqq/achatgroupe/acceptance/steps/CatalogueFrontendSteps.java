@@ -131,6 +131,30 @@ public class CatalogueFrontendSteps {
         }
     }
 
+    @Alors("la carte du produit {string} affiche la mention importante {string}")
+    public void laCarteDuProduitAfficheLaMentionImportante(String productName, String expectedNote) {
+        Locator note = productCard(productName).locator("[data-testid='product-important-note']");
+        assertTrue(note.isVisible(), "La mention importante doit être visible sur la carte '" + productName + "'");
+        assertTrue(note.textContent().contains(expectedNote),
+                "La mention importante doit contenir '" + expectedNote + "' mais contient '" + note.textContent() + "'");
+    }
+
+    @Et("la carte du produit {string} n'affiche aucune mention importante")
+    public void laCarteDuProduitNAfficheAucuneMentionImportante(String productName) {
+        Locator note = productCard(productName).locator("[data-testid='product-important-note']");
+        assertEquals(0, note.count(),
+                "Aucune mention importante ne doit être affichée sur la carte '" + productName + "'");
+    }
+
+    private Locator productCard(String productName) {
+        Locator card = PlaywrightHooks.page()
+                .locator("[data-testid='product-card']")
+                .filter(new Locator.FilterOptions().setHas(
+                        PlaywrightHooks.page().locator("h3", new Page.LocatorOptions().setHasText(productName))));
+        assertTrue(card.count() > 0, "La carte du produit '" + productName + "' doit exister");
+        return card.first();
+    }
+
     @Alors("la carte du produit épuisé est grisée")
     public void laCarteDuProduitEpuiseEstGrisee() {
         Locator exhaustedCards = PlaywrightHooks.page().locator("[data-testid='product-card'][data-exhausted='true']");

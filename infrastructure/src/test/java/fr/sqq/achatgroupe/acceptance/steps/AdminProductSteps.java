@@ -150,6 +150,27 @@ public class AdminProductSteps {
         page().locator("#product-reference").fill(values.get("référence"));
         page().locator("#product-category").fill(values.get("catégorie"));
         page().locator("#product-brand").fill(values.get("marque"));
+        String importantNote = values.get("mention importante");
+        if (importantNote != null) {
+            page().locator("#product-important-note").fill(importantNote);
+        }
+    }
+
+    @Quand("je clique sur le bouton modifier du produit {string}")
+    public void jeCliqueSurLeBoutonModifierDuProduit(String productName) {
+        page().locator("[data-testid='product-row']", new Page.LocatorOptions().setHasText(productName))
+                .first()
+                .locator("button:has-text('Modifier')")
+                .click();
+        page().waitForSelector("[data-testid='product-form']", new Page.WaitForSelectorOptions()
+                .setState(WaitForSelectorState.VISIBLE)
+                .setTimeout(5000));
+    }
+
+    @Alors("le champ mention importante contient {string}")
+    public void leChampMentionImportanteContient(String expected) {
+        assertEquals(expected, page().locator("#product-important-note").inputValue(),
+                "Le champ mention importante doit contenir la valeur enregistrée");
     }
 
     @Et("je soumets le formulaire produit")

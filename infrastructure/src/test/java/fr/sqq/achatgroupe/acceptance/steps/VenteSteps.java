@@ -151,7 +151,7 @@ public class VenteSteps {
         // 2. Create products via admin endpoint
         List<String> products = List.of(
                 """
-                {"name": "Tomates bio", "description": "Tomates grappe biologiques cultivées localement", "prixHt": 3.32, "tauxTva": 5.50, "supplier": "Ferme du Soleil", "stock": 25, "reference": "TOM-001", "category": "Légumes", "brand": "Ferme du Soleil", "colisage": 6}
+                {"name": "Tomates bio", "description": "Tomates grappe biologiques cultivées localement", "prixHt": 3.32, "tauxTva": 5.50, "supplier": "Ferme du Soleil", "stock": 25, "reference": "TOM-001", "category": "Légumes", "brand": "Ferme du Soleil", "colisage": 6, "importantNote": "Le poids est approximatif et peut varier à la réception"}
                 """,
                 """
                 {"name": "Pain de campagne", "description": "Pain artisanal au levain naturel, 500g", "prixHt": 3.98, "tauxTva": 5.50, "supplier": "Boulangerie Martin", "stock": 15, "reference": "PAI-001", "category": "Boulangerie", "brand": "Boulangerie Martin"}
@@ -258,7 +258,7 @@ public class VenteSteps {
 
         List<String> products = List.of(
                 """
-                {"name": "Tomates bio", "description": "Tomates grappe biologiques cultivées localement", "prixHt": 3.32, "tauxTva": 5.50, "supplier": "Ferme du Soleil", "stock": 25, "reference": "TOM-001", "category": "Légumes", "brand": "Ferme du Soleil", "colisage": 6}
+                {"name": "Tomates bio", "description": "Tomates grappe biologiques cultivées localement", "prixHt": 3.32, "tauxTva": 5.50, "supplier": "Ferme du Soleil", "stock": 25, "reference": "TOM-001", "category": "Légumes", "brand": "Ferme du Soleil", "colisage": 6, "importantNote": "Le poids est approximatif et peut varier à la réception"}
                 """,
                 """
                 {"name": "Pain de campagne", "description": "Pain artisanal au levain naturel, 500g", "prixHt": 3.98, "tauxTva": 5.50, "supplier": "Boulangerie Martin", "stock": 15, "reference": "PAI-001", "category": "Boulangerie", "brand": "Boulangerie Martin"}

@@ -28,6 +28,7 @@ const emit = defineEmits<{
       category: string
       brand: string
       colisage?: number
+      importantNote: string
       imageFile?: File
     },
   ]
@@ -71,6 +72,11 @@ const schema = toTypedSchema(
         (v) => v === '' || (!isNaN(Number(v)) && Number(v) >= 1 && Number.isInteger(Number(v))),
         'Le colisage doit être un entier supérieur ou égal à 1',
       ),
+    importantNote: z
+      .string()
+      .max(500, 'La mention importante ne peut pas dépasser 500 caractères')
+      .optional()
+      .default(''),
   }),
 )
 
@@ -88,6 +94,7 @@ const { handleSubmit } = useForm({
         category: props.product.category ?? '',
         brand: props.product.brand ?? '',
         colisage: props.product.colisage != null ? String(props.product.colisage) : '',
+        importantNote: props.product.importantNote ?? '',
       }
     : {
         name: '',
@@ -100,6 +107,7 @@ const { handleSubmit } = useForm({
         category: '',
         brand: '',
         colisage: '',
+        importantNote: '',
       },
 })
 
@@ -141,6 +149,11 @@ const {
   errorMessage: colisageError,
   handleBlur: colisageBlur,
 } = useField<string>('colisage')
+const {
+  value: importantNote,
+  errorMessage: importantNoteError,
+  handleBlur: importantNoteBlur,
+} = useField<string>('importantNote')
 
 const imageFile = ref<File | undefined>(undefined)
 const imagePreview = ref<string | undefined>(props.product?.imageUrl ?? undefined)
@@ -194,6 +207,7 @@ const onSubmit = handleSubmit((values) => {
     category: values.category,
     brand: values.brand,
     colisage: values.colisage ? Number(values.colisage) : undefined,
+    importantNote: values.importantNote ?? '',
     imageFile: imageFile.value,
   })
 })
@@ -268,6 +282,34 @@ const onSubmit = handleSubmit((values) => {
           role="alert"
         >
           {{ descriptionError }}
+        </p>
+      </div>
+      <div class="flex flex-col gap-1">
+        <label for="product-important-note" class="text-sm font-medium text-dark">
+          Mention importante
+        </label>
+        <textarea
+          id="product-important-note"
+          v-model="importantNote"
+          rows="2"
+          placeholder="Ex : le poids est approximatif et peut varier à la réception"
+          :aria-describedby="
+            importantNoteError ? 'product-important-note-error' : 'product-important-note-hint'
+          "
+          :aria-invalid="!!importantNoteError"
+          :class="textareaVariants({ error: !!importantNoteError })"
+          @blur="importantNoteBlur"
+        />
+        <p
+          v-if="importantNoteError"
+          id="product-important-note-error"
+          class="text-sm text-red-600"
+          role="alert"
+        >
+          {{ importantNoteError }}
+        </p>
+        <p v-else id="product-important-note-hint" class="text-sm text-brown/60">
+          Mise en avant sur la fiche produit du catalogue. Laissez vide si aucune mention.
         </p>
       </div>
       <div class="flex flex-col gap-1">

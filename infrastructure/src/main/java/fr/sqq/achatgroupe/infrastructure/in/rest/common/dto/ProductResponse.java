@@ -13,6 +13,7 @@ public record ProductResponse(
         int stock,
         String category,
         String brand,
+        String importantNote,
         String imageUrl
 ) {
 }

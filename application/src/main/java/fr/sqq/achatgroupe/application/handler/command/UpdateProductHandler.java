@@ -74,6 +74,7 @@ public class UpdateProductHandler implements CommandHandler<UpdateProductCommand
                 command.category(),
                 command.brand(),
                 command.colisage(),
+                command.importantNote(),
                 existing.hasImage()
         );
         productRepository.save(updated);

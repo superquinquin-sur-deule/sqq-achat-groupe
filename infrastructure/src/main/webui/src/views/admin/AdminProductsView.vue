@@ -145,6 +145,7 @@ async function onSubmit(data: {
   category: string
   brand: string
   colisage?: number
+  importantNote: string
   imageFile?: File
 }) {
   if (!selectedVenteId.value) return
@@ -164,6 +165,7 @@ async function onSubmit(data: {
         category: data.category,
         brand: data.brand,
         colisage: data.colisage,
+        importantNote: data.importantNote,
       }
       await updateMutation.mutateAsync({ id: editingProduct.value.id, data: updateData })
       productId = editingProduct.value.id
@@ -179,6 +181,7 @@ async function onSubmit(data: {
         category: data.category,
         brand: data.brand,
         colisage: data.colisage,
+        importantNote: data.importantNote,
       }
       const result = await createMutation.mutateAsync(createData)
       productId = (result.data as { data: { id: number } }).data.id
@@ -229,6 +232,7 @@ async function toggleActive(product: AdminProductResponse) {
       category: product.category,
       brand: product.brand,
       colisage: product.colisage,
+      importantNote: product.importantNote,
     }
     await updateMutation.mutateAsync({ id: product.id, data: updateData })
     toast.success(product.active ? 'Produit désactivé' : 'Produit activé')

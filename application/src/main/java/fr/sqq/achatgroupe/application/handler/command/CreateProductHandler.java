@@ -35,6 +35,7 @@ public class CreateProductHandler implements CommandHandler<CreateProductCommand
                 command.category(),
                 command.brand(),
                 command.colisage(),
+                command.importantNote(),
                 false
         );
         return productRepository.saveNew(product);
