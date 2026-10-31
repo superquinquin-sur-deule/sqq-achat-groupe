@@ -69,9 +69,9 @@ public class VenteSansCreneauSteps {
                     "customerLastName": "Dupont",
                     "email": "marie@exemple.fr",
                     "phone": "06 12 34 56 78",
-                    "items": [{"productId": %d, "quantity": 1}]
+                    "items": [{"variantId": %d, "quantity": 1}]
                 }
-                """.formatted(testContext.productIds().get(0));
+                """.formatted(testContext.variantIds().get(0));
     }
 
     // --- Admin : formulaire vente ---

@@ -36,7 +36,7 @@ public interface OrderPersistenceMapper {
     }
 
     default OrderItem toDomain(OrderItemEntity entity) {
-        return new OrderItem(entity.getId(), entity.getProductId(), entity.getQuantity(),
+        return new OrderItem(entity.getId(), entity.getProductId(), entity.getVariantId(), entity.getQuantity(),
                 Money.eur(entity.getUnitPrice()), entity.getCancelledQuantity());
     }
 
@@ -69,6 +69,7 @@ public interface OrderPersistenceMapper {
         entity.setId(domain.id());
         entity.setOrder(orderEntity);
         entity.setProductId(domain.productId());
+        entity.setVariantId(domain.variantId());
         entity.setQuantity(domain.quantity());
         entity.setUnitPrice(domain.unitPrice().amount());
         entity.setCancelledQuantity(domain.cancelledQuantity());

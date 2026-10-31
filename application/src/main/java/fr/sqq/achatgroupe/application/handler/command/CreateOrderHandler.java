@@ -5,12 +5,12 @@ import fr.sqq.achatgroupe.application.port.out.OrderRepository;
 import fr.sqq.achatgroupe.application.port.out.ProductRepository;
 import fr.sqq.achatgroupe.application.port.out.TimeSlotRepository;
 import fr.sqq.achatgroupe.application.port.out.VenteRepository;
-import fr.sqq.achatgroupe.domain.exception.ProductNotFoundException;
+import fr.sqq.achatgroupe.domain.exception.VariantNotFoundException;
 import fr.sqq.achatgroupe.domain.exception.TimeSlotNotFoundException;
 import fr.sqq.achatgroupe.domain.exception.TimeSlotRequiredException;
 import fr.sqq.achatgroupe.domain.exception.VenteNotFoundException;
 import fr.sqq.achatgroupe.domain.model.catalog.Product;
-import fr.sqq.achatgroupe.domain.model.catalog.ProductId;
+import fr.sqq.achatgroupe.domain.model.catalog.ProductVariant;
 import fr.sqq.achatgroupe.domain.model.order.CustomerInfo;
 import fr.sqq.achatgroupe.domain.model.order.Order;
 import fr.sqq.achatgroupe.domain.model.order.OrderItem;
@@ -72,17 +72,18 @@ public class CreateOrderHandler implements CommandHandler<CreateOrderCommand, Or
 
         List<OrderItem> orderItems = new ArrayList<>();
         for (CreateOrderCommand.OrderItemCommand itemCmd : command.items()) {
-            Product product = productRepository.findById(new ProductId(itemCmd.productId()))
-                    .orElseThrow(() -> new ProductNotFoundException(new ProductId(itemCmd.productId())));
+            Product product = productRepository.findByVariantId(itemCmd.variantId())
+                    .orElseThrow(() -> new VariantNotFoundException(itemCmd.variantId()));
 
             if (!product.active()) {
-                throw new ProductNotFoundException(new ProductId(itemCmd.productId()));
+                throw new VariantNotFoundException(itemCmd.variantId());
             }
 
-            product.decrementStock(itemCmd.quantity());
+            ProductVariant variant = product.variant(itemCmd.variantId());
+            variant.decrementStock(itemCmd.quantity(), product.displayName(variant));
             productRepository.save(product);
 
-            orderItems.add(OrderItem.create(itemCmd.productId(), itemCmd.quantity(), product.prixTtc()));
+            orderItems.add(OrderItem.create(product.id(), variant.id(), itemCmd.quantity(), product.prixTtc(variant)));
         }
 
         if (timeSlot != null) {

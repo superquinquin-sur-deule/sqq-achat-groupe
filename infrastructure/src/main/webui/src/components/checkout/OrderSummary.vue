@@ -24,6 +24,11 @@ const props = defineProps<{
   isSubmitting: boolean
 }>()
 
+/** « Sapin Nordmann — 200cm » pour un produit à variantes, le nom seul sinon. */
+function itemLabel(item: CartItem): string {
+  return item.variantLabel ? `${item.name} — ${item.variantLabel}` : item.name
+}
+
 const pickupRangeLabel = computed(() =>
   formatPickupRange(props.pickupStartDate, props.pickupEndDate),
 )
@@ -95,10 +100,10 @@ function formatDate(dateStr: string): string {
       <ul v-else class="flex flex-col gap-2">
         <li
           v-for="item in items"
-          :key="item.productId"
+          :key="item.variantId"
           class="flex items-center justify-between text-sm text-dark"
         >
-          <span>{{ item.name }} × {{ item.quantity }}</span>
+          <span>{{ itemLabel(item) }} × {{ item.quantity }}</span>
           <span class="font-medium">{{ formatPrice(item.price * item.quantity) }}</span>
         </li>
       </ul>

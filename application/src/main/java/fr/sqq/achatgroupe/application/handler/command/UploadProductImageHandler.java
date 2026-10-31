@@ -35,17 +35,14 @@ public class UploadProductImageHandler implements CommandHandler<UploadProductIm
                 existing.venteId(),
                 existing.name(),
                 existing.description(),
-                existing.prixHt(),
                 existing.tauxTva(),
                 existing.supplier(),
-                existing.stock(),
                 existing.active(),
-                existing.reference(),
                 existing.category(),
                 existing.brand(),
-                existing.colisage(),
                 existing.importantNote(),
-                true
+                true,
+                existing.variants()
         );
         productRepository.save(updated);
         return updated;

@@ -2,25 +2,22 @@ package fr.sqq.achatgroupe.application.command;
 
 import fr.sqq.achatgroupe.domain.model.catalog.Product;
 import fr.sqq.achatgroupe.domain.model.catalog.ProductId;
-import fr.sqq.achatgroupe.domain.model.shared.Money;
 import fr.sqq.mediator.Command;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 public record UpdateProductCommand(
         Long venteId,
         ProductId id,
         String name,
         String description,
-        Money prixHt,
         BigDecimal tauxTva,
         String supplier,
-        int stock,
         boolean active,
-        String reference,
         String category,
         String brand,
-        Integer colisage,
-        String importantNote
+        String importantNote,
+        List<ProductVariantCommand> variants
 ) implements Command<Product> {
 }

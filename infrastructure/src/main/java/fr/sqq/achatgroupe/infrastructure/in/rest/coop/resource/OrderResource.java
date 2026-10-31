@@ -1,8 +1,6 @@
 package fr.sqq.achatgroupe.infrastructure.in.rest.coop.resource;
 
 import fr.sqq.achatgroupe.domain.exception.OrderNotFoundException;
-import fr.sqq.achatgroupe.domain.model.catalog.Product;
-import fr.sqq.achatgroupe.domain.model.catalog.ProductId;
 import fr.sqq.achatgroupe.domain.model.order.Order;
 import fr.sqq.achatgroupe.domain.model.planning.TimeSlot;
 import fr.sqq.achatgroupe.application.port.out.OrderRepository;
@@ -58,8 +56,8 @@ public class OrderResource {
 
         var items = order.items().stream()
                 .map(item -> {
-                    String productName = productRepository.findById(new ProductId(item.productId()))
-                            .map(Product::name)
+                    String productName = productRepository.findByVariantId(item.variantId())
+                            .map(product -> product.displayName(item.variantId()))
                             .orElse("Produit #" + item.productId());
                     return new OrderDetailResponse.OrderItemInfo(
                             productName, item.quantity(), item.unitPrice().amount());

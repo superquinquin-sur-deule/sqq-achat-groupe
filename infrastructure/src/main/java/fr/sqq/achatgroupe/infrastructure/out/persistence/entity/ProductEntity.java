@@ -1,14 +1,20 @@
 package fr.sqq.achatgroupe.infrastructure.out.persistence.entity;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OrderBy;
 import jakarta.persistence.Table;
 import jakarta.persistence.Version;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "products")
@@ -29,26 +35,17 @@ public class ProductEntity {
     @Column(name = "description")
     private String description;
 
-    @Column(name = "prix_ht", nullable = false, precision = 10, scale = 2)
-    private BigDecimal prixHt;
-
     @Column(name = "taux_tva", nullable = false, precision = 5, scale = 2)
     private BigDecimal tauxTva;
 
     @Column(name = "supplier", nullable = false)
     private String supplier;
 
-    @Column(name = "stock", nullable = false)
-    private int stock;
-
     @Column(name = "active", nullable = false)
     private boolean active;
 
     @Column(name = "vente_id", nullable = false)
     private Long venteId;
-
-    @Column(name = "reference", nullable = false)
-    private String reference;
 
     @Column(name = "category", nullable = false)
     private String category;
@@ -59,11 +56,12 @@ public class ProductEntity {
     @Column(name = "has_image", nullable = false)
     private boolean hasImage;
 
-    @Column(name = "colisage")
-    private Integer colisage;
-
     @Column(name = "important_note", length = 500)
     private String importantNote;
+
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @OrderBy("position, id")
+    private List<ProductVariantEntity> variants = new ArrayList<>();
 
     public Long getId() {
         return id;
@@ -89,14 +87,6 @@ public class ProductEntity {
         this.description = description;
     }
 
-    public BigDecimal getPrixHt() {
-        return prixHt;
-    }
-
-    public void setPrixHt(BigDecimal prixHt) {
-        this.prixHt = prixHt;
-    }
-
     public BigDecimal getTauxTva() {
         return tauxTva;
     }
@@ -113,14 +103,6 @@ public class ProductEntity {
         this.supplier = supplier;
     }
 
-    public int getStock() {
-        return stock;
-    }
-
-    public void setStock(int stock) {
-        this.stock = stock;
-    }
-
     public boolean isActive() {
         return active;
     }
@@ -132,9 +114,6 @@ public class ProductEntity {
     public Long getVenteId() { return venteId; }
     public void setVenteId(Long venteId) { this.venteId = venteId; }
 
-    public String getReference() { return reference; }
-    public void setReference(String reference) { this.reference = reference; }
-
     public String getCategory() { return category; }
     public void setCategory(String category) { this.category = category; }
 
@@ -144,11 +123,11 @@ public class ProductEntity {
     public boolean isHasImage() { return hasImage; }
     public void setHasImage(boolean hasImage) { this.hasImage = hasImage; }
 
-    public Integer getColisage() { return colisage; }
-    public void setColisage(Integer colisage) { this.colisage = colisage; }
-
     public String getImportantNote() { return importantNote; }
     public void setImportantNote(String importantNote) { this.importantNote = importantNote; }
+
+    public List<ProductVariantEntity> getVariants() { return variants; }
+    public void setVariants(List<ProductVariantEntity> variants) { this.variants = variants; }
 
 
 }

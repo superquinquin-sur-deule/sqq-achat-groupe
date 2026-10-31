@@ -111,9 +111,9 @@ public class CheckoutSteps {
         addFirstProductToCart();
         // Override cart quantity via localStorage to exceed stock (UI now prevents this)
         PlaywrightHooks.page().evaluate("""
-                const cart = JSON.parse(localStorage.getItem('cart'));
+                const cart = JSON.parse(localStorage.getItem('cart-v2'));
                 cart.items[0].quantity = cart.items[0].stock + 10;
-                localStorage.setItem('cart', JSON.stringify(cart));
+                localStorage.setItem('cart-v2', JSON.stringify(cart));
                 """);
         PlaywrightHooks.page().reload();
         PlaywrightHooks.page().waitForSelector("[data-testid='product-card']", new Page.WaitForSelectorOptions()

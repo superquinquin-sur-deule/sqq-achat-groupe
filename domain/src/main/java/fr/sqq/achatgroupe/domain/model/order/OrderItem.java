@@ -6,12 +6,14 @@ public class OrderItem {
 
     private final Long id;
     private final Long productId;
+    private final Long variantId;
     private final int quantity;
     private final Money unitPrice;
     private int cancelledQuantity;
 
-    public OrderItem(Long id, Long productId, int quantity, Money unitPrice, int cancelledQuantity) {
+    public OrderItem(Long id, Long productId, Long variantId, int quantity, Money unitPrice, int cancelledQuantity) {
         if (productId == null) throw new IllegalArgumentException("Product id must not be null");
+        if (variantId == null) throw new IllegalArgumentException("Variant id must not be null");
         if (quantity <= 0) throw new IllegalArgumentException("Quantity must be positive");
         if (unitPrice == null || !unitPrice.isPositive()) {
             throw new IllegalArgumentException("Unit price must be positive");
@@ -21,13 +23,14 @@ public class OrderItem {
         }
         this.id = id;
         this.productId = productId;
+        this.variantId = variantId;
         this.quantity = quantity;
         this.unitPrice = unitPrice;
         this.cancelledQuantity = cancelledQuantity;
     }
 
-    public static OrderItem create(Long productId, int quantity, Money unitPrice) {
-        return new OrderItem(null, productId, quantity, unitPrice, 0);
+    public static OrderItem create(Long productId, Long variantId, int quantity, Money unitPrice) {
+        return new OrderItem(null, productId, variantId, quantity, unitPrice, 0);
     }
 
     public void cancelQuantity(int qty) {
@@ -56,6 +59,7 @@ public class OrderItem {
 
     public Long id() { return id; }
     public Long productId() { return productId; }
+    public Long variantId() { return variantId; }
     public int quantity() { return quantity; }
     public Money unitPrice() { return unitPrice; }
     public int cancelledQuantity() { return cancelledQuantity; }

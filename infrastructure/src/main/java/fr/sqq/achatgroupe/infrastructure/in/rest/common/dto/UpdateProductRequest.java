@@ -1,24 +1,23 @@
 package fr.sqq.achatgroupe.infrastructure.in.rest.common.dto;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.DecimalMin;
-import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 public record UpdateProductRequest(
         @NotBlank(message = "Le nom est requis") String name,
         String description,
-        @NotNull(message = "Le prix HT est requis") @DecimalMin(value = "0.01", message = "Le prix HT doit être supérieur à 0") BigDecimal prixHt,
         @NotNull(message = "Le taux de TVA est requis") @DecimalMin(value = "0", message = "Le taux de TVA ne peut pas être négatif") BigDecimal tauxTva,
         @NotBlank(message = "Le fournisseur est requis") String supplier,
-        @Min(value = 0, message = "Le stock ne peut pas être négatif") int stock,
         boolean active,
-        @NotBlank(message = "La référence est requise") String reference,
         @NotBlank(message = "La catégorie est requise") String category,
         @NotBlank(message = "La marque est requise") String brand,
-        @Min(value = 1, message = "Le colisage doit être supérieur à 0") Integer colisage,
-        @Size(max = 500, message = "La mention importante ne peut pas dépasser 500 caractères") String importantNote
+        @Size(max = 500, message = "La mention importante ne peut pas dépasser 500 caractères") String importantNote,
+        @NotEmpty(message = "Au moins une variante est requise") @Valid List<ProductVariantRequest> variants
 ) {}

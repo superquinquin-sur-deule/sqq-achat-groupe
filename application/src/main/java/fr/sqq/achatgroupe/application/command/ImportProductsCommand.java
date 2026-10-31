@@ -11,6 +11,10 @@ public record ImportProductsCommand(
         List<CsvProductRow> rows
 ) implements Command<ImportResult> {
 
+    /**
+     * Une ligne de CSV. Lorsque {@code variante} est renseigné, les lignes consécutives
+     * partageant le même {@code name} forment un seul produit à plusieurs variantes.
+     */
     public record CsvProductRow(
             String name,
             String description,
@@ -22,7 +26,8 @@ public record ImportProductsCommand(
             String category,
             String brand,
             Integer colisage,
-            String importantNote
+            String importantNote,
+            String variante
     ) {
     }
 }

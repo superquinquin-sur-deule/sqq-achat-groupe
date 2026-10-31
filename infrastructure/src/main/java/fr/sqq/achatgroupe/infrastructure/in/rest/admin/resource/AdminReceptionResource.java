@@ -44,7 +44,7 @@ public class AdminReceptionResource {
                         s.supplier(), s.receptionId(), s.status(),
                         s.lines().stream()
                                 .map(l -> new ReceptionLineResponse(
-                                        l.productId(), l.productName(),
+                                        l.variantId(), l.productName(),
                                         l.orderedQuantity(), l.receivedQuantity(), l.shortage()))
                                 .toList()))
                 .toList();
@@ -56,7 +56,7 @@ public class AdminReceptionResource {
     public DataResponse<Void> recordReception(@PathParam("venteId") Long venteId,
                                               RecordReceptionRequest request) {
         List<ReceptionLineCommand> lines = request.lines().stream()
-                .map(l -> new ReceptionLineCommand(l.productId(), l.receivedQuantity()))
+                .map(l -> new ReceptionLineCommand(l.variantId(), l.receivedQuantity()))
                 .toList();
 
         mediator.send(new RecordReceptionCommand(venteId, request.supplier(), lines));
@@ -70,7 +70,7 @@ public class AdminReceptionResource {
 
         List<ShortagePreviewResponse.ShortageItem> items = result.items().stream()
                 .map(i -> new ShortagePreviewResponse.ShortageItem(
-                        i.productId(), i.productName(), i.supplier(),
+                        i.variantId(), i.productName(), i.supplier(),
                         i.orderedQty(), i.receivedQty(), i.shortage(), i.affectedOrderCount()))
                 .toList();
 

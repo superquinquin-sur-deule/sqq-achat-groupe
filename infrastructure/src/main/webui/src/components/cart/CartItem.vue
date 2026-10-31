@@ -20,23 +20,25 @@ const formattedPrice = computed(() =>
   new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(props.item.price),
 )
 
+const label = computed(() => cartStore.itemLabel(props.item))
+
 const isMinQuantity = computed(() => props.item.quantity <= 1)
 const isMaxQuantity = computed(() => props.item.quantity >= props.item.stock)
 
 function increase() {
   if (!isMaxQuantity.value) {
-    cartStore.updateQuantity(props.item.productId, props.item.quantity + 1)
+    cartStore.updateQuantity(props.item.variantId, props.item.quantity + 1)
   }
 }
 
 function decrease() {
   if (!isMinQuantity.value) {
-    cartStore.updateQuantity(props.item.productId, props.item.quantity - 1)
+    cartStore.updateQuantity(props.item.variantId, props.item.quantity - 1)
   }
 }
 
 function remove() {
-  cartStore.removeItem(props.item.productId)
+  cartStore.removeItem(props.item.variantId)
 }
 </script>
 
@@ -47,7 +49,7 @@ function remove() {
   >
     <div class="flex-1 min-w-0">
       <p data-testid="item-name" class="text-base font-medium text-dark truncate">
-        {{ item.name }}
+        {{ label }}
       </p>
       <p data-testid="item-price" class="mt-1 text-sm text-brown">{{ formattedPrice }}</p>
     </div>
@@ -58,7 +60,7 @@ function remove() {
         variant="secondary"
         size="icon"
         :disabled="isMinQuantity"
-        :aria-label="`Diminuer la quantité de ${item.name}`"
+        :aria-label="`Diminuer la quantité de ${label}`"
         @click="decrease"
       >
         <svg
@@ -89,7 +91,7 @@ function remove() {
         variant="secondary"
         size="icon"
         :disabled="isMaxQuantity"
-        :aria-label="`Augmenter la quantité de ${item.name}`"
+        :aria-label="`Augmenter la quantité de ${label}`"
         @click="increase"
       >
         <svg
@@ -114,7 +116,7 @@ function remove() {
       data-testid="remove-item"
       variant="ghost"
       size="icon"
-      :aria-label="`Supprimer ${item.name} du panier`"
+      :aria-label="`Supprimer ${label} du panier`"
       class="text-red-600 hover:text-red-700"
       @click="remove"
     >

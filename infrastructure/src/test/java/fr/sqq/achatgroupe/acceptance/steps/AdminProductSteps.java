@@ -143,11 +143,11 @@ public class AdminProductSteps {
     public void jeRemplisLeFormulaireProduit(io.cucumber.datatable.DataTable dataTable) {
         Map<String, String> values = dataTable.asMap(String.class, String.class);
         page().locator("#product-name").fill(values.get("nom"));
-        page().locator("#product-prix-ht").fill(values.get("prix HT"));
+        page().locator("#product-variant-0-prix-ht").fill(values.get("prix HT"));
         page().locator("#product-taux-tva").fill(values.get("TVA"));
         page().locator("#product-supplier").fill(values.get("fournisseur"));
-        page().locator("#product-stock").fill(values.get("stock"));
-        page().locator("#product-reference").fill(values.get("référence"));
+        page().locator("#product-variant-0-stock").fill(values.get("stock"));
+        page().locator("#product-variant-0-reference").fill(values.get("référence"));
         page().locator("#product-category").fill(values.get("catégorie"));
         page().locator("#product-brand").fill(values.get("marque"));
         String importantNote = values.get("mention importante");
@@ -249,7 +249,7 @@ public class AdminProductSteps {
     @Et("je soumets le formulaire produit vide")
     public void jeSoumetsLeFormulaireProduitVide() {
         // Clear the default stock value
-        page().locator("#product-stock").fill("");
+        page().locator("#product-variant-0-stock").fill("");
         page().locator("button:has-text('Créer le produit')").click();
         page().waitForTimeout(500);
     }
@@ -276,19 +276,19 @@ public class AdminProductSteps {
     @Alors("les champs verrouillés sont désactivés")
     public void lesChampsVerrouillsSontDesactives() {
         assertTrue(page().locator("#product-name").isDisabled(), "Le champ nom doit être désactivé");
-        assertTrue(page().locator("#product-reference").isDisabled(), "Le champ référence doit être désactivé");
+        assertTrue(page().locator("#product-variant-0-reference").isDisabled(), "Le champ référence doit être désactivé");
         assertTrue(page().locator("#product-category").isDisabled(), "Le champ catégorie doit être désactivé");
         assertTrue(page().locator("#product-brand").isDisabled(), "Le champ marque doit être désactivé");
-        assertTrue(page().locator("#product-prix-ht").isDisabled(), "Le champ prix HT doit être désactivé");
+        assertTrue(page().locator("#product-variant-0-prix-ht").isDisabled(), "Le champ prix HT doit être désactivé");
         assertTrue(page().locator("#product-taux-tva").isDisabled(), "Le champ TVA doit être désactivé");
         assertTrue(page().locator("#product-supplier").isDisabled(), "Le champ fournisseur doit être désactivé");
-        assertTrue(page().locator("#product-colisage").isDisabled(), "Le champ colisage doit être désactivé");
+        assertTrue(page().locator("#product-variant-0-colisage").isDisabled(), "Le champ colisage doit être désactivé");
     }
 
     @Et("les champs description et stock sont activés")
     public void lesChampsDescriptionEtStockSontActives() {
         assertFalse(page().locator("#product-description").isDisabled(), "Le champ description doit être activé");
-        assertFalse(page().locator("#product-stock").isDisabled(), "Le champ stock doit être activé");
+        assertFalse(page().locator("#product-variant-0-stock").isDisabled(), "Le champ stock doit être activé");
     }
 
     @Et("je modifie la description du produit en {string}")
@@ -298,7 +298,7 @@ public class AdminProductSteps {
 
     @Et("je modifie le stock du produit en {string}")
     public void jeModifieLeStockDuProduitEn(String stock) {
-        page().locator("#product-stock").fill(stock);
+        page().locator("#product-variant-0-stock").fill(stock);
     }
 
     @Et("je clique sur le bouton désactiver du premier produit")

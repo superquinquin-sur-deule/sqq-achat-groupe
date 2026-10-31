@@ -28,7 +28,7 @@ public interface ReceptionPersistenceMapper {
     }
 
     default ReceptionItem toDomain(ReceptionItemEntity entity) {
-        return new ReceptionItem(entity.getId(), entity.getProductId(),
+        return new ReceptionItem(entity.getId(), entity.getProductId(), entity.getVariantId(),
                 entity.getOrderedQuantity(), entity.getReceivedQuantity());
     }
 
@@ -53,6 +53,7 @@ public interface ReceptionPersistenceMapper {
         entity.setId(domain.id());
         entity.setReception(receptionEntity);
         entity.setProductId(domain.productId());
+        entity.setVariantId(domain.variantId());
         entity.setOrderedQuantity(domain.orderedQuantity());
         entity.setReceivedQuantity(domain.receivedQuantity());
         return entity;

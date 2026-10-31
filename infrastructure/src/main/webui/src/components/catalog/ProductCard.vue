@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { cva } from 'class-variance-authority'
-import type { ProductResponse } from '@/api/generated/model'
+import type { ProductResponse, ProductVariantResponse } from '@/api/generated/model'
 import type { RayonColor } from '@/utils/rayon-colors'
 import Card from '@/components/ui/Card.vue'
 import Button from '@/components/ui/Button.vue'
@@ -13,24 +13,56 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
-  add: [product: ProductResponse]
+  add: [product: ProductResponse, variant: ProductVariantResponse]
 }>()
 
 const cartStore = useCartStore()
 
-const isExhausted = computed(() => props.product.stock === 0)
+const variants = computed(() => props.product.variants ?? [])
 
-const quantity = computed(() => cartStore.getItemQuantity(props.product.id))
+/**
+ * Un produit « simple » n'a qu'une variante, au libellé vide : on garde alors
+ * exactement l'ancienne carte, sans sélecteur.
+ */
+const hasVariantChoice = computed(() => variants.value.length > 1)
+
+const soleVariant = computed(() => (hasVariantChoice.value ? null : (variants.value[0] ?? null)))
+
+/** Rien n'est présélectionné : le client choisit sa variante avant de pouvoir ajouter. */
+const selectedVariantId = ref<number | null>(null)
+
+const selectedVariant = computed<ProductVariantResponse | null>(() => {
+  if (soleVariant.value) return soleVariant.value
+  return variants.value.find((v) => v.id === selectedVariantId.value) ?? null
+})
+
+const isExhausted = computed(() => variants.value.every((v) => v.stock === 0))
+
+const quantity = computed(() =>
+  selectedVariant.value ? cartStore.getItemQuantity(selectedVariant.value.id) : 0,
+)
 
 const isInCart = computed(() => quantity.value > 0)
 
-const isMaxQuantity = computed(() => quantity.value >= props.product.stock)
-
-const formattedPrice = computed(() =>
-  new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(
-    props.product.prixTtc,
-  ),
+const isMaxQuantity = computed(
+  () => !!selectedVariant.value && quantity.value >= selectedVariant.value.stock,
 )
+
+const canAdd = computed(
+  () => !!selectedVariant.value && selectedVariant.value.stock > 0 && !isMaxQuantity.value,
+)
+
+function formatPrice(amount: number): string {
+  return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(amount)
+}
+
+/** Prix affiché en tête de carte : celui de la variante choisie, sinon le plus bas. */
+const formattedPrice = computed(() => {
+  if (selectedVariant.value) return formatPrice(selectedVariant.value.prixTtc)
+  if (variants.value.length === 0) return ''
+  const min = Math.min(...variants.value.map((v) => v.prixTtc))
+  return formatPrice(min)
+})
 
 const productCardVariants = cva('', {
   variants: {
@@ -40,32 +72,60 @@ const productCardVariants = cva('', {
   },
 })
 
+const variantOptionVariants = cva(
+  'flex min-h-[44px] w-full items-center justify-between gap-3 rounded-lg border px-3 py-2 text-left text-sm font-medium transition-colors focus:outline-2 focus:outline-offset-2 focus:outline-dark',
+  {
+    variants: {
+      state: {
+        selected: 'border-primary bg-primary text-dark',
+        available: 'border-gray-300 bg-white text-dark hover:border-primary',
+        disabled: 'cursor-not-allowed border-gray-200 bg-gray-100 text-gray-400',
+      },
+    },
+    defaultVariants: { state: 'available' },
+  },
+)
+
+function variantState(variant: ProductVariantResponse): 'selected' | 'available' | 'disabled' {
+  if (variant.stock === 0) return 'disabled'
+  if (selectedVariantId.value === variant.id) return 'selected'
+  return 'available'
+}
+
+function selectVariant(variant: ProductVariantResponse) {
+  if (variant.stock > 0) {
+    selectedVariantId.value = variant.id
+  }
+}
+
 function handleAdd() {
-  if (!isExhausted.value && !isMaxQuantity.value) {
-    emit('add', props.product)
+  if (canAdd.value && selectedVariant.value) {
+    emit('add', props.product, selectedVariant.value)
   }
 }
 
 function increase() {
-  if (!isMaxQuantity.value) {
-    cartStore.updateQuantity(props.product.id, quantity.value + 1)
+  if (!isMaxQuantity.value && selectedVariant.value) {
+    cartStore.updateQuantity(selectedVariant.value.id, quantity.value + 1)
   }
 }
 
 function decrease() {
+  if (!selectedVariant.value) return
   if (quantity.value <= 1) {
-    cartStore.removeItem(props.product.id)
+    cartStore.removeItem(selectedVariant.value.id)
   } else {
-    cartStore.updateQuantity(props.product.id, quantity.value - 1)
+    cartStore.updateQuantity(selectedVariant.value.id, quantity.value - 1)
   }
 }
 
 function onQuantityInput(event: Event) {
+  if (!selectedVariant.value) return
   const value = parseInt((event.target as HTMLInputElement).value)
   if (!value || value < 1) {
-    cartStore.removeItem(props.product.id)
+    cartStore.removeItem(selectedVariant.value.id)
   } else {
-    cartStore.updateQuantity(props.product.id, Math.min(value, props.product.stock))
+    cartStore.updateQuantity(selectedVariant.value.id, Math.min(value, selectedVariant.value.stock))
   }
 }
 </script>
@@ -135,13 +195,46 @@ function onQuantityInput(event: Event) {
         </svg>
         <span><span class="sr-only">Mention importante : </span>{{ product.importantNote }}</span>
       </p>
+
+      <div
+        v-if="hasVariantChoice"
+        data-testid="variant-selector"
+        class="mt-4 flex flex-col gap-2"
+        role="radiogroup"
+        :aria-label="`Choisir une déclinaison de ${product.name}`"
+      >
+        <button
+          v-for="variant in variants"
+          :key="variant.id"
+          type="button"
+          role="radio"
+          data-testid="variant-option"
+          :data-variant-id="variant.id"
+          :data-selected="selectedVariantId === variant.id || undefined"
+          :data-exhausted="variant.stock === 0 || undefined"
+          :aria-checked="selectedVariantId === variant.id"
+          :disabled="variant.stock === 0"
+          :class="variantOptionVariants({ state: variantState(variant) })"
+          @click="selectVariant(variant)"
+        >
+          <span data-testid="variant-option-label">{{ variant.label }}</span>
+          <span class="flex items-center gap-2">
+            <span v-if="variant.stock === 0" class="text-xs font-medium text-red-600">Épuisé</span>
+            <span data-testid="variant-option-price" class="font-semibold">{{
+              formatPrice(variant.prixTtc)
+            }}</span>
+          </span>
+        </button>
+      </div>
+
       <div class="mt-auto">
         <div class="mt-4 flex items-center justify-between">
           <span
             data-testid="product-price"
             class="rounded-full bg-primary px-3 py-1 text-sm font-semibold text-dark"
           >
-            {{ formattedPrice }}
+            <span v-if="hasVariantChoice && !selectedVariant">À partir de </span
+            >{{ formattedPrice }}
           </span>
           <span
             v-if="isExhausted"
@@ -180,7 +273,7 @@ function onQuantityInput(event: Event) {
             data-testid="item-quantity"
             :value="quantity"
             min="1"
-            :max="product.stock"
+            :max="selectedVariant?.stock"
             class="min-h-[44px] w-14 appearance-none rounded-lg border-2 border-dark bg-white text-center text-base font-semibold text-dark [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none [-moz-appearance:textfield] focus:outline-2 focus:outline-offset-2 focus:outline-dark"
             :aria-label="`Quantité de ${product.name}`"
             @change="onQuantityInput"
@@ -214,7 +307,7 @@ function onQuantityInput(event: Event) {
           data-testid="add-button"
           variant="primary"
           class="mt-4 w-full transition-transform hover:scale-[1.02] active:scale-[0.98]"
-          :disabled="isExhausted"
+          :disabled="!canAdd"
           :aria-label="`Ajouter ${product.name} au panier`"
           @click="handleAdd"
         >

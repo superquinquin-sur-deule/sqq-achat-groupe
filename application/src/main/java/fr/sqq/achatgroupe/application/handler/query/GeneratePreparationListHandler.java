@@ -6,7 +6,7 @@ import fr.sqq.achatgroupe.application.port.out.TimeSlotRepository;
 import fr.sqq.achatgroupe.application.query.GeneratePreparationListQuery;
 import fr.sqq.achatgroupe.application.query.GeneratePreparationListQuery.PreparationItem;
 import fr.sqq.achatgroupe.application.query.GeneratePreparationListQuery.PreparationOrder;
-import fr.sqq.achatgroupe.domain.model.catalog.Product;
+import fr.sqq.achatgroupe.application.service.VariantIndex;
 import fr.sqq.achatgroupe.domain.model.order.Order;
 import fr.sqq.achatgroupe.domain.model.planning.TimeSlot;
 import fr.sqq.mediator.QueryHandler;
@@ -38,9 +38,7 @@ public class GeneratePreparationListHandler implements QueryHandler<GeneratePrep
     public List<PreparationOrder> handle(GeneratePreparationListQuery query) {
         List<Order> orders = orderRepository.findConfirmedByVenteId(query.venteId());
 
-        List<Product> products = productRepository.findAllByVenteId(query.venteId());
-        Map<Long, Product> productsById = products.stream()
-                .collect(Collectors.toMap(Product::id, Function.identity()));
+        VariantIndex variants = VariantIndex.of(productRepository.findAllByVenteId(query.venteId()));
 
         List<TimeSlot> timeSlots = timeSlotRepository.findAllByVenteId(query.venteId());
         Map<Long, TimeSlot> timeSlotsById = timeSlots.stream()
@@ -55,12 +53,12 @@ public class GeneratePreparationListHandler implements QueryHandler<GeneratePrep
 
                     List<PreparationItem> items = order.items().stream()
                             .map(item -> {
-                                Product product = productsById.get(item.productId());
-                                String productName = product != null
-                                        ? product.name()
+                                VariantIndex.Entry indexed = variants.get(item.variantId());
+                                String productName = indexed != null
+                                        ? indexed.displayName()
                                         : "Produit inconnu (ID: " + item.productId() + ")";
-                                String supplier = product != null
-                                        ? product.supplier()
+                                String supplier = indexed != null
+                                        ? indexed.product().supplier()
                                         : "Fournisseur inconnu";
                                 return new PreparationItem(productName, supplier, item.effectiveQuantity(), item.cancelledQuantity());
                             })

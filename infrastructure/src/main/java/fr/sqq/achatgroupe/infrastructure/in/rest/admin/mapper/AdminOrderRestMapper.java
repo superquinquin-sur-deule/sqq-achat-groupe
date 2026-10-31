@@ -1,6 +1,6 @@
 package fr.sqq.achatgroupe.infrastructure.in.rest.admin.mapper;
 
-import fr.sqq.achatgroupe.domain.model.catalog.Product;
+import fr.sqq.achatgroupe.application.service.VariantIndex;
 import fr.sqq.achatgroupe.domain.model.order.Order;
 import fr.sqq.achatgroupe.domain.model.order.OrderItem;
 import fr.sqq.achatgroupe.domain.model.planning.TimeSlot;
@@ -56,14 +56,14 @@ public interface AdminOrderRestMapper {
                 .toList();
     }
 
-    default AdminOrderDetailResponse toDetailResponse(Order order, Map<Long, TimeSlot> timeSlotsById, Map<Long, Product> productsById) {
+    default AdminOrderDetailResponse toDetailResponse(Order order, Map<Long, TimeSlot> timeSlotsById, VariantIndex variants) {
         TimeSlot slot = order.timeSlotId() != null ? timeSlotsById.get(order.timeSlotId()) : null;
         AdminOrderDetailResponse.TimeSlotInfo timeSlotInfo = slot != null
                 ? new AdminOrderDetailResponse.TimeSlotInfo(slot.date(), slot.startTime(), slot.endTime())
                 : null;
 
         List<AdminOrderDetailResponse.OrderItemInfo> items = order.items().stream()
-                .map(item -> toItemResponse(item, productsById))
+                .map(item -> toItemResponse(item, variants))
                 .toList();
 
         return new AdminOrderDetailResponse(
@@ -81,9 +81,8 @@ public interface AdminOrderRestMapper {
         );
     }
 
-    default AdminOrderDetailResponse.OrderItemInfo toItemResponse(OrderItem item, Map<Long, Product> productsById) {
-        Product product = productsById.get(item.productId());
-        String productName = product != null ? product.name() : "Produit #" + item.productId();
+    default AdminOrderDetailResponse.OrderItemInfo toItemResponse(OrderItem item, VariantIndex variants) {
+        String productName = variants.displayNameOr(item.variantId(), "Produit #" + item.productId());
         return new AdminOrderDetailResponse.OrderItemInfo(
                 productName,
                 item.quantity(),

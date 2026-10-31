@@ -26,6 +26,9 @@ public class ReceptionItemEntity {
     @Column(name = "product_id", nullable = false)
     private Long productId;
 
+    @Column(name = "variant_id", nullable = false)
+    private Long variantId;
+
     @Column(name = "ordered_quantity", nullable = false)
     private int orderedQuantity;
 
@@ -40,6 +43,9 @@ public class ReceptionItemEntity {
 
     public Long getProductId() { return productId; }
     public void setProductId(Long productId) { this.productId = productId; }
+
+    public Long getVariantId() { return variantId; }
+    public void setVariantId(Long variantId) { this.variantId = variantId; }
 
     public int getOrderedQuantity() { return orderedQuantity; }
     public void setOrderedQuantity(int orderedQuantity) { this.orderedQuantity = orderedQuantity; }

@@ -2,6 +2,7 @@ package fr.sqq.achatgroupe.application.handler.command;
 
 import fr.sqq.achatgroupe.application.command.CreateProductCommand;
 import fr.sqq.achatgroupe.application.port.out.ProductRepository;
+import fr.sqq.achatgroupe.application.service.ProductVariantFactory;
 import fr.sqq.achatgroupe.domain.model.catalog.Product;
 import fr.sqq.mediator.CommandHandler;
 import io.quarkus.logging.Log;
@@ -20,23 +21,20 @@ public class CreateProductHandler implements CommandHandler<CreateProductCommand
     @Override
     @Transactional
     public Product handle(CreateProductCommand command) {
-        Log.infof("Creating product %d for %s", command.name(), command.venteId());
+        Log.infof("Creating product %s for %s", command.name(), command.venteId());
         Product product = new Product(
                 null,
                 command.venteId(),
                 command.name(),
                 command.description(),
-                command.prixHt(),
                 command.tauxTva(),
                 command.supplier(),
-                command.stock(),
                 true,
-                command.reference(),
                 command.category(),
                 command.brand(),
-                command.colisage(),
                 command.importantNote(),
-                false
+                false,
+                ProductVariantFactory.toDomain(null, command.variants())
         );
         return productRepository.saveNew(product);
     }

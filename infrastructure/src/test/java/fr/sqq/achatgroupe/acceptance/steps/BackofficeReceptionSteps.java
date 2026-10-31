@@ -163,7 +163,7 @@ public class BackofficeReceptionSteps {
         Map<Long, Integer> orderedQuantities = new HashMap<>();
         for (Order order : confirmedOrders) {
             for (OrderItem item : order.items()) {
-                orderedQuantities.merge(item.productId(), item.quantity(), Integer::sum);
+                orderedQuantities.merge(item.variantId(), item.quantity(), Integer::sum);
             }
         }
 

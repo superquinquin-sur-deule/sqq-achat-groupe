@@ -15,7 +15,7 @@ const { selectedVenteId } = storeToRefs(venteStore)
 const supplier = route.params.supplier as string
 
 interface ReceptionLine {
-  productId: number
+  variantId: number
   productName: string
   orderedQuantity: number
   receivedQuantity: number
@@ -36,7 +36,7 @@ const loading = ref(true)
 const isEditing = ref(false)
 const submitting = ref(false)
 const receptionForm = ref<
-  { productId: number; productName: string; orderedQuantity: number; receivedQuantity: number }[]
+  { variantId: number; productName: string; orderedQuantity: number; receivedQuantity: number }[]
 >([])
 
 const title = computed(() =>
@@ -61,7 +61,7 @@ async function fetchSupplierData() {
     isEditing.value = supplierData.status === 'COMPLETED'
     receptionForm.value = supplierData.lines
       .map((l) => ({
-        productId: l.productId,
+        variantId: l.variantId,
         productName: l.productName,
         orderedQuantity: l.orderedQuantity,
         receivedQuantity: isEditing.value ? l.receivedQuantity : l.orderedQuantity,
@@ -85,7 +85,7 @@ async function submitReception() {
       body: JSON.stringify({
         supplier,
         lines: receptionForm.value.map((l) => ({
-          productId: l.productId,
+          variantId: l.variantId,
           receivedQuantity: l.receivedQuantity,
         })),
       }),
@@ -127,7 +127,7 @@ onMounted(fetchSupplierData)
           <tbody>
             <tr
               v-for="item in receptionForm"
-              :key="item.productId"
+              :key="item.variantId"
               class="border-b border-gray-100"
             >
               <td class="py-2 text-dark">{{ item.productName }}</td>

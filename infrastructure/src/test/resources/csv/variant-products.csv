@@ -1,0 +1,5 @@
+nom,description,fournisseur,stock,reference fournisseur,categorie,marque,prix vente ht,tva,colisage,variante
+Sapin Nordmann,Sapin coupe frais,Pepiniere des Cimes,20,SAP-150,Decoration,Pepiniere des Cimes,25.00,20.00,5,150cm
+Sapin Nordmann,Sapin coupe frais,Pepiniere des Cimes,15,SAP-200,Decoration,Pepiniere des Cimes,35.00,20.00,3,200cm
+Sapin Nordmann,Sapin coupe frais,Pepiniere des Cimes,8,SAP-250,Decoration,Pepiniere des Cimes,50.00,20.00,2,250cm
+Couronne de l'Avent,Couronne artisanale,Pepiniere des Cimes,10,COU-001,Decoration,Pepiniere des Cimes,19.90,20.00,,

@@ -7,7 +7,7 @@ import { useVenteQuery } from '@/composables/api/useVentesApi'
 import { useVenteExpiredRedirect } from '@/composables/useVenteExpiredRedirect'
 import { useVenteProductsQuery } from '@/composables/api/useProductsApi'
 import { useVenteTimeslotsQuery } from '@/composables/api/useTimeslotsApi'
-import type { ProductResponse } from '@/api/generated/model'
+import type { ProductResponse, ProductVariantResponse } from '@/api/generated/model'
 import { getRayonColor } from '@/utils/rayon-colors'
 import HeroBanner from '@/components/catalog/HeroBanner.vue'
 import RayonNav from '@/components/catalog/RayonNav.vue'
@@ -30,7 +30,10 @@ const {
   data: products,
   isLoading: loading,
   isFetchingNextPage,
-} = useVenteProductsQuery(venteId, computed(() => !venteClosed.value))
+} = useVenteProductsQuery(
+  venteId,
+  computed(() => !venteClosed.value),
+)
 
 const { data: timeSlots, isLoading: timeSlotsLoading } = useVenteTimeslotsQuery(venteId)
 
@@ -49,8 +52,8 @@ const groupedRayons = computed(() => {
     }))
 })
 
-function handleAddToCart(product: ProductResponse) {
-  cartStore.addItem(product)
+function handleAddToCart(product: ProductResponse, variant: ProductVariantResponse) {
+  cartStore.addItem(product, variant)
   toast.success('Produit ajouté')
 }
 </script>

@@ -66,8 +66,8 @@ public class OrderSetupSteps {
             String[] parts = entry.trim().split(":");
             int productIndex = Integer.parseInt(parts[0]);
             int quantity = Integer.parseInt(parts[1]);
-            Long productId = testContext.productIds().get(productIndex);
-            items.add(new OrderItemCommand(productId, quantity));
+            Long variantId = testContext.variantIds().get(productIndex);
+            items.add(new OrderItemCommand(variantId, quantity));
         }
         return items;
     }

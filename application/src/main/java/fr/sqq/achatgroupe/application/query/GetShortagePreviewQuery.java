@@ -8,6 +8,6 @@ public record GetShortagePreviewQuery(Long venteId) implements Query<GetShortage
 
     public record ShortagePreviewResult(List<ShortageItem> items) {}
 
-    public record ShortageItem(Long productId, String productName, String supplier,
+    public record ShortageItem(Long variantId, String productName, String supplier,
                                int orderedQty, int receivedQty, int shortage, int affectedOrderCount) {}
 }

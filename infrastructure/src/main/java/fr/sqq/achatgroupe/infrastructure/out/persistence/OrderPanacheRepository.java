@@ -187,13 +187,13 @@ public class OrderPanacheRepository implements OrderRepository, PanacheRepositor
     }
 
     @Override
-    public List<ProductOrderedQuantity> findEffectiveOrderedQuantities(Long venteId) {
+    public List<VariantOrderedQuantity> findEffectiveOrderedQuantities(Long venteId) {
         List<Object[]> rows = getEntityManager()
-                .createQuery("SELECT oi.productId, SUM(oi.quantity - oi.cancelledQuantity) FROM OrderItemEntity oi JOIN oi.order o WHERE o.venteId = ?1 AND o.status != 'CANCELLED' GROUP BY oi.productId", Object[].class)
+                .createQuery("SELECT oi.variantId, SUM(oi.quantity - oi.cancelledQuantity) FROM OrderItemEntity oi JOIN oi.order o WHERE o.venteId = ?1 AND o.status != 'CANCELLED' GROUP BY oi.variantId", Object[].class)
                 .setParameter(1, venteId)
                 .getResultList();
         return rows.stream()
-                .map(row -> new ProductOrderedQuantity((Long) row[0], ((Number) row[1]).longValue()))
+                .map(row -> new VariantOrderedQuantity((Long) row[0], ((Number) row[1]).longValue()))
                 .toList();
     }
 

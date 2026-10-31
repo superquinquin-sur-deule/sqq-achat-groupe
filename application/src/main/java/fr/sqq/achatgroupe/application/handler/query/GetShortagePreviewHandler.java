@@ -6,7 +6,7 @@ import fr.sqq.achatgroupe.application.port.out.ReceptionRepository;
 import fr.sqq.achatgroupe.application.query.GetShortagePreviewQuery;
 import fr.sqq.achatgroupe.application.query.GetShortagePreviewQuery.ShortageItem;
 import fr.sqq.achatgroupe.application.query.GetShortagePreviewQuery.ShortagePreviewResult;
-import fr.sqq.achatgroupe.domain.model.catalog.Product;
+import fr.sqq.achatgroupe.application.service.VariantIndex;
 import fr.sqq.achatgroupe.domain.model.order.Order;
 import fr.sqq.achatgroupe.domain.model.order.OrderItem;
 import fr.sqq.achatgroupe.domain.model.reception.Reception;
@@ -39,14 +39,12 @@ public class GetShortagePreviewHandler implements QueryHandler<GetShortagePrevie
     @Transactional
     public ShortagePreviewResult handle(GetShortagePreviewQuery query) {
         List<Reception> receptions = receptionRepository.findAllByVenteId(query.venteId());
-        List<Product> products = productRepository.findAllByVenteId(query.venteId());
-        Map<Long, Product> productsById = products.stream()
-                .collect(Collectors.toMap(Product::id, Function.identity()));
+        VariantIndex variants = VariantIndex.of(productRepository.findAllByVenteId(query.venteId()));
 
         Map<Long, ReceptionItem> shortageItems = receptions.stream()
                 .flatMap(r -> r.items().stream())
                 .filter(item -> item.shortage() > 0)
-                .collect(Collectors.toMap(ReceptionItem::productId, Function.identity()));
+                .collect(Collectors.toMap(ReceptionItem::variantId, Function.identity()));
 
         if (shortageItems.isEmpty()) {
             return new ShortagePreviewResult(List.of());
@@ -56,22 +54,22 @@ public class GetShortagePreviewHandler implements QueryHandler<GetShortagePrevie
 
         Map<Long, Long> affectedOrderCounts = shortageItems.keySet().stream()
                 .collect(Collectors.toMap(
-                        productId -> productId,
-                        productId -> confirmedOrders.stream()
+                        variantId -> variantId,
+                        variantId -> confirmedOrders.stream()
                                 .filter(order -> order.items().stream()
-                                        .anyMatch(item -> item.productId().equals(productId)))
+                                        .anyMatch(item -> item.variantId().equals(variantId)))
                                 .count()));
 
         List<ShortageItem> items = shortageItems.entrySet().stream()
                 .map(entry -> {
-                    Long productId = entry.getKey();
+                    Long variantId = entry.getKey();
                     ReceptionItem ri = entry.getValue();
-                    Product product = productsById.get(productId);
-                    String name = product != null ? product.name() : "Produit #" + productId;
-                    String supplier = product != null ? product.supplier() : "Inconnu";
-                    return new ShortageItem(productId, name, supplier,
+                    VariantIndex.Entry indexed = variants.get(variantId);
+                    String name = indexed != null ? indexed.displayName() : "Produit #" + ri.productId();
+                    String supplier = indexed != null ? indexed.product().supplier() : "Inconnu";
+                    return new ShortageItem(variantId, name, supplier,
                             ri.orderedQuantity(), ri.receivedQuantity(), ri.shortage(),
-                            affectedOrderCounts.getOrDefault(productId, 0L).intValue());
+                            affectedOrderCounts.getOrDefault(variantId, 0L).intValue());
                 })
                 .toList();
 

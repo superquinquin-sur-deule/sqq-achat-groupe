@@ -3,7 +3,7 @@ import { ref, computed, watch } from 'vue'
 import Button from '@/components/ui/Button.vue'
 import EmptyState from '@/components/ui/EmptyState.vue'
 import Pagination from '@/components/ui/Pagination.vue'
-import ProductForm from '@/components/admin/ProductForm.vue'
+import ProductForm, { type VariantFormValue } from '@/components/admin/ProductForm.vue'
 import ProductImportForm from '@/components/admin/ProductImportForm.vue'
 import { useVenteStore } from '@/stores/venteStore'
 import { storeToRefs } from 'pinia'
@@ -136,16 +136,13 @@ function closeForm() {
 async function onSubmit(data: {
   name: string
   description: string
-  prixHt: number
   tauxTva: number
   supplier: string
-  stock: number
   active: boolean
-  reference: string
   category: string
   brand: string
-  colisage?: number
   importantNote: string
+  variants: VariantFormValue[]
   imageFile?: File
 }) {
   if (!selectedVenteId.value) return
@@ -156,16 +153,13 @@ async function onSubmit(data: {
       const updateData: UpdateProductRequest = {
         name: data.name,
         description: data.description,
-        prixHt: data.prixHt,
         tauxTva: data.tauxTva,
         supplier: data.supplier,
-        stock: data.stock,
         active: data.active,
-        reference: data.reference,
         category: data.category,
         brand: data.brand,
-        colisage: data.colisage,
         importantNote: data.importantNote,
+        variants: data.variants,
       }
       await updateMutation.mutateAsync({ id: editingProduct.value.id, data: updateData })
       productId = editingProduct.value.id
@@ -173,15 +167,12 @@ async function onSubmit(data: {
       const createData: CreateProductRequest = {
         name: data.name,
         description: data.description,
-        prixHt: data.prixHt,
         tauxTva: data.tauxTva,
         supplier: data.supplier,
-        stock: data.stock,
-        reference: data.reference,
         category: data.category,
         brand: data.brand,
-        colisage: data.colisage,
         importantNote: data.importantNote,
+        variants: data.variants,
       }
       const result = await createMutation.mutateAsync(createData)
       productId = (result.data as { data: { id: number } }).data.id
@@ -223,16 +214,20 @@ async function toggleActive(product: AdminProductResponse) {
     const updateData: UpdateProductRequest = {
       name: product.name,
       description: product.description,
-      prixHt: product.prixHt,
       tauxTva: product.tauxTva,
       supplier: product.supplier,
-      stock: product.stock,
       active: !product.active,
-      reference: product.reference,
       category: product.category,
       brand: product.brand,
-      colisage: product.colisage,
       importantNote: product.importantNote,
+      variants: product.variants.map((v) => ({
+        id: v.id,
+        label: v.label,
+        reference: v.reference,
+        prixHt: v.prixHt,
+        stock: v.stock,
+        colisage: v.colisage,
+      })),
     }
     await updateMutation.mutateAsync({ id: product.id, data: updateData })
     toast.success(product.active ? 'Produit désactivé' : 'Produit activé')
@@ -312,8 +307,9 @@ function formatPrice(price: number): string {
     <AdminTable
       v-else-if="products && products.length > 0"
       :columns="[
-        'Réf.',
         'Nom',
+        'Variante',
+        'Réf.',
         'Catégorie',
         'Marque',
         'Prix HT',
@@ -334,16 +330,35 @@ function formatPrice(price: number): string {
         class="border-t border-gray-100 transition-colors hover:bg-surface"
         data-testid="product-row"
       >
-        <td class="px-4 py-3 text-dark">{{ product.reference }}</td>
         <td class="px-4 py-3 font-medium text-dark">{{ product.name }}</td>
+        <td class="px-4 py-3 text-dark">
+          <div v-for="v in product.variants" :key="v.id" data-testid="variant-cell-label">
+            {{ v.label || '—' }}
+          </div>
+        </td>
+        <td class="px-4 py-3 text-dark">
+          <div v-for="v in product.variants" :key="v.id" data-testid="variant-cell-reference">
+            {{ v.reference }}
+          </div>
+        </td>
         <td class="px-4 py-3 text-dark">{{ product.category }}</td>
         <td class="px-4 py-3 text-dark">{{ product.brand }}</td>
-        <td class="px-4 py-3 text-dark">{{ formatPrice(product.prixHt) }}</td>
+        <td class="px-4 py-3 text-dark">
+          <div v-for="v in product.variants" :key="v.id">{{ formatPrice(v.prixHt) }}</div>
+        </td>
         <td class="px-4 py-3 text-dark">{{ product.tauxTva }} %</td>
-        <td class="px-4 py-3 font-medium text-dark">{{ formatPrice(product.prixTtc) }}</td>
+        <td class="px-4 py-3 font-medium text-dark">
+          <div v-for="v in product.variants" :key="v.id">{{ formatPrice(v.prixTtc) }}</div>
+        </td>
         <td class="px-4 py-3 text-dark">{{ product.supplier }}</td>
-        <td class="px-4 py-3 text-dark">{{ product.stock }}</td>
-        <td class="px-4 py-3 text-dark">{{ product.colisage ?? '—' }}</td>
+        <td class="px-4 py-3 text-dark">
+          <div v-for="v in product.variants" :key="v.id" data-testid="variant-cell-stock">
+            {{ v.stock }}
+          </div>
+        </td>
+        <td class="px-4 py-3 text-dark">
+          <div v-for="v in product.variants" :key="v.id">{{ v.colisage ?? '—' }}</div>
+        </td>
         <td class="px-4 py-3">
           <span
             :class="[
