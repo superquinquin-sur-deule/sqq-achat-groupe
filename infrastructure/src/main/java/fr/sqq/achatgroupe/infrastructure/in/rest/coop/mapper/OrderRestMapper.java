@@ -13,7 +13,7 @@ public interface OrderRestMapper {
 
     default CreateOrderCommand toCommand(Long venteId, CreateOrderRequest request) {
         var items = request.items().stream()
-                .map(i -> new OrderItemCommand(i.productId(), i.quantity()))
+                .map(i -> new OrderItemCommand(i.variantId(), i.quantity()))
                 .toList();
         return new CreateOrderCommand(
                 venteId,

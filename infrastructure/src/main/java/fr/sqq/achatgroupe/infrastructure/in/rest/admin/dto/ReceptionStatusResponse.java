@@ -7,6 +7,6 @@ public record ReceptionStatusResponse(List<SupplierReceptionStatus> suppliers, b
     public record SupplierReceptionStatus(String supplier, Long receptionId, String status,
                                           List<ReceptionLineResponse> lines) {}
 
-    public record ReceptionLineResponse(Long productId, String productName, int orderedQuantity,
+    public record ReceptionLineResponse(Long variantId, String productName, int orderedQuantity,
                                         int receivedQuantity, int shortage) {}
 }

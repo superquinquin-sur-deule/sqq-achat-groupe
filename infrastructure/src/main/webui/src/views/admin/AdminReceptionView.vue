@@ -13,7 +13,7 @@ const { selectedVenteId } = storeToRefs(venteStore)
 
 // Types
 interface ReceptionLine {
-  productId: number
+  variantId: number
   productName: string
   orderedQuantity: number
   receivedQuantity: number
@@ -31,7 +31,7 @@ interface ReceptionStatus {
   hasAdjustments: boolean
 }
 interface ShortageItem {
-  productId: number
+  variantId: number
   productName: string
   supplier: string
   orderedQty: number
@@ -228,7 +228,7 @@ watch(
                 <tbody>
                   <tr
                     v-for="line in supplier.lines"
-                    :key="line.productId"
+                    :key="line.variantId"
                     :class="['border-b border-gray-100', line.shortage > 0 ? 'bg-red-50' : '']"
                   >
                     <td class="py-1 text-dark">{{ line.productName }}</td>
@@ -274,7 +274,7 @@ watch(
               <tbody>
                 <tr
                   v-for="item in shortagePreview"
-                  :key="item.productId"
+                  :key="item.variantId"
                   class="border-b border-gray-100"
                   data-testid="shortage-row"
                 >

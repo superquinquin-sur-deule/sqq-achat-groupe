@@ -27,7 +27,7 @@ function goToCatalogue() {
 <template>
   <Card>
     <div class="space-y-0">
-      <CartItemComponent v-for="item in cartStore.items" :key="item.productId" :item="item" />
+      <CartItemComponent v-for="item in cartStore.items" :key="item.variantId" :item="item" />
     </div>
 
     <div

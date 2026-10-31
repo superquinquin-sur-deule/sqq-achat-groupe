@@ -5,6 +5,7 @@ import fr.sqq.achatgroupe.application.port.out.OrderRepository;
 import fr.sqq.achatgroupe.application.port.out.ProductRepository;
 import fr.sqq.achatgroupe.application.port.out.ReceptionRepository;
 import fr.sqq.achatgroupe.domain.model.catalog.Product;
+import fr.sqq.achatgroupe.domain.model.catalog.ProductVariant;
 import fr.sqq.achatgroupe.domain.model.order.CustomerInfo;
 import fr.sqq.achatgroupe.domain.model.order.Order;
 import fr.sqq.achatgroupe.domain.model.order.OrderItem;
@@ -34,7 +35,16 @@ class ApplyShortageAdjustmentsHandlerTest {
 
     private static final Long VENTE_ID = 1L;
     private static final Long PRODUCT_A = 10L;
-    private static final Long PRODUCT_B = 20L;
+    private static final Long VARIANT_A = 110L;
+
+    /** Produit simple : une variante unique, au libellé vide. */
+    private static Product simpleProduct(Long productId, Long variantId, String name, String reference,
+                                         String supplier, int stock) {
+        return new Product(productId, VENTE_ID, name, "Bio", BigDecimal.ZERO, supplier, true,
+                "Legumes", supplier, null, false,
+                List.of(new ProductVariant(variantId, productId, "", reference,
+                        Money.eur(new BigDecimal("3.50")), stock, null, 0)));
+    }
 
     @BeforeEach
     void setUp() {
@@ -46,16 +56,16 @@ class ApplyShortageAdjustmentsHandlerTest {
 
     @Test
     void should_be_idempotent_when_called_twice() {
-        Product productA = new Product(PRODUCT_A, VENTE_ID, "Tomates", "Bio", Money.eur(new BigDecimal("3.50")), BigDecimal.ZERO, "Ferme A", 100, true, "TOM-001", "Legumes", "Ferme A", null, null, false);
+        Product productA = simpleProduct(PRODUCT_A, VARIANT_A, "Tomates", "TOM-001", "Ferme A", 100);
 
         // Order with 4x Product A
         Order order = Order.create(VENTE_ID, OrderNumber.generate(),
                 new CustomerInfo("Alice", "Dupont", "alice@test.com", "0601020304"), 1L,
-                List.of(OrderItem.create(PRODUCT_A, 4, Money.eur(new BigDecimal("3.50")))), null);
+                List.of(OrderItem.create(PRODUCT_A, VARIANT_A, 4, Money.eur(new BigDecimal("3.50")))), null);
 
         // Reception: ordered 4, received 3 → shortage = 1
         Reception reception = Reception.create(VENTE_ID, "Ferme A",
-                List.of(ReceptionItem.create(PRODUCT_A, 4, 3)));
+                List.of(ReceptionItem.create(PRODUCT_A, VARIANT_A, 4, 3)));
 
         when(receptionRepository.findAllByVenteId(VENTE_ID)).thenReturn(List.of(reception));
         when(orderRepository.findConfirmedByVenteId(VENTE_ID)).thenReturn(List.of(order));
@@ -77,17 +87,17 @@ class ApplyShortageAdjustmentsHandlerTest {
 
     @Test
     void should_not_save_orders_when_already_adjusted() {
-        Product productA = new Product(PRODUCT_A, VENTE_ID, "Tomates", "Bio", Money.eur(new BigDecimal("3.50")), BigDecimal.ZERO, "Ferme A", 100, true, "TOM-001", "Legumes", "Ferme A", null, null, false);
+        Product productA = simpleProduct(PRODUCT_A, VARIANT_A, "Tomates", "TOM-001", "Ferme A", 100);
 
         // Order already adjusted: 4 ordered, 1 cancelled
-        OrderItem adjustedItem = new OrderItem(1L, PRODUCT_A, 4, Money.eur(new BigDecimal("3.50")), 1);
+        OrderItem adjustedItem = new OrderItem(1L, PRODUCT_A, VARIANT_A, 4, Money.eur(new BigDecimal("3.50")), 1);
         Order order = new Order(java.util.UUID.randomUUID(), VENTE_ID, OrderNumber.generate(),
                 new CustomerInfo("Alice", "Dupont", "alice@test.com", "0601020304"), 1L,
                 List.of(adjustedItem), fr.sqq.achatgroupe.domain.model.order.OrderStatus.CONFIRMED,
                 Money.eur(new BigDecimal("14.00")), java.time.Instant.now(), null, null);
 
         Reception reception = Reception.create(VENTE_ID, "Ferme A",
-                List.of(ReceptionItem.create(PRODUCT_A, 4, 3)));
+                List.of(ReceptionItem.create(PRODUCT_A, VARIANT_A, 4, 3)));
 
         when(receptionRepository.findAllByVenteId(VENTE_ID)).thenReturn(List.of(reception));
         when(orderRepository.findConfirmedByVenteId(VENTE_ID)).thenReturn(List.of(order));
@@ -101,15 +111,15 @@ class ApplyShortageAdjustmentsHandlerTest {
 
     @Test
     void should_apply_partial_remaining_shortage() {
-        Product productA = new Product(PRODUCT_A, VENTE_ID, "Tomates", "Bio", Money.eur(new BigDecimal("3.50")), BigDecimal.ZERO, "Ferme A", 100, true, "TOM-001", "Legumes", "Ferme A", null, null, false);
+        Product productA = simpleProduct(PRODUCT_A, VARIANT_A, "Tomates", "TOM-001", "Ferme A", 100);
 
         // Two orders with Product A
         Order order1 = Order.create(VENTE_ID, OrderNumber.generate(),
                 new CustomerInfo("Alice", "Dupont", "alice@test.com", "0601020304"), 1L,
-                List.of(OrderItem.create(PRODUCT_A, 3, Money.eur(new BigDecimal("3.50")))), null);
+                List.of(OrderItem.create(PRODUCT_A, VARIANT_A, 3, Money.eur(new BigDecimal("3.50")))), null);
 
         // Order2 already has 1 cancelled (from a previous partial run)
-        OrderItem partiallyAdjustedItem = new OrderItem(2L, PRODUCT_A, 2, Money.eur(new BigDecimal("3.50")), 1);
+        OrderItem partiallyAdjustedItem = new OrderItem(2L, PRODUCT_A, VARIANT_A, 2, Money.eur(new BigDecimal("3.50")), 1);
         Order order2 = new Order(java.util.UUID.randomUUID(), VENTE_ID, OrderNumber.generate(),
                 new CustomerInfo("Bob", "Martin", "bob@test.com", "0605060708"), 1L,
                 List.of(partiallyAdjustedItem), fr.sqq.achatgroupe.domain.model.order.OrderStatus.CONFIRMED,
@@ -117,7 +127,7 @@ class ApplyShortageAdjustmentsHandlerTest {
 
         // Shortage = 3, already cancelled = 1, remaining = 2
         Reception reception = Reception.create(VENTE_ID, "Ferme A",
-                List.of(ReceptionItem.create(PRODUCT_A, 5, 2)));
+                List.of(ReceptionItem.create(PRODUCT_A, VARIANT_A, 5, 2)));
 
         when(receptionRepository.findAllByVenteId(VENTE_ID)).thenReturn(List.of(reception));
         when(orderRepository.findConfirmedByVenteId(VENTE_ID)).thenReturn(List.of(order1, order2));

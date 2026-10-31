@@ -11,6 +11,6 @@ public record GetReceptionStatusQuery(Long venteId) implements Query<GetReceptio
     public record SupplierReceptionStatus(String supplier, Long receptionId, String status,
                                           List<ReceptionLineStatus> lines) {}
 
-    public record ReceptionLineStatus(Long productId, String productName, int orderedQuantity,
+    public record ReceptionLineStatus(Long variantId, String productName, int orderedQuantity,
                                       int receivedQuantity, int shortage) {}
 }

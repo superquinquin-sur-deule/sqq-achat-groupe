@@ -49,16 +49,16 @@ public class ApplyShortageAdjustmentsHandler implements CommandHandler<ApplyShor
         List<Order> confirmedOrders = orderRepository.findConfirmedByVenteId(command.venteId());
         List<Product> products = productRepository.findAllByVenteId(command.venteId());
 
-        // Only suppliers that have ordered products need a reception
+        // Seuls les fournisseurs dont une variante a été commandée doivent être réceptionnés.
         Map<Long, Integer> orderedQtys = new HashMap<>();
         for (Order order : confirmedOrders) {
             for (OrderItem item : order.items()) {
-                orderedQtys.merge(item.productId(), item.quantity(), Integer::sum);
+                orderedQtys.merge(item.variantId(), item.quantity(), Integer::sum);
             }
         }
 
         Set<String> suppliersWithOrders = products.stream()
-                .filter(p -> orderedQtys.containsKey(p.id()))
+                .filter(p -> p.variants().stream().anyMatch(v -> orderedQtys.containsKey(v.id())))
                 .map(Product::supplier)
                 .collect(Collectors.toSet());
 
@@ -70,16 +70,16 @@ public class ApplyShortageAdjustmentsHandler implements CommandHandler<ApplyShor
             throw new IllegalStateException("Toutes les réceptions doivent être enregistrées avant d'appliquer les ajustements");
         }
 
-        Map<Long, Integer> shortageByProduct = new HashMap<>();
+        Map<Long, Integer> shortageByVariant = new HashMap<>();
         for (Reception reception : receptions) {
             for (ReceptionItem item : reception.items()) {
                 if (item.shortage() > 0) {
-                    shortageByProduct.put(item.productId(), item.shortage());
+                    shortageByVariant.put(item.variantId(), item.shortage());
                 }
             }
         }
 
-        if (shortageByProduct.isEmpty()) {
+        if (shortageByVariant.isEmpty()) {
             LOG.info("Aucun manque détecté, pas d'ajustement nécessaire");
             return null;
         }
@@ -87,14 +87,14 @@ public class ApplyShortageAdjustmentsHandler implements CommandHandler<ApplyShor
         // Subtract already-cancelled quantities to make idempotent
         for (Order order : confirmedOrders) {
             for (OrderItem item : order.items()) {
-                if (item.cancelledQuantity() > 0 && shortageByProduct.containsKey(item.productId())) {
-                    shortageByProduct.merge(item.productId(), -item.cancelledQuantity(), Integer::sum);
+                if (item.cancelledQuantity() > 0 && shortageByVariant.containsKey(item.variantId())) {
+                    shortageByVariant.merge(item.variantId(), -item.cancelledQuantity(), Integer::sum);
                 }
             }
         }
-        shortageByProduct.values().removeIf(v -> v <= 0);
+        shortageByVariant.values().removeIf(v -> v <= 0);
 
-        if (shortageByProduct.isEmpty()) {
+        if (shortageByVariant.isEmpty()) {
             LOG.info("Ajustements déjà appliqués, aucune action nécessaire");
             return null;
         }
@@ -102,15 +102,15 @@ public class ApplyShortageAdjustmentsHandler implements CommandHandler<ApplyShor
         List<Order> shuffled = new ArrayList<>(confirmedOrders);
         Collections.shuffle(shuffled);
 
-        for (Map.Entry<Long, Integer> entry : shortageByProduct.entrySet()) {
-            Long productId = entry.getKey();
+        for (Map.Entry<Long, Integer> entry : shortageByVariant.entrySet()) {
+            Long variantId = entry.getKey();
             int remainingShortage = entry.getValue();
 
             for (Order order : shuffled) {
                 if (remainingShortage <= 0) break;
 
                 for (OrderItem item : order.items()) {
-                    if (item.productId().equals(productId) && item.effectiveQuantity() > 0) {
+                    if (item.variantId().equals(variantId) && item.effectiveQuantity() > 0) {
                         int toCancel = Math.min(item.effectiveQuantity(), remainingShortage);
                         item.cancelQuantity(toCancel);
                         remainingShortage -= toCancel;

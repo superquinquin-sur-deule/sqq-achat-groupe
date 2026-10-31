@@ -11,7 +11,7 @@ import fr.sqq.achatgroupe.application.query.ListAllProductsQuery;
 import fr.sqq.achatgroupe.application.query.ListAllTimeSlotsQuery;
 import fr.sqq.achatgroupe.application.query.ListOrdersQuery;
 import fr.sqq.achatgroupe.application.port.out.DistributionPdfGenerator;
-import fr.sqq.achatgroupe.domain.model.catalog.Product;
+import fr.sqq.achatgroupe.application.service.VariantIndex;
 import fr.sqq.achatgroupe.domain.model.order.Order;
 import fr.sqq.achatgroupe.domain.model.planning.TimeSlot;
 import fr.sqq.achatgroupe.domain.model.vente.Vente;
@@ -108,9 +108,7 @@ public class AdminOrderResource {
         List<TimeSlot> timeSlots = mediator.send(ListAllTimeSlotsQuery.all(venteId)).items();
         Map<Long, TimeSlot> timeSlotsById = timeSlots.stream()
                 .collect(Collectors.toMap(TimeSlot::id, Function.identity()));
-        List<Product> products = mediator.send(ListAllProductsQuery.all(venteId)).items();
-        Map<Long, Product> productsById = products.stream()
-                .collect(Collectors.toMap(Product::id, Function.identity()));
-        return new DataResponse<>(mapper.toDetailResponse(order, timeSlotsById, productsById));
+        VariantIndex variants = VariantIndex.of(mediator.send(ListAllProductsQuery.all(venteId)).items());
+        return new DataResponse<>(mapper.toDetailResponse(order, timeSlotsById, variants));
     }
 }

@@ -1,51 +1,71 @@
 package fr.sqq.achatgroupe.infrastructure.in.rest.admin.mapper;
 
 import fr.sqq.achatgroupe.application.command.CreateProductCommand;
+import fr.sqq.achatgroupe.application.command.ProductVariantCommand;
 import fr.sqq.achatgroupe.application.command.UpdateProductCommand;
 import fr.sqq.achatgroupe.domain.model.catalog.Product;
 import fr.sqq.achatgroupe.domain.model.catalog.ProductId;
+import fr.sqq.achatgroupe.domain.model.catalog.ProductVariant;
 import fr.sqq.achatgroupe.domain.model.shared.Money;
 import fr.sqq.achatgroupe.infrastructure.in.rest.admin.dto.AdminProductResponse;
+import fr.sqq.achatgroupe.infrastructure.in.rest.admin.dto.AdminProductVariantResponse;
 import fr.sqq.achatgroupe.infrastructure.in.rest.common.dto.CreateProductRequest;
+import fr.sqq.achatgroupe.infrastructure.in.rest.common.dto.ProductVariantRequest;
 import fr.sqq.achatgroupe.infrastructure.in.rest.common.dto.UpdateProductRequest;
 import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
+
+import java.util.List;
 
 @Mapper(componentModel = "cdi")
 public interface AdminProductRestMapper {
 
-    @Mapping(target = "id", expression = "java(product.id())")
-    @Mapping(target = "venteId", expression = "java(product.venteId())")
-    @Mapping(target = "name", expression = "java(product.name())")
-    @Mapping(target = "description", expression = "java(product.description())")
-    @Mapping(target = "prixHt", expression = "java(product.prixHt().amount())")
-    @Mapping(target = "tauxTva", expression = "java(product.tauxTva())")
-    @Mapping(target = "prixTtc", expression = "java(product.prixTtc().amount())")
-    @Mapping(target = "supplier", expression = "java(product.supplier())")
-    @Mapping(target = "stock", expression = "java(product.stock())")
-    @Mapping(target = "active", expression = "java(product.active())")
-    @Mapping(target = "reference", expression = "java(product.reference())")
-    @Mapping(target = "category", expression = "java(product.category())")
-    @Mapping(target = "brand", expression = "java(product.brand())")
-    @Mapping(target = "colisage", expression = "java(product.colisage())")
-    @Mapping(target = "importantNote", expression = "java(product.importantNote())")
-    @Mapping(target = "imageUrl", expression = "java(product.hasImage() ? \"/api/product-images/\" + product.id() : null)")
-    AdminProductResponse toResponse(Product product);
+    default AdminProductResponse toResponse(Product product) {
+        if (product == null) {
+            return null;
+        }
+        List<AdminProductVariantResponse> variants = product.variants().stream()
+                .map(variant -> toResponse(product, variant))
+                .toList();
+
+        return new AdminProductResponse(
+                product.id(),
+                product.venteId(),
+                product.name(),
+                product.description(),
+                product.tauxTva(),
+                product.supplier(),
+                product.active(),
+                product.category(),
+                product.brand(),
+                product.importantNote(),
+                product.hasImage() ? "/api/product-images/" + product.id() : null,
+                variants
+        );
+    }
+
+    default AdminProductVariantResponse toResponse(Product product, ProductVariant variant) {
+        return new AdminProductVariantResponse(
+                variant.id(),
+                variant.label(),
+                variant.reference(),
+                variant.prixHt().amount(),
+                product.prixTtc(variant).amount(),
+                variant.stock(),
+                variant.colisage()
+        );
+    }
 
     default CreateProductCommand toCreateCommand(CreateProductRequest request, Long venteId) {
         return new CreateProductCommand(
                 venteId,
                 request.name(),
                 request.description(),
-                Money.eur(request.prixHt()),
                 request.tauxTva(),
                 request.supplier(),
-                request.stock(),
-                request.reference(),
                 request.category(),
                 request.brand(),
-                request.colisage(),
-                request.importantNote()
+                request.importantNote(),
+                toVariantCommands(request.variants())
         );
     }
 
@@ -55,16 +75,28 @@ public interface AdminProductRestMapper {
                 new ProductId(id),
                 request.name(),
                 request.description(),
-                Money.eur(request.prixHt()),
                 request.tauxTva(),
                 request.supplier(),
-                request.stock(),
                 request.active(),
-                request.reference(),
                 request.category(),
                 request.brand(),
-                request.colisage(),
-                request.importantNote()
+                request.importantNote(),
+                toVariantCommands(request.variants())
         );
+    }
+
+    default List<ProductVariantCommand> toVariantCommands(List<ProductVariantRequest> requests) {
+        if (requests == null) {
+            return List.of();
+        }
+        return requests.stream()
+                .map(r -> new ProductVariantCommand(
+                        r.id(),
+                        r.label() == null ? "" : r.label(),
+                        r.reference(),
+                        Money.eur(r.prixHt()),
+                        r.stock(),
+                        r.colisage()))
+                .toList();
     }
 }

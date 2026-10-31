@@ -7,7 +7,9 @@ import fr.sqq.achatgroupe.application.query.GetReceptionStatusQuery;
 import fr.sqq.achatgroupe.application.query.GetReceptionStatusQuery.ReceptionLineStatus;
 import fr.sqq.achatgroupe.application.query.GetReceptionStatusQuery.ReceptionStatusResult;
 import fr.sqq.achatgroupe.application.query.GetReceptionStatusQuery.SupplierReceptionStatus;
+import fr.sqq.achatgroupe.application.service.VariantIndex;
 import fr.sqq.achatgroupe.domain.model.catalog.Product;
+import fr.sqq.achatgroupe.domain.model.catalog.ProductVariant;
 import fr.sqq.achatgroupe.domain.model.order.Order;
 import fr.sqq.achatgroupe.domain.model.order.OrderItem;
 import fr.sqq.achatgroupe.domain.model.reception.Reception;
@@ -15,6 +17,7 @@ import fr.sqq.mediator.QueryHandler;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -41,8 +44,7 @@ public class GetReceptionStatusHandler implements QueryHandler<GetReceptionStatu
     @Transactional
     public ReceptionStatusResult handle(GetReceptionStatusQuery query) {
         List<Product> products = productRepository.findAllByVenteId(query.venteId());
-        Map<Long, Product> productsById = products.stream()
-                .collect(Collectors.toMap(Product::id, Function.identity()));
+        VariantIndex variants = VariantIndex.of(products);
 
         Map<String, List<Product>> productsBySupplier = products.stream()
                 .collect(Collectors.groupingBy(Product::supplier));
@@ -51,18 +53,18 @@ public class GetReceptionStatusHandler implements QueryHandler<GetReceptionStatu
         Map<String, Reception> receptionBySupplier = receptions.stream()
                 .collect(Collectors.toMap(Reception::supplier, Function.identity()));
 
-        // Compute ordered quantities per product from confirmed orders
+        // Quantités commandées par variante : c'est l'unité réceptionnée.
         List<Order> confirmedOrders = orderRepository.findConfirmedByVenteId(query.venteId());
         Map<Long, Integer> orderedQuantities = new HashMap<>();
         for (Order order : confirmedOrders) {
             for (OrderItem item : order.items()) {
-                orderedQuantities.merge(item.productId(), item.quantity(), Integer::sum);
+                orderedQuantities.merge(item.variantId(), item.quantity(), Integer::sum);
             }
         }
 
-        // Only suppliers that have ordered products need a reception
+        // Seuls les fournisseurs dont une variante a été commandée doivent être réceptionnés.
         Set<String> suppliersWithOrders = products.stream()
-                .filter(p -> orderedQuantities.containsKey(p.id()))
+                .filter(p -> p.variants().stream().anyMatch(v -> orderedQuantities.containsKey(v.id())))
                 .map(Product::supplier)
                 .collect(Collectors.toSet());
 
@@ -72,26 +74,27 @@ public class GetReceptionStatusHandler implements QueryHandler<GetReceptionStatu
                     Reception reception = receptionBySupplier.get(supplier);
                     if (reception != null) {
                         List<ReceptionLineStatus> lines = reception.items().stream()
-                                .map(item -> {
-                                    Product p = productsById.get(item.productId());
-                                    String name = p != null ? p.name() : "Produit #" + item.productId();
-                                    return new ReceptionLineStatus(
-                                            item.productId(), name,
-                                            item.orderedQuantity(), item.receivedQuantity(), item.shortage());
-                                })
+                                .map(item -> new ReceptionLineStatus(
+                                        item.variantId(),
+                                        variants.displayNameOr(item.variantId(), "Produit #" + item.productId()),
+                                        item.orderedQuantity(), item.receivedQuantity(), item.shortage()))
                                 .toList();
                         return new SupplierReceptionStatus(supplier, reception.id(),
                                 reception.status().name(), lines);
-                    } else {
-                        // For pending suppliers, provide product lines with ordered quantities
-                        List<ReceptionLineStatus> lines = productsBySupplier.getOrDefault(supplier, List.of()).stream()
-                                .filter(p -> orderedQuantities.containsKey(p.id()))
-                                .map(p -> new ReceptionLineStatus(
-                                        p.id(), p.name(),
-                                        orderedQuantities.getOrDefault(p.id(), 0), 0, 0))
-                                .toList();
-                        return new SupplierReceptionStatus(supplier, null, "PENDING", lines);
                     }
+
+                    // Fournisseur en attente : on liste les variantes commandées avec leur quantité.
+                    List<ReceptionLineStatus> lines = new ArrayList<>();
+                    for (Product product : productsBySupplier.getOrDefault(supplier, List.of())) {
+                        for (ProductVariant variant : product.variants()) {
+                            Integer ordered = orderedQuantities.get(variant.id());
+                            if (ordered != null) {
+                                lines.add(new ReceptionLineStatus(variant.id(),
+                                        product.displayName(variant), ordered, 0, 0));
+                            }
+                        }
+                    }
+                    return new SupplierReceptionStatus(supplier, null, "PENDING", lines);
                 })
                 .toList();
 

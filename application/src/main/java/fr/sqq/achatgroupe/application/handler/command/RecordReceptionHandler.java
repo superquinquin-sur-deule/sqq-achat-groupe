@@ -5,6 +5,7 @@ import fr.sqq.achatgroupe.application.command.RecordReceptionCommand.ReceptionLi
 import fr.sqq.achatgroupe.application.port.out.OrderRepository;
 import fr.sqq.achatgroupe.application.port.out.ProductRepository;
 import fr.sqq.achatgroupe.application.port.out.ReceptionRepository;
+import fr.sqq.achatgroupe.application.service.VariantIndex;
 import fr.sqq.achatgroupe.domain.model.catalog.Product;
 import fr.sqq.achatgroupe.domain.model.order.Order;
 import fr.sqq.achatgroupe.domain.model.order.OrderItem;
@@ -20,7 +21,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @ApplicationScoped
@@ -59,33 +59,35 @@ public class RecordReceptionHandler implements CommandHandler<RecordReceptionCom
 
         List<Product> products = productRepository.findAllByVenteId(command.venteId());
 
-        Map<Long, Product> productsById = products.stream()
+        // La réception se fait variante par variante : c'est l'unité réellement commandée.
+        VariantIndex supplierVariants = VariantIndex.of(products.stream()
                 .filter(p -> command.supplier().equals(p.supplier()))
-                .collect(Collectors.toMap(Product::id, Function.identity()));
+                .toList());
 
         Map<Long, Integer> orderedQuantities = new HashMap<>();
         for (Order order : confirmedOrders) {
             for (OrderItem item : order.items()) {
-                if (productsById.containsKey(item.productId())) {
-                    orderedQuantities.merge(item.productId(), item.quantity(), Integer::sum);
+                if (supplierVariants.contains(item.variantId())) {
+                    orderedQuantities.merge(item.variantId(), item.quantity(), Integer::sum);
                 }
             }
         }
 
-        Map<Long, Integer> receivedByProduct = command.lines().stream()
-                .collect(Collectors.toMap(ReceptionLineCommand::productId, ReceptionLineCommand::receivedQuantity));
+        Map<Long, Integer> receivedByVariant = command.lines().stream()
+                .collect(Collectors.toMap(ReceptionLineCommand::variantId, ReceptionLineCommand::receivedQuantity));
 
         List<ReceptionItem> items = orderedQuantities.entrySet().stream()
                 .map(entry -> ReceptionItem.create(
+                        supplierVariants.get(entry.getKey()).product().id(),
                         entry.getKey(),
                         entry.getValue(),
-                        receivedByProduct.getOrDefault(entry.getKey(), 0)))
+                        receivedByVariant.getOrDefault(entry.getKey(), 0)))
                 .toList();
 
         Reception reception = Reception.create(command.venteId(), command.supplier(), items);
         Reception saved = receptionRepository.save(reception);
 
-        LOG.infof("Réception enregistrée pour vente %d, fournisseur %s : %d produits",
+        LOG.infof("Réception enregistrée pour vente %d, fournisseur %s : %d variantes",
                 command.venteId(), command.supplier(), items.size());
         return saved;
     }

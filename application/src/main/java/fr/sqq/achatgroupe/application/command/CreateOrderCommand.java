@@ -16,6 +16,6 @@ public record CreateOrderCommand(
         List<OrderItemCommand> items
 ) implements Command<Order> {
 
-    public record OrderItemCommand(Long productId, int quantity) {
+    public record OrderItemCommand(Long variantId, int quantity) {
     }
 }

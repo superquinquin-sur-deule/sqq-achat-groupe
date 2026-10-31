@@ -2,16 +2,19 @@ package fr.sqq.achatgroupe.infrastructure.out.persistence;
 
 import fr.sqq.achatgroupe.domain.model.catalog.Product;
 import fr.sqq.achatgroupe.domain.model.catalog.ProductId;
+import fr.sqq.achatgroupe.domain.model.catalog.ProductVariant;
 import fr.sqq.achatgroupe.application.port.out.ProductRepository;
 import fr.sqq.achatgroupe.application.query.CursorPage;
 import fr.sqq.achatgroupe.application.query.CursorPageRequest;
 import fr.sqq.achatgroupe.infrastructure.out.persistence.cursor.CursorCodec;
 import fr.sqq.achatgroupe.infrastructure.out.persistence.entity.ProductEntity;
+import fr.sqq.achatgroupe.infrastructure.out.persistence.entity.ProductVariantEntity;
 import fr.sqq.achatgroupe.infrastructure.out.persistence.mapper.ProductPersistenceMapper;
 import io.quarkus.hibernate.orm.panache.PanacheRepositoryBase;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -62,6 +65,13 @@ public class ProductPanacheRepository implements ProductRepository, PanacheRepos
     }
 
     @Override
+    public Optional<Product> findByVariantId(Long variantId) {
+        return find("SELECT p FROM ProductEntity p JOIN p.variants v WHERE v.id = ?1", variantId)
+                .firstResultOptional()
+                .map(mapper::toDomain);
+    }
+
+    @Override
     public List<Product> findAllByVenteId(Long venteId) {
         return list("venteId = ?1", venteId).stream()
                 .map(mapper::toDomain)
@@ -88,7 +98,8 @@ public class ProductPanacheRepository implements ProductRepository, PanacheRepos
         if (search != null && !search.isBlank()) {
             String pattern = "%" + search.trim().toLowerCase() + "%";
             params.put("search", pattern);
-            query.append(" AND (LOWER(name) LIKE :search OR LOWER(description) LIKE :search OR LOWER(brand) LIKE :search OR LOWER(supplier) LIKE :search OR LOWER(reference) LIKE :search)");
+            query.append(" AND (LOWER(name) LIKE :search OR LOWER(description) LIKE :search OR LOWER(brand) LIKE :search OR LOWER(supplier) LIKE :search"
+                    + " OR id IN (SELECT v.product.id FROM ProductVariantEntity v WHERE LOWER(v.reference) LIKE :search))");
         }
 
         query.append(" ORDER BY id ASC");
@@ -103,15 +114,36 @@ public class ProductPanacheRepository implements ProductRepository, PanacheRepos
         ProductEntity entity = findById(product.id());
         entity.setName(product.name());
         entity.setDescription(product.description());
-        entity.setPrixHt(product.prixHt().amount());
         entity.setTauxTva(product.tauxTva());
         entity.setSupplier(product.supplier());
-        entity.setStock(product.stock());
         entity.setActive(product.active());
-        entity.setReference(product.reference());
         entity.setCategory(product.category());
         entity.setBrand(product.brand());
+        entity.setImportantNote(product.importantNote());
         entity.setHasImage(product.hasImage());
+        syncVariants(entity, product);
+    }
+
+    /** Upsert des variantes présentes et suppression (orphanRemoval) de celles retirées. */
+    private void syncVariants(ProductEntity entity, Product product) {
+        Map<Long, ProductVariantEntity> existing = new HashMap<>();
+        for (ProductVariantEntity variantEntity : entity.getVariants()) {
+            existing.put(variantEntity.getId(), variantEntity);
+        }
+
+        List<ProductVariantEntity> target = new ArrayList<>();
+        for (ProductVariant variant : product.variants()) {
+            ProductVariantEntity variantEntity = variant.id() != null ? existing.get(variant.id()) : null;
+            if (variantEntity == null) {
+                variantEntity = new ProductVariantEntity();
+                variantEntity.setProduct(entity);
+            }
+            mapper.applyTo(variantEntity, variant);
+            target.add(variantEntity);
+        }
+
+        entity.getVariants().clear();
+        entity.getVariants().addAll(target);
     }
 
     @Override

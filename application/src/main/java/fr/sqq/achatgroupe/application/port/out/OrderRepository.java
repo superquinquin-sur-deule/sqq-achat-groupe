@@ -50,7 +50,7 @@ public interface OrderRepository {
 
     record DailyOrderCount(LocalDate date, long orderCount) {}
 
-    record ProductOrderedQuantity(Long productId, long effectiveQuantity) {}
+    record VariantOrderedQuantity(Long variantId, long effectiveQuantity) {}
 
-    List<ProductOrderedQuantity> findEffectiveOrderedQuantities(Long venteId);
+    List<VariantOrderedQuantity> findEffectiveOrderedQuantities(Long venteId);
 }

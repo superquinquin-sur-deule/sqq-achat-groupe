@@ -132,7 +132,14 @@ defineExpose({ setResult })
           Format attendu : nom, description, prix_ht, taux_tva, fournisseur, stock, reference,
           categorie, marque
         </p>
-        <p class="text-sm text-brown/60">Colonnes optionnelles : colisage, mention importante</p>
+        <p class="text-sm text-brown/60">
+          Colonnes optionnelles : colisage, mention importante, variante
+        </p>
+        <p class="text-sm text-brown/60">
+          Pour un produit à déclinaisons, répétez le même nom sur plusieurs lignes consécutives et
+          renseignez la colonne « variante » (ex. 150cm, 200cm) : chaque ligne porte sa propre
+          référence, son prix et son stock.
+        </p>
       </template>
       <template v-else>
         <div class="flex items-center gap-2" @click.stop>

@@ -1,19 +1,18 @@
 package fr.sqq.achatgroupe.infrastructure.in.rest.common.dto;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 public record ProductResponse(
         Long id,
         String name,
         String description,
-        BigDecimal prixHt,
         BigDecimal tauxTva,
-        BigDecimal prixTtc,
         String supplier,
-        int stock,
         String category,
         String brand,
         String importantNote,
-        String imageUrl
+        String imageUrl,
+        List<ProductVariantResponse> variants
 ) {
 }

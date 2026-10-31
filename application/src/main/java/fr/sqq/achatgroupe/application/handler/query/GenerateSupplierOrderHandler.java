@@ -4,7 +4,9 @@ import fr.sqq.achatgroupe.application.port.out.OrderRepository;
 import fr.sqq.achatgroupe.application.port.out.ProductRepository;
 import fr.sqq.achatgroupe.application.query.GenerateSupplierOrderQuery;
 import fr.sqq.achatgroupe.application.query.GenerateSupplierOrderQuery.SupplierOrderLine;
+import fr.sqq.achatgroupe.application.service.VariantIndex;
 import fr.sqq.achatgroupe.domain.model.catalog.Product;
+import fr.sqq.achatgroupe.domain.model.catalog.ProductVariant;
 import fr.sqq.achatgroupe.domain.model.order.Order;
 import fr.sqq.achatgroupe.domain.model.order.OrderItem;
 import fr.sqq.mediator.QueryHandler;
@@ -15,8 +17,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 @ApplicationScoped
 public class GenerateSupplierOrderHandler implements QueryHandler<GenerateSupplierOrderQuery, List<SupplierOrderLine>> {
@@ -33,26 +33,31 @@ public class GenerateSupplierOrderHandler implements QueryHandler<GenerateSuppli
     @Transactional
     public List<SupplierOrderLine> handle(GenerateSupplierOrderQuery query) {
         List<Order> orders = orderRepository.findConfirmedByVenteId(query.venteId());
+        VariantIndex variants = VariantIndex.of(productRepository.findAllByVenteId(query.venteId()));
 
-        List<Product> products = productRepository.findAllByVenteId(query.venteId());
-        Map<Long, Product> productsById = products.stream()
-                .collect(Collectors.toMap(Product::id, Function.identity()));
-
-        Map<Long, Integer> quantitiesByProduct = new HashMap<>();
+        // Une ligne de bon fournisseur par variante : c'est elle qui porte la référence et le colisage.
+        Map<Long, Integer> quantitiesByVariant = new HashMap<>();
         for (Order order : orders) {
             for (OrderItem item : order.items()) {
-                quantitiesByProduct.merge(item.productId(), item.quantity(), Integer::sum);
+                quantitiesByVariant.merge(item.variantId(), item.quantity(), Integer::sum);
             }
         }
 
-        return quantitiesByProduct.entrySet().stream()
+        return quantitiesByVariant.entrySet().stream()
                 .map(entry -> {
-                    Product product = productsById.get(entry.getKey());
+                    VariantIndex.Entry indexed = variants.get(entry.getKey());
+                    if (indexed == null) {
+                        return null;
+                    }
+                    Product product = indexed.product();
+                    ProductVariant variant = indexed.variant();
                     int qty = entry.getValue();
-                    Integer colisage = product.colisage();
+                    Integer colisage = variant.colisage();
                     Integer nombreColis = colisage != null ? (int) Math.ceil((double) qty / colisage) : null;
-                    return new SupplierOrderLine(product.reference(), product.name(), product.brand(), product.supplier(), qty, colisage, nombreColis);
+                    return new SupplierOrderLine(variant.reference(), product.displayName(variant), product.brand(),
+                            product.supplier(), qty, colisage, nombreColis);
                 })
+                .filter(line -> line != null)
                 .sorted(Comparator.comparing(SupplierOrderLine::supplier)
                         .thenComparing(SupplierOrderLine::productName))
                 .toList();

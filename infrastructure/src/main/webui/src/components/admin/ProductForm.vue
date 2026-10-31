@@ -1,12 +1,22 @@
 <script setup lang="ts">
-import { useForm, useField } from 'vee-validate'
+import { useForm, useField, useFieldArray } from 'vee-validate'
 import { toTypedSchema } from '@vee-validate/zod'
 import { z } from 'zod'
-import { computed, nextTick, onMounted, ref } from 'vue'
+import { nextTick, onMounted, ref } from 'vue'
 import { cva } from 'class-variance-authority'
 import Input from '@/components/ui/Input.vue'
 import Button from '@/components/ui/Button.vue'
+import ProductVariantRow from '@/components/admin/ProductVariantRow.vue'
 import type { AdminProductResponse } from '@/api/generated/model'
+
+export interface VariantFormValue {
+  id?: number
+  label: string
+  reference: string
+  prixHt: number
+  stock: number
+  colisage?: number
+}
 
 const props = defineProps<{
   product?: AdminProductResponse
@@ -19,16 +29,13 @@ const emit = defineEmits<{
     data: {
       name: string
       description: string
-      prixHt: number
       tauxTva: number
       supplier: string
-      stock: number
       active: boolean
-      reference: string
       category: string
       brand: string
-      colisage?: number
       importantNote: string
+      variants: VariantFormValue[]
       imageFile?: File
     },
   ]
@@ -38,14 +45,39 @@ const emit = defineEmits<{
 const isEdit = !!props.product
 const fieldsLocked = !!(props.hasOrders && isEdit)
 
+const variantSchema = z.object({
+  id: z.number().optional(),
+  label: z
+    .string()
+    .max(100, 'Le libellé ne peut pas dépasser 100 caractères')
+    .optional()
+    .default(''),
+  reference: z.string().min(1, 'Merci de saisir une référence'),
+  prixHt: z
+    .string()
+    .min(1, 'Merci de saisir un prix HT')
+    .refine((v) => !isNaN(Number(v)) && Number(v) > 0, 'Le prix HT doit être supérieur à 0'),
+  stock: z
+    .string()
+    .min(1, 'Merci de saisir un stock')
+    .refine(
+      (v) => !isNaN(Number(v)) && Number(v) >= 0 && Number.isInteger(Number(v)),
+      'Le stock ne peut pas être négatif',
+    ),
+  colisage: z
+    .string()
+    .optional()
+    .default('')
+    .refine(
+      (v) => v === '' || (!isNaN(Number(v)) && Number(v) >= 1 && Number.isInteger(Number(v))),
+      'Le colisage doit être un entier supérieur ou égal à 1',
+    ),
+})
+
 const schema = toTypedSchema(
   z.object({
     name: z.string().min(1, 'Merci de saisir un nom de produit'),
     description: z.string().optional().default(''),
-    prixHt: z
-      .string()
-      .min(1, 'Merci de saisir un prix HT')
-      .refine((v) => !isNaN(Number(v)) && Number(v) > 0, 'Le prix HT doit être supérieur à 0'),
     tauxTva: z
       .string()
       .min(1, 'Merci de saisir un taux de TVA')
@@ -54,60 +86,65 @@ const schema = toTypedSchema(
         'Le taux de TVA ne peut pas être négatif',
       ),
     supplier: z.string().min(1, 'Merci de saisir un fournisseur'),
-    stock: z
-      .string()
-      .min(1, 'Merci de saisir un stock')
-      .refine(
-        (v) => !isNaN(Number(v)) && Number(v) >= 0 && Number.isInteger(Number(v)),
-        'Le stock ne peut pas être négatif',
-      ),
-    reference: z.string().min(1, 'Merci de saisir une référence'),
     category: z.string().min(1, 'Merci de saisir une catégorie'),
     brand: z.string().min(1, 'Merci de saisir une marque'),
-    colisage: z
-      .string()
-      .optional()
-      .default('')
-      .refine(
-        (v) => v === '' || (!isNaN(Number(v)) && Number(v) >= 1 && Number.isInteger(Number(v))),
-        'Le colisage doit être un entier supérieur ou égal à 1',
-      ),
     importantNote: z
       .string()
       .max(500, 'La mention importante ne peut pas dépasser 500 caractères')
       .optional()
       .default(''),
+    variants: z
+      .array(variantSchema)
+      .min(1, 'Un produit doit avoir au moins une variante')
+      .superRefine((variants, ctx) => {
+        if (variants.length > 1 && variants.some((v) => !v.label?.trim())) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: 'Chaque variante doit avoir un libellé (ex. 150cm)',
+          })
+        }
+        const references = variants.map((v) => v.reference?.trim()).filter(Boolean)
+        if (new Set(references).size !== references.length) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: 'Les références des variantes doivent être différentes',
+          })
+        }
+      }),
   }),
 )
 
-const { handleSubmit } = useForm({
+const emptyVariant = () => ({ label: '', reference: '', prixHt: '', stock: '0', colisage: '' })
+
+const { handleSubmit, errors } = useForm({
   validationSchema: schema,
   initialValues: props.product
     ? {
         name: props.product.name,
         description: props.product.description ?? '',
-        prixHt: String(props.product.prixHt),
         tauxTva: String(props.product.tauxTva),
         supplier: props.product.supplier,
-        stock: String(props.product.stock),
-        reference: props.product.reference ?? '',
         category: props.product.category ?? '',
         brand: props.product.brand ?? '',
-        colisage: props.product.colisage != null ? String(props.product.colisage) : '',
         importantNote: props.product.importantNote ?? '',
+        variants: (props.product.variants ?? []).map((v) => ({
+          id: v.id,
+          label: v.label ?? '',
+          reference: v.reference ?? '',
+          prixHt: String(v.prixHt),
+          stock: String(v.stock),
+          colisage: v.colisage != null ? String(v.colisage) : '',
+        })),
       }
     : {
         name: '',
         description: '',
-        prixHt: '',
         tauxTva: '5.50',
         supplier: '',
-        stock: '0',
-        reference: '',
         category: '',
         brand: '',
-        colisage: '',
         importantNote: '',
+        variants: [emptyVariant()],
       },
 })
 
@@ -118,11 +155,6 @@ const {
   handleBlur: descriptionBlur,
 } = useField<string>('description')
 const {
-  value: prixHt,
-  errorMessage: prixHtError,
-  handleBlur: prixHtBlur,
-} = useField<string>('prixHt')
-const {
   value: tauxTva,
   errorMessage: tauxTvaError,
   handleBlur: tauxTvaBlur,
@@ -132,12 +164,6 @@ const {
   errorMessage: supplierError,
   handleBlur: supplierBlur,
 } = useField<string>('supplier')
-const { value: stock, errorMessage: stockError, handleBlur: stockBlur } = useField<string>('stock')
-const {
-  value: reference,
-  errorMessage: referenceError,
-  handleBlur: referenceBlur,
-} = useField<string>('reference')
 const {
   value: category,
   errorMessage: categoryError,
@@ -145,26 +171,20 @@ const {
 } = useField<string>('category')
 const { value: brand, errorMessage: brandError, handleBlur: brandBlur } = useField<string>('brand')
 const {
-  value: colisage,
-  errorMessage: colisageError,
-  handleBlur: colisageBlur,
-} = useField<string>('colisage')
-const {
   value: importantNote,
   errorMessage: importantNoteError,
   handleBlur: importantNoteBlur,
 } = useField<string>('importantNote')
 
+const {
+  fields: variantFields,
+  push: pushVariant,
+  remove: removeVariant,
+} = useFieldArray('variants')
+
 const imageFile = ref<File | undefined>(undefined)
 const imagePreview = ref<string | undefined>(props.product?.imageUrl ?? undefined)
 const firstInput = ref<InstanceType<typeof Input> | null>(null)
-
-const prixTtc = computed(() => {
-  const ht = Number(prixHt.value)
-  const tva = Number(tauxTva.value)
-  if (isNaN(ht) || isNaN(tva) || ht <= 0) return null
-  return (ht * (1 + tva / 100)).toFixed(2)
-})
 
 const textareaVariants = cva(
   'min-h-[44px] rounded-lg border px-3 py-2 text-dark transition-colors focus:outline-2 focus:outline-offset-2 focus:outline-dark',
@@ -198,16 +218,20 @@ const onSubmit = handleSubmit((values) => {
   emit('submit', {
     name: values.name,
     description: values.description ?? '',
-    prixHt: Number(values.prixHt),
     tauxTva: Number(values.tauxTva),
     supplier: values.supplier,
-    stock: Number(values.stock),
     active: props.product?.active ?? true,
-    reference: values.reference,
     category: values.category,
     brand: values.brand,
-    colisage: values.colisage ? Number(values.colisage) : undefined,
     importantNote: values.importantNote ?? '',
+    variants: values.variants.map((v) => ({
+      id: v.id,
+      label: (v.label ?? '').trim(),
+      reference: v.reference,
+      prixHt: Number(v.prixHt),
+      stock: Number(v.stock),
+      colisage: v.colisage ? Number(v.colisage) : undefined,
+    })),
     imageFile: imageFile.value,
   })
 })
@@ -232,18 +256,6 @@ const onSubmit = handleSubmit((values) => {
           @blur="nameBlur"
         />
         <Input
-          id="product-reference"
-          v-model="reference"
-          label="Référence"
-          type="text"
-          :error="referenceError ?? ''"
-          :disabled="fieldsLocked"
-          required
-          @blur="referenceBlur"
-        />
-      </div>
-      <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <Input
           id="product-category"
           v-model="category"
           label="Catégorie"
@@ -253,6 +265,8 @@ const onSubmit = handleSubmit((values) => {
           required
           @blur="categoryBlur"
         />
+      </div>
+      <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <Input
           id="product-brand"
           v-model="brand"
@@ -262,6 +276,28 @@ const onSubmit = handleSubmit((values) => {
           :disabled="fieldsLocked"
           required
           @blur="brandBlur"
+        />
+        <Input
+          id="product-supplier"
+          v-model="supplier"
+          label="Fournisseur"
+          type="text"
+          :error="supplierError ?? ''"
+          :disabled="fieldsLocked"
+          required
+          @blur="supplierBlur"
+        />
+        <Input
+          id="product-taux-tva"
+          v-model="tauxTva"
+          label="TVA (%)"
+          type="number"
+          step="0.01"
+          min="0"
+          :error="tauxTvaError ?? ''"
+          :disabled="fieldsLocked"
+          required
+          @blur="tauxTvaBlur"
         />
       </div>
       <div class="flex flex-col gap-1">
@@ -349,74 +385,43 @@ const onSubmit = handleSubmit((values) => {
           />
         </div>
       </div>
-      <div class="grid grid-cols-1 gap-4 sm:grid-cols-4">
-        <Input
-          id="product-prix-ht"
-          v-model="prixHt"
-          label="Prix HT (€)"
-          type="number"
-          step="0.01"
-          min="0.01"
-          :error="prixHtError ?? ''"
-          :disabled="fieldsLocked"
-          required
-          @blur="prixHtBlur"
+
+      <fieldset
+        class="flex flex-col gap-3 rounded-lg border border-gray-200 p-4"
+        data-testid="variants-section"
+      >
+        <legend class="px-1 text-sm font-medium text-dark">Variantes</legend>
+        <p class="text-sm text-brown/60">
+          Laissez le libellé vide pour un produit sans déclinaison. Ajoutez une ligne par taille ou
+          format : chacune a sa propre référence, son prix et son stock.
+        </p>
+
+        <ProductVariantRow
+          v-for="(field, index) in variantFields"
+          :key="field.key"
+          :index="index"
+          :locked="fieldsLocked"
+          :removable="variantFields.length > 1"
+          :taux-tva="tauxTva"
+          @remove="removeVariant(index)"
         />
-        <Input
-          id="product-taux-tva"
-          v-model="tauxTva"
-          label="TVA (%)"
-          type="number"
-          step="0.01"
-          min="0"
-          :error="tauxTvaError ?? ''"
-          :disabled="fieldsLocked"
-          required
-          @blur="tauxTvaBlur"
-        />
-        <div class="flex flex-col gap-1">
-          <label class="text-sm font-medium text-dark">Prix TTC (€)</label>
-          <div
-            class="flex min-h-[44px] items-center rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-dark"
+
+        <p v-if="errors.variants" class="text-sm text-red-600" role="alert">
+          {{ errors.variants }}
+        </p>
+
+        <div>
+          <Button
+            type="button"
+            data-testid="add-variant"
+            variant="secondary"
+            @click="pushVariant(emptyVariant())"
           >
-            {{ prixTtc ?? '—' }}
-          </div>
+            Ajouter une variante
+          </Button>
         </div>
-        <Input
-          id="product-stock"
-          v-model="stock"
-          label="Stock"
-          type="number"
-          min="0"
-          step="1"
-          :error="stockError ?? ''"
-          required
-          @blur="stockBlur"
-        />
-      </div>
-      <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <Input
-          id="product-supplier"
-          v-model="supplier"
-          label="Fournisseur"
-          type="text"
-          :error="supplierError ?? ''"
-          :disabled="fieldsLocked"
-          required
-          @blur="supplierBlur"
-        />
-        <Input
-          id="product-colisage"
-          v-model="colisage"
-          label="Colisage"
-          type="number"
-          min="1"
-          step="1"
-          :error="colisageError ?? ''"
-          :disabled="fieldsLocked"
-          @blur="colisageBlur"
-        />
-      </div>
+      </fieldset>
+
       <div class="mt-2 flex gap-2">
         <Button type="submit" variant="primary" :loading="loading">
           {{ isEdit ? 'Enregistrer les modifications' : 'Créer le produit' }}

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import type { ProductResponse } from '@/api/generated/model'
+import type { ProductResponse, ProductVariantResponse } from '@/api/generated/model'
 import { getRayonColor, toRayonId } from '@/utils/rayon-colors'
 import ProductCard from './ProductCard.vue'
 
@@ -10,7 +10,7 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
-  add: [product: ProductResponse]
+  add: [product: ProductResponse, variant: ProductVariantResponse]
 }>()
 
 const groupedProducts = computed(() => {
@@ -68,7 +68,7 @@ const groupedProducts = computed(() => {
             :key="product.id"
             :product="product"
             :rayon-color="group.color"
-            @add="emit('add', $event)"
+            @add="(p, v) => emit('add', p, v)"
           />
         </div>
       </div>

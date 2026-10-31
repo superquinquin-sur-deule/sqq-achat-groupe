@@ -11,6 +11,7 @@ public class TestContext {
     private Long venteId;
     private Long emptyVenteId;
     private List<Long> productIds;
+    private List<Long> variantIds;
     private List<Long> timeSlotIds;
     private LocalDate pickupStartDate;
     private LocalDate pickupEndDate;
@@ -39,6 +40,15 @@ public class TestContext {
         this.productIds = productIds;
     }
 
+    /** Variantes « par défaut » des produits de test, dans le même ordre que productIds. */
+    public List<Long> variantIds() {
+        return variantIds;
+    }
+
+    public void setVariantIds(List<Long> variantIds) {
+        this.variantIds = variantIds;
+    }
+
     public List<Long> timeSlotIds() {
         return timeSlotIds;
     }
@@ -64,6 +74,7 @@ public class TestContext {
         venteId = null;
         emptyVenteId = null;
         productIds = null;
+        variantIds = null;
         timeSlotIds = null;
         pickupStartDate = null;
         pickupEndDate = null;

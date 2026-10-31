@@ -18,6 +18,9 @@ public interface ProductRepository {
 
     Optional<Product> findByIdAndVenteId(ProductId id, Long venteId);
 
+    /** Charge le produit propriétaire de la variante donnée. */
+    Optional<Product> findByVariantId(Long variantId);
+
     List<Product> findAllByVenteId(Long venteId);
 
     CursorPage<Product> findAllByVenteId(Long venteId, CursorPageRequest pageRequest);

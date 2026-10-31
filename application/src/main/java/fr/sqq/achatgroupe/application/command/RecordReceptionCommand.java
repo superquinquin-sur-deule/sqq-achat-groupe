@@ -11,5 +11,5 @@ public record RecordReceptionCommand(
         List<ReceptionLineCommand> lines
 ) implements Command<Reception> {
 
-    public record ReceptionLineCommand(Long productId, int receivedQuantity) {}
+    public record ReceptionLineCommand(Long variantId, int receivedQuantity) {}
 }

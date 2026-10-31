@@ -37,11 +37,11 @@ public class DeleteTimeSlotSteps {
     public void uneCommandeExisteSurLePremierCreneau() {
         Long venteId = testContext.venteId();
         Long timeSlotId = testContext.timeSlotIds().get(0);
-        Long productId = testContext.productIds().get(0);
+        Long variantId = testContext.variantIds().get(0);
 
         Order order = mediator.send(new CreateOrderCommand(
                 venteId, "Test", "Utilisateur", "test@exemple.fr", "0612345678",
-                timeSlotId, null, List.of(new OrderItemCommand(productId, 1))
+                timeSlotId, null, List.of(new OrderItemCommand(variantId, 1))
         ));
 
         createdOrderId = order.id();

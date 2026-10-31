@@ -45,7 +45,7 @@ export const useCheckoutStore = defineStore('checkout', () => {
       timeSlotId: selectedTimeSlotId.value ?? undefined,
       idempotencyKey: idempotencyKey.value,
       items: cartStore.items.map((item) => ({
-        productId: item.productId,
+        variantId: item.variantId,
         quantity: item.quantity,
       })),
     })

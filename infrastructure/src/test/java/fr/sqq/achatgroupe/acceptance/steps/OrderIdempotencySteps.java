@@ -24,7 +24,7 @@ public class OrderIdempotencySteps {
     private String secondOrderId;
 
     private String createOrderBody() {
-        Long productId = testContext.productIds().get(0);
+        Long variantId = testContext.variantIds().get(0);
         Long timeSlotId = testContext.timeSlotIds().get(0);
         return """
                 {
@@ -34,9 +34,9 @@ public class OrderIdempotencySteps {
                     "phone": "06 12 34 56 78",
                     "timeSlotId": %d,
                     "idempotencyKey": "%s",
-                    "items": [{"productId": %d, "quantity": 1}]
+                    "items": [{"variantId": %d, "quantity": 1}]
                 }
-                """.formatted(timeSlotId, idempotencyKey, productId);
+                """.formatted(timeSlotId, idempotencyKey, variantId);
     }
 
     @Quand("je crée une commande avec une clé d'idempotence")
