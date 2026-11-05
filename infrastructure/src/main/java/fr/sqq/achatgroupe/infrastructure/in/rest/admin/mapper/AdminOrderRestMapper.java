@@ -77,7 +77,8 @@ public interface AdminOrderRestMapper {
                 timeSlotInfo,
                 items,
                 order.totalAmount().amount(),
-                order.createdAt()
+                order.createdAt(),
+                order.cancellationReason()
         );
     }
 
