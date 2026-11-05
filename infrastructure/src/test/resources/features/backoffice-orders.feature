@@ -54,3 +54,17 @@ Fonctionnalité: Liste des commandes back-office
     Et je vois le créneau de retrait dans le détail backoffice
     Et je vois le tableau des produits avec quantités et prix
     Et je vois le total de la commande
+
+  Scénario: Annulation d'une commande depuis son détail
+    Quand je navigue vers la page backoffice commandes
+    Et je clique sur une commande confirmée dans la liste backoffice
+    Et j'annule la commande avec la raison "Client absent"
+    Alors le détail affiche la commande annulée avec la raison "Client absent"
+    Et le bouton d'annulation n'est plus proposé
+
+  Scénario: La raison est obligatoire pour annuler une commande
+    Quand je navigue vers la page backoffice commandes
+    Et je clique sur une commande confirmée dans la liste backoffice
+    Et je confirme l'annulation sans saisir de raison
+    Alors une erreur m'indique que la raison est requise
+    Et la commande reste confirmée dans le détail

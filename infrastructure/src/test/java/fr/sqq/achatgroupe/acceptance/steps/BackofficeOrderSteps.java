@@ -183,6 +183,71 @@ public class BackofficeOrderSteps {
                 .setTimeout(10000));
     }
 
+    @Et("je clique sur une commande confirmée dans la liste backoffice")
+    public void jeCliqueSurUneCommandeConfirmeeDansLaListe() {
+        Locator rows = page().locator("[data-testid='backoffice-order-row']");
+        Locator targetRow = null;
+        for (int i = 0; i < rows.count(); i++) {
+            String statusText = rows.nth(i).locator("[data-testid='backoffice-order-status']").textContent();
+            if (statusText.contains("Confirmé")) {
+                targetRow = rows.nth(i);
+                break;
+            }
+        }
+        assertNotNull(targetRow, "Il doit y avoir au moins une commande confirmée");
+        targetRow.locator("a").first().click();
+        page().waitForSelector("[data-testid='order-cancel-btn']", new Page.WaitForSelectorOptions()
+                .setState(WaitForSelectorState.VISIBLE)
+                .setTimeout(10000));
+    }
+
+    @Et("j'annule la commande avec la raison {string}")
+    public void jAnnuleLaCommandeAvecLaRaison(String reason) {
+        page().locator("[data-testid='order-cancel-btn']").click();
+        page().locator("[data-testid='order-cancel-reason-input']").fill(reason);
+        page().locator("[data-testid='order-cancel-confirm-btn']").click();
+        page().waitForSelector("[data-testid='order-cancellation-reason']", new Page.WaitForSelectorOptions()
+                .setState(WaitForSelectorState.VISIBLE)
+                .setTimeout(10000));
+    }
+
+    @Alors("le détail affiche la commande annulée avec la raison {string}")
+    public void leDetailAfficheLaCommandeAnnulee(String reason) {
+        String reasonText = page().locator("[data-testid='order-cancellation-reason']").textContent();
+        assertTrue(reasonText.contains(reason),
+                "Le motif d'annulation doit contenir '" + reason + "', got: " + reasonText);
+        assertTrue(page().locator("[data-testid='order-detail-customer']").isVisible(),
+                "Le détail de la commande doit rester affiché");
+    }
+
+    @Et("le bouton d'annulation n'est plus proposé")
+    public void leBoutonDAnnulationNEstPlusPropose() {
+        assertEquals(0, page().locator("[data-testid='order-cancel-btn']").count(),
+                "Le bouton d'annulation ne doit plus être proposé sur une commande annulée");
+    }
+
+    @Et("je confirme l'annulation sans saisir de raison")
+    public void jeConfirmeLAnnulationSansRaison() {
+        page().locator("[data-testid='order-cancel-btn']").click();
+        page().locator("[data-testid='order-cancel-confirm-btn']").click();
+        page().waitForSelector("[data-testid='order-cancel-error']", new Page.WaitForSelectorOptions()
+                .setState(WaitForSelectorState.VISIBLE)
+                .setTimeout(10000));
+    }
+
+    @Alors("une erreur m'indique que la raison est requise")
+    public void uneErreurMIndiqueQueLaRaisonEstRequise() {
+        String error = page().locator("[data-testid='order-cancel-error']").textContent();
+        assertTrue(error.toLowerCase().contains("raison"),
+                "L'erreur doit mentionner la raison, got: " + error);
+    }
+
+    @Et("la commande reste confirmée dans le détail")
+    public void laCommandeResteConfirmeeDansLeDetail() {
+        assertEquals(0, page().locator("[data-testid='order-cancellation-reason']").count(),
+                "Aucun motif d'annulation ne doit être affiché");
+    }
+
     @Alors("je vois les coordonnées du client")
     public void jeVoisLesCoordonneesDuClient() {
         Locator customer = page().locator("[data-testid='order-detail-customer']");

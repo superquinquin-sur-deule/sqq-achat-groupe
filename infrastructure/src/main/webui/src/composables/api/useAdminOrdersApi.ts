@@ -4,6 +4,7 @@ import { queryKeys } from '@/api/queryKeys'
 import {
   getApiAdminVentesVenteIdOrders,
   getApiAdminVentesVenteIdOrdersId,
+  putApiAdminVentesVenteIdOrdersIdCancel,
   putApiAdminVentesVenteIdOrdersIdPickup,
 } from '@/api/generated/admin-orders/admin-orders'
 
@@ -68,6 +69,21 @@ export function usePickupMutation(venteId: MaybeRefOrGetter<number | null>) {
       if (id !== null) {
         queryClient.invalidateQueries({ queryKey: ['admin', 'orders'] })
       }
+    },
+  })
+}
+
+export function useCancelOrderMutation(venteId: MaybeRefOrGetter<number | null>) {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ orderId, reason }: { orderId: string; reason: string }) =>
+      putApiAdminVentesVenteIdOrdersIdCancel(toValue(venteId)!, orderId, { reason }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'orders'] })
+      // L'annulation restitue le stock et libère une place du créneau.
+      queryClient.invalidateQueries({ queryKey: ['admin', 'products'] })
+      queryClient.invalidateQueries({ queryKey: ['admin', 'timeslots'] })
+      queryClient.invalidateQueries({ queryKey: ['admin', 'dashboard'] })
     },
   })
 }

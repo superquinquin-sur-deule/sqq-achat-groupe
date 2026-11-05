@@ -1,5 +1,6 @@
 package fr.sqq.achatgroupe.infrastructure.in.rest.admin.resource;
 
+import fr.sqq.achatgroupe.application.command.CancelOrderCommand;
 import fr.sqq.achatgroupe.application.command.MarkOrderPickedUpCommand;
 import fr.sqq.achatgroupe.application.query.CursorPage;
 import fr.sqq.achatgroupe.application.query.CursorPageRequest;
@@ -19,10 +20,12 @@ import fr.sqq.achatgroupe.domain.model.vente.VenteId;
 import fr.sqq.achatgroupe.infrastructure.in.rest.admin.mapper.AdminOrderRestMapper;
 import fr.sqq.achatgroupe.infrastructure.in.rest.admin.dto.AdminOrderDetailResponse;
 import fr.sqq.achatgroupe.infrastructure.in.rest.admin.dto.AdminOrderResponse;
+import fr.sqq.achatgroupe.infrastructure.in.rest.admin.dto.CancelOrderRequest;
 import fr.sqq.achatgroupe.infrastructure.in.rest.common.dto.CursorPageResponse;
 import fr.sqq.achatgroupe.infrastructure.in.rest.common.dto.DataResponse;
 import fr.sqq.achatgroupe.infrastructure.in.rest.common.dto.ProblemDetailResponse;
 import fr.sqq.mediator.Mediator;
+import jakarta.validation.Valid;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
@@ -79,6 +82,23 @@ public class AdminOrderResource {
     public Response markAsPickedUp(@PathParam("venteId") Long venteId, @PathParam("id") UUID id) {
         try {
             mediator.send(new MarkOrderPickedUpCommand(venteId, id));
+        } catch (IllegalStateException e) {
+            return Response.status(Response.Status.CONFLICT)
+                    .type(MediaType.valueOf("application/problem+json"))
+                    .entity(new ProblemDetailResponse("about:blank", "Transition invalide", 409, e.getMessage()))
+                    .build();
+        }
+        return Response.noContent().build();
+    }
+
+    @PUT
+    @Path("/{id}/cancel")
+    @APIResponse(responseCode = "204", description = "No content")
+    @APIResponse(responseCode = "409", description = "Conflict")
+    public Response cancelOrder(@PathParam("venteId") Long venteId, @PathParam("id") UUID id,
+                                @Valid CancelOrderRequest request) {
+        try {
+            mediator.send(new CancelOrderCommand(venteId, id, request.reason()));
         } catch (IllegalStateException e) {
             return Response.status(Response.Status.CONFLICT)
                     .type(MediaType.valueOf("application/problem+json"))

@@ -11,6 +11,8 @@ import io.quarkus.logging.Log;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.transaction.Transactional;
 
+import java.util.Optional;
+
 @ApplicationScoped
 public class CancelOrderHandler implements CommandHandler<CancelOrderCommand, Void> {
     private final OrderRepository orderRepository;
@@ -25,12 +27,16 @@ public class CancelOrderHandler implements CommandHandler<CancelOrderCommand, Vo
     @Transactional
     public Void handle(CancelOrderCommand command) {
 
-        Order order = orderRepository.findOrderById(command.orderId())
+        Order order = findOrder(command)
                 .orElseThrow(() -> new OrderNotFoundException(command.orderId()));
 
-        if (order.status() == OrderStatus.CANCELLED || order.status() == OrderStatus.PICKED_UP) {
-            Log.infof("Annulation ignorée : commande %s déjà en statut %s", command.orderId(), order.status());
+        if (order.status() == OrderStatus.CANCELLED) {
+            Log.infof("Annulation ignorée : commande %s déjà annulée", command.orderId());
             return null;
+        }
+
+        if (order.status() == OrderStatus.PICKED_UP) {
+            throw new IllegalStateException("Impossible d'annuler une commande déjà récupérée");
         }
 
         orderStockService.releaseStock(order);
@@ -40,5 +46,12 @@ public class CancelOrderHandler implements CommandHandler<CancelOrderCommand, Vo
 
         Log.infof("Commande %s annulée — stocks restaurés, créneau libéré", command.orderId());
         return null;
+    }
+
+    private Optional<Order> findOrder(CancelOrderCommand command) {
+        if (command.venteId() == null) {
+            return orderRepository.findOrderById(command.orderId());
+        }
+        return orderRepository.findOrderByIdAndVenteId(command.orderId(), command.venteId());
     }
 }

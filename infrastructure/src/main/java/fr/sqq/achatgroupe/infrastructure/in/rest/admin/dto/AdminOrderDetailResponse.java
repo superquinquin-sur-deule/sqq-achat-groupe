@@ -18,7 +18,8 @@ public record AdminOrderDetailResponse(
         TimeSlotInfo timeSlot,
         List<OrderItemInfo> items,
         BigDecimal totalAmount,
-        Instant createdAt
+        Instant createdAt,
+        String cancellationReason
 ) {
     public record TimeSlotInfo(LocalDate date, LocalTime startTime, LocalTime endTime) {}
     public record OrderItemInfo(String productName, int quantity, BigDecimal unitPrice, BigDecimal subtotal) {}
