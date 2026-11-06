@@ -38,6 +38,11 @@ public class OrderSetupSteps {
             String nom = row.get("nom");
             String email = row.get("email");
             String telephone = row.get("téléphone");
+            // Colonne optionnelle : les scénarios qui ne testent pas le numéro gardent un défaut.
+            String numeroCooperateur = row.getOrDefault("coopérateur", null);
+            if (numeroCooperateur == null || numeroCooperateur.isBlank()) {
+                numeroCooperateur = "1000";
+            }
             int creneauIndex = Integer.parseInt(row.get("créneau"));
             Long timeSlotId = testContext.timeSlotIds().get(creneauIndex);
             String statut = row.get("statut");
@@ -45,7 +50,7 @@ public class OrderSetupSteps {
             List<OrderItemCommand> items = parseProducts(row.get("produits"));
 
             Order order = mediator.send(new CreateOrderCommand(
-                    venteId, prenom, nom, email, telephone, timeSlotId, null, items
+                    venteId, prenom, nom, email, telephone, numeroCooperateur, timeSlotId, null, items
             ));
 
             if ("PICKED_UP".equals(statut)) {

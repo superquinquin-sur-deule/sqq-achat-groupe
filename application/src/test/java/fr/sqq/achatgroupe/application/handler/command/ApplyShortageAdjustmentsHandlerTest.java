@@ -60,7 +60,7 @@ class ApplyShortageAdjustmentsHandlerTest {
 
         // Order with 4x Product A
         Order order = Order.create(VENTE_ID, OrderNumber.generate(),
-                new CustomerInfo("Alice", "Dupont", "alice@test.com", "0601020304"), 1L,
+                new CustomerInfo("Alice", "Dupont", "alice@test.com", "0601020304", "1001"), 1L,
                 List.of(OrderItem.create(PRODUCT_A, VARIANT_A, 4, Money.eur(new BigDecimal("3.50")))), null);
 
         // Reception: ordered 4, received 3 → shortage = 1
@@ -92,7 +92,7 @@ class ApplyShortageAdjustmentsHandlerTest {
         // Order already adjusted: 4 ordered, 1 cancelled
         OrderItem adjustedItem = new OrderItem(1L, PRODUCT_A, VARIANT_A, 4, Money.eur(new BigDecimal("3.50")), 1);
         Order order = new Order(java.util.UUID.randomUUID(), VENTE_ID, OrderNumber.generate(),
-                new CustomerInfo("Alice", "Dupont", "alice@test.com", "0601020304"), 1L,
+                new CustomerInfo("Alice", "Dupont", "alice@test.com", "0601020304", "1001"), 1L,
                 List.of(adjustedItem), fr.sqq.achatgroupe.domain.model.order.OrderStatus.CONFIRMED,
                 Money.eur(new BigDecimal("14.00")), java.time.Instant.now(), null, null);
 
@@ -115,13 +115,13 @@ class ApplyShortageAdjustmentsHandlerTest {
 
         // Two orders with Product A
         Order order1 = Order.create(VENTE_ID, OrderNumber.generate(),
-                new CustomerInfo("Alice", "Dupont", "alice@test.com", "0601020304"), 1L,
+                new CustomerInfo("Alice", "Dupont", "alice@test.com", "0601020304", "1001"), 1L,
                 List.of(OrderItem.create(PRODUCT_A, VARIANT_A, 3, Money.eur(new BigDecimal("3.50")))), null);
 
         // Order2 already has 1 cancelled (from a previous partial run)
         OrderItem partiallyAdjustedItem = new OrderItem(2L, PRODUCT_A, VARIANT_A, 2, Money.eur(new BigDecimal("3.50")), 1);
         Order order2 = new Order(java.util.UUID.randomUUID(), VENTE_ID, OrderNumber.generate(),
-                new CustomerInfo("Bob", "Martin", "bob@test.com", "0605060708"), 1L,
+                new CustomerInfo("Bob", "Martin", "bob@test.com", "0605060708", "1002"), 1L,
                 List.of(partiallyAdjustedItem), fr.sqq.achatgroupe.domain.model.order.OrderStatus.CONFIRMED,
                 Money.eur(new BigDecimal("7.00")), java.time.Instant.now(), null, null);
 

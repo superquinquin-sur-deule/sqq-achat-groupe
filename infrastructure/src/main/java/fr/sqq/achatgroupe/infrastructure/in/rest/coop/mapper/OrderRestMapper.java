@@ -21,6 +21,7 @@ public interface OrderRestMapper {
                 request.customerLastName(),
                 request.email(),
                 request.phone(),
+                request.cooperatorNumber(),
                 request.timeSlotId(),
                 request.idempotencyKey(),
                 items

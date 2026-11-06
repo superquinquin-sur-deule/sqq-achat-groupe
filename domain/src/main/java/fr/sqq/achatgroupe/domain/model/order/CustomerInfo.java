@@ -1,6 +1,6 @@
 package fr.sqq.achatgroupe.domain.model.order;
 
-public record CustomerInfo(String firstName, String lastName, String email, String phone) {
+public record CustomerInfo(String firstName, String lastName, String email, String phone, String cooperatorNumber) {
 
     public CustomerInfo {
         if (firstName == null || firstName.isBlank()) throw new IllegalArgumentException("Customer first name must not be blank");
@@ -8,6 +8,11 @@ public record CustomerInfo(String firstName, String lastName, String email, Stri
         if (email == null || email.isBlank()) throw new IllegalArgumentException("Customer email must not be blank");
         if (!email.contains("@")) throw new IllegalArgumentException("Customer email must be valid");
         if (phone == null || phone.isBlank()) throw new IllegalArgumentException("Customer phone must not be blank");
+        // Blank pour les commandes antérieures à l'ajout du numéro de coopérateur (migration V029).
+        if (cooperatorNumber == null) throw new IllegalArgumentException("Customer cooperator number must not be null");
+        if (!cooperatorNumber.isBlank() && !cooperatorNumber.matches("\\d+")) {
+            throw new IllegalArgumentException("Customer cooperator number must contain digits only");
+        }
     }
 
     public String fullName() {

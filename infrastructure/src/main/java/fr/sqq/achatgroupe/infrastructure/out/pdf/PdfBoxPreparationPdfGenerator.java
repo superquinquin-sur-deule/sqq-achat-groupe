@@ -81,6 +81,9 @@ public class PdfBoxPreparationPdfGenerator implements PreparationPdfGenerator {
         if (order.customerPhone() != null && !order.customerPhone().isBlank()) {
             y = drawText(cs, "Tél : " + order.customerPhone(), fontRegular, TEXT_FONT_SIZE, MARGIN, y);
         }
+        if (order.cooperatorNumber() != null && !order.cooperatorNumber().isBlank()) {
+            y = drawText(cs, "N° coopérateur : " + order.cooperatorNumber(), fontRegular, TEXT_FONT_SIZE, MARGIN, y);
+        }
         y -= LINE_HEIGHT;
 
         // Table header

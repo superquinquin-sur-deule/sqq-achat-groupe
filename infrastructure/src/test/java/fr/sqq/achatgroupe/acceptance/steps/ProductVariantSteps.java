@@ -170,7 +170,7 @@ public class ProductVariantSteps {
         Long variant2 = testContext.variantIds().get(2);
 
         mediator.send(new CreateOrderCommand(
-                testContext.venteId(), "Alice", "Dupont", "alice@test.fr", "0612345678",
+                testContext.venteId(), "Alice", "Dupont", "alice@test.fr", "0612345678", "1001",
                 testContext.timeSlotIds().get(0), null,
                 List.of(new OrderItemCommand(variant1, qty1), new OrderItemCommand(variant2, qty2))));
 

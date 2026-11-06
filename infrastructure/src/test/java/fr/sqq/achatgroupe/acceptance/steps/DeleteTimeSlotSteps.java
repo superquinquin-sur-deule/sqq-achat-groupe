@@ -40,7 +40,7 @@ public class DeleteTimeSlotSteps {
         Long variantId = testContext.variantIds().get(0);
 
         Order order = mediator.send(new CreateOrderCommand(
-                venteId, "Test", "Utilisateur", "test@exemple.fr", "0612345678",
+                venteId, "Test", "Utilisateur", "test@exemple.fr", "0612345678", "1001",
                 timeSlotId, null, List.of(new OrderItemCommand(variantId, 1))
         ));
 

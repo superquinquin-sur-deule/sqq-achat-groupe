@@ -8,8 +8,8 @@ import java.util.UUID;
 public record GeneratePreparationListQuery(Long venteId) implements Query<List<GeneratePreparationListQuery.PreparationOrder>> {
 
     public record PreparationOrder(UUID orderId, String orderNumber, String customerFirstName, String customerLastName,
-                                   String customerEmail, String customerPhone, String timeSlotLabel,
-                                   List<PreparationItem> items) {
+                                   String customerEmail, String customerPhone, String cooperatorNumber,
+                                   String timeSlotLabel, List<PreparationItem> items) {
     }
 
     public record PreparationItem(String productName, String supplier, int quantity, int cancelledQuantity) {

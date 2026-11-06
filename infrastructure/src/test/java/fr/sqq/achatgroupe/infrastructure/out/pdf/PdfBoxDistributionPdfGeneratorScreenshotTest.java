@@ -21,11 +21,11 @@ class PdfBoxDistributionPdfGeneratorScreenshotTest {
     void single_slot_with_three_orders() throws IOException {
         List<DistributionOrder> orders = List.of(
                 new DistributionOrder(UUID.fromString("00000000-0000-0000-0000-000000000001"),
-                        "AG-2025-00000001", "Alice", "Dupont", "Samedi 18/01 — 10h00-11h00"),
+                        "AG-2025-00000001", "Alice", "Dupont", "1001", "Samedi 18/01 — 10h00-11h00"),
                 new DistributionOrder(UUID.fromString("00000000-0000-0000-0000-000000000002"),
-                        "AG-2025-00000002", "Bob", "Martin", "Samedi 18/01 — 10h00-11h00"),
+                        "AG-2025-00000002", "Bob", "Martin", "1002", "Samedi 18/01 — 10h00-11h00"),
                 new DistributionOrder(UUID.fromString("00000000-0000-0000-0000-000000000003"),
-                        "AG-2025-00000003", "Claire", "Bernard", "Samedi 18/01 — 10h00-11h00")
+                        "AG-2025-00000003", "Claire", "Bernard", "1003", "Samedi 18/01 — 10h00-11h00")
         );
 
         byte[] pdf = generator.generate(orders);
@@ -36,13 +36,13 @@ class PdfBoxDistributionPdfGeneratorScreenshotTest {
     void multiple_slots() throws IOException {
         List<DistributionOrder> orders = List.of(
                 new DistributionOrder(UUID.fromString("00000000-0000-0000-0000-000000000001"),
-                        "AG-2025-00000001", "Alice", "Dupont", "Samedi 18/01 — 10h00-11h00"),
+                        "AG-2025-00000001", "Alice", "Dupont", "1001", "Samedi 18/01 — 10h00-11h00"),
                 new DistributionOrder(UUID.fromString("00000000-0000-0000-0000-000000000002"),
-                        "AG-2025-00000002", "Bob", "Martin", "Samedi 18/01 — 10h00-11h00"),
+                        "AG-2025-00000002", "Bob", "Martin", "1002", "Samedi 18/01 — 10h00-11h00"),
                 new DistributionOrder(UUID.fromString("00000000-0000-0000-0000-000000000003"),
-                        "AG-2025-00000003", "Claire", "Bernard", "Samedi 18/01 — 11h00-12h00"),
+                        "AG-2025-00000003", "Claire", "Bernard", "1003", "Samedi 18/01 — 11h00-12h00"),
                 new DistributionOrder(UUID.fromString("00000000-0000-0000-0000-000000000004"),
-                        "AG-2025-00000004", "David", "Leroy", "Samedi 18/01 — 11h00-12h00")
+                        "AG-2025-00000004", "David", "Leroy", "1004", "Samedi 18/01 — 11h00-12h00")
         );
 
         byte[] pdf = generator.generate(orders);

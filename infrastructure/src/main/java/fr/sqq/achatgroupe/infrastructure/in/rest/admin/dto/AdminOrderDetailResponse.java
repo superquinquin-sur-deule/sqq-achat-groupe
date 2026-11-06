@@ -15,6 +15,7 @@ public record AdminOrderDetailResponse(
         String customerLastName,
         String customerEmail,
         String customerPhone,
+        String cooperatorNumber,
         TimeSlotInfo timeSlot,
         List<OrderItemInfo> items,
         BigDecimal totalAmount,

@@ -84,6 +84,7 @@ public class AdminProductSteps {
         page().locator("#customer-first-name").fill("Marie");
         page().locator("#customer-email").fill("marie@exemple.fr");
         page().locator("#customer-phone").fill("06 12 34 56 78");
+        page().locator("#customer-cooperator-number").fill("1001");
         page().locator("button:has-text('Continuer')").first().click();
         page().waitForSelector("[role='radiogroup']", new Page.WaitForSelectorOptions()
                 .setState(WaitForSelectorState.VISIBLE)

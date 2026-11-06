@@ -96,9 +96,12 @@ public class PdfBoxDistributionPdfGenerator implements DistributionPdfGenerator 
                     cs.addRect(cbX, cbY, CHECKBOX_SIZE, CHECKBOX_SIZE);
                     cs.stroke();
 
-                    // NOM Prénom — AG-XXXX-XXXXX
-                    String line = order.customerLastName().toUpperCase() + " " + order.customerFirstName()
-                            + " \u2014 " + order.orderNumber();
+                    // NOM Prénom — n° coopérateur — AG-XXXX-XXXXX
+                    String line = order.customerLastName().toUpperCase() + " " + order.customerFirstName();
+                    if (order.cooperatorNumber() != null && !order.cooperatorNumber().isBlank()) {
+                        line += " \u2014 n\u00b0 " + order.cooperatorNumber();
+                    }
+                    line += " \u2014 " + order.orderNumber();
                     drawText(cs, line, fontRegular, TEXT_FONT_SIZE, MARGIN + 20, y + 2);
 
                     y -= LINE_HEIGHT;

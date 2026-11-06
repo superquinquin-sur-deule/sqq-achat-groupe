@@ -10,7 +10,7 @@ Fonctionnalité: Formulaire de commande et sélection de créneau
     Et j'ai des produits dans mon panier
     Quand je navigue vers le checkout
     Alors je vois le Stepper à l'étape 2 "Coordonnées"
-    Et je vois les champs "Nom", "Prénom", "Adresse email" et "Téléphone"
+    Et je vois les champs "Nom", "Prénom", "Adresse email", "Téléphone" et "Numéro de coopérateur"
 
   Scénario: La validation affiche des messages d'erreur bienveillants
     Étant donné qu'une vente existe avec des produits et des créneaux
@@ -18,6 +18,30 @@ Fonctionnalité: Formulaire de commande et sélection de créneau
     Quand je navigue vers le checkout
     Et je clique sur "Continuer" sans remplir le formulaire
     Alors je vois des messages d'erreur sous les champs invalides
+
+  Scénario: Un numéro de coopérateur non numérique est refusé
+    Étant donné qu'une vente existe avec des produits et des créneaux
+    Et j'ai des produits dans mon panier
+    Quand je navigue vers le checkout
+    Et je remplis mes coordonnées avec le numéro de coopérateur "ABC123"
+    Alors je vois l'erreur "Le numéro de coopérateur ne doit contenir que des chiffres"
+    Et je reste à l'étape coordonnées
+
+  Scénario: Le numéro de coopérateur est repris dans le récapitulatif
+    Étant donné qu'une vente existe avec des produits et des créneaux
+    Et j'ai des produits dans mon panier
+    Et j'ai rempli mes coordonnées valides
+    Et j'ai sélectionné un créneau disponible
+    Alors le récapitulatif affiche le numéro de coopérateur "1001"
+
+  Scénario: Le numéro de coopérateur est enregistré avec la commande
+    Étant donné qu'une vente existe avec des produits et des créneaux
+    Et j'ai des produits dans mon panier
+    Et j'ai rempli mes coordonnées valides
+    Et j'ai sélectionné un créneau disponible
+    Quand je confirme ma commande
+    Alors je suis redirigé vers la confirmation
+    Et la commande enregistrée porte le numéro de coopérateur "1001"
 
   Scénario: Les créneaux disponibles sont affichés avec les places restantes
     Étant donné qu'une vente existe avec des produits et des créneaux

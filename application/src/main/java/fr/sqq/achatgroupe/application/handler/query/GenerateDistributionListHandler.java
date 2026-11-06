@@ -49,6 +49,7 @@ public class GenerateDistributionListHandler implements QueryHandler<GenerateDis
                             order.orderNumber().value(),
                             order.customer().firstName(),
                             order.customer().lastName(),
+                            order.customer().cooperatorNumber(),
                             timeSlotLabel
                     );
                 })

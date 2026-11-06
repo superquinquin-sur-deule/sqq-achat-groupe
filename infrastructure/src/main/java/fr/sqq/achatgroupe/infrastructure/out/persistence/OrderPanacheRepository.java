@@ -113,8 +113,10 @@ public class OrderPanacheRepository implements OrderRepository, PanacheRepositor
         conditions.add("status IN :statuses");
         params.put("statuses", statuses);
 
+        // La recherche porte sur l'identité du coopérateur : nom, prénom ou numéro de coopérateur.
         if (searchName != null && !searchName.isBlank()) {
-            conditions.add("(LOWER(customerFirstName) LIKE :searchName OR LOWER(customerLastName) LIKE :searchName)");
+            conditions.add("(LOWER(customerFirstName) LIKE :searchName OR LOWER(customerLastName) LIKE :searchName"
+                    + " OR cooperatorNumber LIKE :searchName)");
             params.put("searchName", "%" + searchName.toLowerCase() + "%");
         }
 

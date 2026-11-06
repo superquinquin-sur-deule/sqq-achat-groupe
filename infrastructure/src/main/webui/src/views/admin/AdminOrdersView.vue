@@ -65,7 +65,7 @@ const timeSlots = computed(() => timeslotsPageData.value?.data ?? [])
       <input
         v-model="searchInput"
         type="text"
-        placeholder="Rechercher par nom..."
+        placeholder="Rechercher par nom ou n° de coopérateur..."
         class="rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary"
         data-testid="backoffice-search-input"
         @input="onSearchInput"

@@ -51,14 +51,14 @@ class GenerateSupplierOrderHandlerTest {
         Product cheese = simpleProduct(30L, 130L, "Fromage", "FRO-001", "Ferme B", "Fromage", new BigDecimal("8.00"), null);
 
         Order order1 = Order.create(VENTE_ID, OrderNumber.generate(),
-                new CustomerInfo("Alice", "Dupont", "alice@test.com", "0601020304"), 1L,
+                new CustomerInfo("Alice", "Dupont", "alice@test.com", "0601020304", "1001"), 1L,
                 List.of(
                         OrderItem.create(10L, 110L, 3, Money.eur(new BigDecimal("3.50"))),
                         OrderItem.create(30L, 130L, 1, Money.eur(new BigDecimal("8.00")))
                 ), null);
 
         Order order2 = Order.create(VENTE_ID, OrderNumber.generate(),
-                new CustomerInfo("Bob", "Martin", "bob@test.com", "0605060708"), 1L,
+                new CustomerInfo("Bob", "Martin", "bob@test.com", "0605060708", "1002"), 1L,
                 List.of(
                         OrderItem.create(10L, 110L, 2, Money.eur(new BigDecimal("3.50"))),
                         OrderItem.create(20L, 120L, 5, Money.eur(new BigDecimal("2.00")))
@@ -81,7 +81,7 @@ class GenerateSupplierOrderHandlerTest {
         Product tomatoes = simpleProduct(10L, 110L, "Tomates", "TOM-001", "Ferme A", "Legumes", new BigDecimal("3.50"), 6);
 
         Order order1 = Order.create(VENTE_ID, OrderNumber.generate(),
-                new CustomerInfo("Alice", "Dupont", "alice@test.com", "0601020304"), 1L,
+                new CustomerInfo("Alice", "Dupont", "alice@test.com", "0601020304", "1001"), 1L,
                 List.of(OrderItem.create(10L, 110L, 10, Money.eur(new BigDecimal("3.50")))), null);
 
         when(orderRepository.findConfirmedByVenteId(VENTE_ID)).thenReturn(List.of(order1));
@@ -104,7 +104,7 @@ class GenerateSupplierOrderHandlerTest {
                 ));
 
         Order order = Order.create(VENTE_ID, OrderNumber.generate(),
-                new CustomerInfo("Alice", "Dupont", "alice@test.com", "0601020304"), 1L,
+                new CustomerInfo("Alice", "Dupont", "alice@test.com", "0601020304", "1001"), 1L,
                 List.of(
                         OrderItem.create(40L, 140L, 7, Money.eur(new BigDecimal("29.90"))),
                         OrderItem.create(40L, 141L, 4, Money.eur(new BigDecimal("39.90")))

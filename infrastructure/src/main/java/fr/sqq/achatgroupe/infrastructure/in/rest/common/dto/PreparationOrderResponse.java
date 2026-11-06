@@ -5,5 +5,5 @@ import java.util.UUID;
 
 public record PreparationOrderResponse(UUID orderId, String orderNumber, String customerFirstName,
                                        String customerLastName, String customerEmail,
-                                       String customerPhone, String timeSlotLabel,
+                                       String customerPhone, String cooperatorNumber, String timeSlotLabel,
                                        List<PreparationItemResponse> items) {}

@@ -31,6 +31,7 @@ public class OrderIdempotencySteps {
                     "customerFirstName": "Marie",
                     "customerLastName": "Dupont",
                     "email": "marie@exemple.fr",
+                    "cooperatorNumber": "1001",
                     "phone": "06 12 34 56 78",
                     "timeSlotId": %d,
                     "idempotencyKey": "%s",

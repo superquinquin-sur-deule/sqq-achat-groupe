@@ -157,7 +157,7 @@ function formatSlot(slot: { date: string; startTime: string; endTime: string } |
         data-testid="order-detail-customer"
       >
         <h2 class="mb-4 text-lg font-semibold text-dark">Coordonnées</h2>
-        <dl class="grid grid-cols-1 gap-3 sm:grid-cols-3">
+        <dl class="grid grid-cols-1 gap-3 sm:grid-cols-4">
           <div>
             <dt class="text-sm text-brown">Nom</dt>
             <dd class="font-medium text-dark">
@@ -171,6 +171,12 @@ function formatSlot(slot: { date: string; startTime: string; endTime: string } |
           <div>
             <dt class="text-sm text-brown">Téléphone</dt>
             <dd class="font-medium text-dark">{{ order.customerPhone }}</dd>
+          </div>
+          <div>
+            <dt class="text-sm text-brown">N° de coopérateur</dt>
+            <dd class="font-medium text-dark" data-testid="order-detail-cooperator-number">
+              {{ order.cooperatorNumber }}
+            </dd>
           </div>
         </dl>
       </div>

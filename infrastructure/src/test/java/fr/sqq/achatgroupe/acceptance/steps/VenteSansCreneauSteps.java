@@ -68,6 +68,7 @@ public class VenteSansCreneauSteps {
                     "customerFirstName": "Marie",
                     "customerLastName": "Dupont",
                     "email": "marie@exemple.fr",
+                    "cooperatorNumber": "1001",
                     "phone": "06 12 34 56 78",
                     "items": [{"variantId": %d, "quantity": 1}]
                 }
@@ -191,6 +192,7 @@ public class VenteSansCreneauSteps {
         page().locator("#customer-first-name").fill("Marie");
         page().locator("#customer-email").fill("marie@exemple.fr");
         page().locator("#customer-phone").fill("06 12 34 56 78");
+        page().locator("#customer-cooperator-number").fill("1001");
         page().locator("button:has-text('Continuer')").first().click();
     }
 

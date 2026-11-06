@@ -11,6 +11,7 @@ public record CreateOrderCommand(
         String customerLastName,
         String email,
         String phone,
+        String cooperatorNumber,
         Long timeSlotId,
         String idempotencyKey,
         List<OrderItemCommand> items

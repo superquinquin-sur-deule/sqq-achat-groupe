@@ -11,6 +11,7 @@ interface CustomerInfo {
   lastName: string
   email: string
   phone: string
+  cooperatorNumber: string
 }
 
 const props = defineProps<{
@@ -73,6 +74,10 @@ function formatDate(dateStr: string): string {
         <div class="flex gap-2">
           <dt class="font-medium">Téléphone :</dt>
           <dd>{{ customerInfo.phone }}</dd>
+        </div>
+        <div class="flex gap-2">
+          <dt class="font-medium">N° de coopérateur :</dt>
+          <dd data-testid="order-summary-cooperator-number">{{ customerInfo.cooperatorNumber }}</dd>
         </div>
       </dl>
     </Card>

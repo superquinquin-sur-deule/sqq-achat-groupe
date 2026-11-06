@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 import java.util.List;
@@ -13,6 +14,9 @@ public record CreateOrderRequest(
         @NotBlank(message = "Le nom est requis") String customerLastName,
         @NotBlank(message = "L'email est requis") @Email(message = "Email invalide") String email,
         @NotBlank(message = "Le téléphone est requis") String phone,
+        @NotBlank(message = "Le numéro de coopérateur est requis")
+        @Pattern(regexp = "\\d+", message = "Le numéro de coopérateur ne doit contenir que des chiffres")
+        @Size(max = 50, message = "Le numéro de coopérateur est trop long") String cooperatorNumber,
         Long timeSlotId,
         String idempotencyKey,
         @NotEmpty(message = "La commande doit contenir au moins un article")

@@ -258,6 +258,13 @@ public class BackofficeOrderSteps {
         assertTrue(text.contains("Téléphone"), "La section doit contenir 'Téléphone'");
     }
 
+    @Et("je vois le numéro de coopérateur dans le détail backoffice")
+    public void jeVoisLeNumeroDeCooperateurDansLeDetailBackoffice() {
+        Locator numero = page().locator("[data-testid='order-detail-cooperator-number']");
+        assertTrue(numero.isVisible(), "Le numéro de coopérateur doit être visible");
+        assertFalse(numero.textContent().trim().isBlank(), "Le numéro de coopérateur ne doit pas être vide");
+    }
+
     @Et("je vois le créneau de retrait dans le détail backoffice")
     public void jeVoisLeCreneauDeRetraitDansLeDetailBackoffice() {
         Locator timeslot = page().locator("[data-testid='order-detail-timeslot']");

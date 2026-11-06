@@ -21,6 +21,7 @@ public interface AdminPreparationRestMapper {
                 .map(item -> new PreparationItemResponse(item.productName(), item.supplier(), item.quantity(), item.cancelledQuantity()))
                 .toList();
         return new PreparationOrderResponse(order.orderId(), order.orderNumber(), order.customerFirstName(),
-                order.customerLastName(), order.customerEmail(), order.customerPhone(), order.timeSlotLabel(), items);
+                order.customerLastName(), order.customerEmail(), order.customerPhone(), order.cooperatorNumber(),
+                order.timeSlotLabel(), items);
     }
 }

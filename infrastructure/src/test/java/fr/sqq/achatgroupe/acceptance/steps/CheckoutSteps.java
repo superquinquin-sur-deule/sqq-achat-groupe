@@ -4,11 +4,16 @@ import com.microsoft.playwright.Locator;
 import com.microsoft.playwright.Page;
 import com.microsoft.playwright.options.WaitForSelectorState;
 import fr.sqq.achatgroupe.acceptance.support.TestContext;
+import fr.sqq.achatgroupe.application.port.out.OrderRepository;
+import fr.sqq.achatgroupe.domain.model.order.Order;
 import io.cucumber.java.fr.Alors;
 import io.cucumber.java.fr.Et;
 import io.cucumber.java.fr.Quand;
 import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;
+
+import java.net.URI;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -17,6 +22,9 @@ public class CheckoutSteps {
 
     @Inject
     TestContext testContext;
+
+    @Inject
+    OrderRepository orderRepository;
 
     // --- Helpers ---
 
@@ -57,6 +65,7 @@ public class CheckoutSteps {
         PlaywrightHooks.page().locator("#customer-first-name").fill("Marie");
         PlaywrightHooks.page().locator("#customer-email").fill("marie@exemple.fr");
         PlaywrightHooks.page().locator("#customer-phone").fill("06 12 34 56 78");
+        PlaywrightHooks.page().locator("#customer-cooperator-number").fill("1001");
     }
 
     private void submitCustomerForm() {
@@ -172,12 +181,14 @@ public class CheckoutSteps {
         assertEquals("2", stepText, "L'étape courante doit être 2");
     }
 
-    @Et("je vois les champs \"Nom\", \"Prénom\", \"Adresse email\" et \"Téléphone\"")
+    @Et("je vois les champs \"Nom\", \"Prénom\", \"Adresse email\", \"Téléphone\" et \"Numéro de coopérateur\"")
     public void jeVoisLesChampsDuFormulaire() {
         assertTrue(PlaywrightHooks.page().locator("#customer-last-name").isVisible(), "Le champ nom doit être visible");
         assertTrue(PlaywrightHooks.page().locator("#customer-first-name").isVisible(), "Le champ prénom doit être visible");
         assertTrue(PlaywrightHooks.page().locator("#customer-email").isVisible(), "Le champ email doit être visible");
         assertTrue(PlaywrightHooks.page().locator("#customer-phone").isVisible(), "Le champ téléphone doit être visible");
+        assertTrue(PlaywrightHooks.page().locator("#customer-cooperator-number").isVisible(),
+                "Le champ numéro de coopérateur doit être visible");
     }
 
     @Alors("je vois des messages d'erreur sous les champs invalides")
@@ -237,5 +248,57 @@ public class CheckoutSteps {
     @Alors("je suis redirigé vers la page d'accueil")
     public void jeSuisRedirigeVersLaPageDAccueil() {
         PlaywrightHooks.page().waitForURL("**/ventes/" + testContext.venteId(), new Page.WaitForURLOptions().setTimeout(5000));
+    }
+
+    // --- Numéro de coopérateur ---
+
+    @Et("je remplis mes coordonnées avec le numéro de coopérateur {string}")
+    public void jeRemplisMesCoordonneesAvecLeNumeroDeCooperateur(String numero) {
+        fillCustomerForm();
+        PlaywrightHooks.page().locator("#customer-cooperator-number").fill(numero);
+        PlaywrightHooks.page().locator("button:has-text('Continuer')").first().click();
+    }
+
+    @Alors("je vois l'erreur {string}")
+    public void jeVoisLErreur(String message) {
+        Locator error = PlaywrightHooks.page().locator("[role='alert']", new Page.LocatorOptions().setHasText(message));
+        error.first().waitFor(new Locator.WaitForOptions()
+                .setState(WaitForSelectorState.VISIBLE)
+                .setTimeout(5000));
+        assertTrue(error.count() > 0, "Le message d'erreur \"" + message + "\" doit être affiché");
+    }
+
+    @Et("je reste à l'étape coordonnées")
+    public void jeResteALEtapeCoordonnees() {
+        assertTrue(PlaywrightHooks.page().locator("#customer-cooperator-number").isVisible(),
+                "Le formulaire de coordonnées doit rester affiché");
+        assertEquals(0, PlaywrightHooks.page().locator("[role='radiogroup']").count(),
+                "L'étape créneau ne doit pas être atteinte");
+    }
+
+    @Alors("le récapitulatif affiche le numéro de coopérateur {string}")
+    public void leRecapitulatifAfficheLeNumeroDeCooperateur(String numero) {
+        Locator value = PlaywrightHooks.page().locator("[data-testid='order-summary-cooperator-number']");
+        value.waitFor(new Locator.WaitForOptions()
+                .setState(WaitForSelectorState.VISIBLE)
+                .setTimeout(5000));
+        assertEquals(numero, value.textContent().trim(), "Le récapitulatif doit afficher le numéro de coopérateur");
+    }
+
+    @Et("la commande enregistrée porte le numéro de coopérateur {string}")
+    public void laCommandeEnregistreePorteLeNumeroDeCooperateur(String numero) {
+        String query = URI.create(PlaywrightHooks.page().url()).getQuery();
+        assertNotNull(query, "L'URL de confirmation doit porter l'identifiant de commande");
+        String orderId = java.util.Arrays.stream(query.split("&"))
+                .filter(param -> param.startsWith("orderId="))
+                .map(param -> param.substring("orderId=".length()))
+                .findFirst()
+                .orElse(null);
+        assertNotNull(orderId, "L'URL de confirmation doit contenir orderId");
+
+        Order order = orderRepository.findOrderById(UUID.fromString(orderId))
+                .orElseThrow(() -> new AssertionError("La commande doit être enregistrée"));
+        assertEquals(numero, order.customer().cooperatorNumber(),
+                "La commande doit porter le numéro de coopérateur saisi");
     }
 }

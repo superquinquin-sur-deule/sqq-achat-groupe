@@ -74,6 +74,7 @@ public interface AdminOrderRestMapper {
                 order.customer().lastName(),
                 order.customer().email(),
                 order.customer().phone(),
+                order.customer().cooperatorNumber(),
                 timeSlotInfo,
                 items,
                 order.totalAmount().amount(),

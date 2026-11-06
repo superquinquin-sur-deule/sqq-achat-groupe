@@ -24,7 +24,8 @@ public interface OrderPersistenceMapper {
                 entity.getId(),
                 entity.getVenteId(),
                 new OrderNumber(entity.getOrderNumber()),
-                new CustomerInfo(entity.getCustomerFirstName(), entity.getCustomerLastName(), entity.getCustomerEmail(), entity.getCustomerPhone()),
+                new CustomerInfo(entity.getCustomerFirstName(), entity.getCustomerLastName(), entity.getCustomerEmail(),
+                        entity.getCustomerPhone(), entity.getCooperatorNumber()),
                 entity.getTimeSlotId(),
                 items,
                 OrderStatus.valueOf(entity.getStatus()),
@@ -49,6 +50,7 @@ public interface OrderPersistenceMapper {
         entity.setCustomerLastName(domain.customer().lastName());
         entity.setCustomerEmail(domain.customer().email());
         entity.setCustomerPhone(domain.customer().phone());
+        entity.setCooperatorNumber(domain.customer().cooperatorNumber());
         entity.setTimeSlotId(domain.timeSlotId());
         entity.setStatus(domain.status().name());
         entity.setTotalAmount(domain.totalAmount().amount());

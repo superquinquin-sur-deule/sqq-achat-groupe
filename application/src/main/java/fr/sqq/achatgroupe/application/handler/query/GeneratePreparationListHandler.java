@@ -73,6 +73,7 @@ public class GeneratePreparationListHandler implements QueryHandler<GeneratePrep
                             order.customer().lastName(),
                             order.customer().email(),
                             order.customer().phone(),
+                            order.customer().cooperatorNumber(),
                             timeSlotLabel,
                             items
                     );

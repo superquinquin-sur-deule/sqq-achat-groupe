@@ -39,7 +39,7 @@ public class CancelOrderSteps {
     @Transactional
     public void uneCommandeConfirmeeExiste(int quantity) {
         Order order = mediator.send(new CreateOrderCommand(
-                testContext.venteId(), "Camille", "Durand", "camille@exemple.fr", "0612345678",
+                testContext.venteId(), "Camille", "Durand", "camille@exemple.fr", "0612345678", "1001",
                 testContext.timeSlotIds().get(0), null,
                 List.of(new OrderItemCommand(testContext.variantIds().get(0), quantity))
         ));

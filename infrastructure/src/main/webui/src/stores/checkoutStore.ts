@@ -9,10 +9,19 @@ interface CustomerInfo {
   lastName: string
   email: string
   phone: string
+  cooperatorNumber: string
 }
 
 export const useCheckoutStore = defineStore('checkout', () => {
-  const customerInfo = ref<CustomerInfo>({ firstName: '', lastName: '', email: '', phone: '' })
+  const emptyCustomerInfo = (): CustomerInfo => ({
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+    cooperatorNumber: '',
+  })
+
+  const customerInfo = ref<CustomerInfo>(emptyCustomerInfo())
   const selectedTimeSlotId = ref<number | null>(null)
   const currentStep = ref(2)
   const isSubmitting = ref(false)
@@ -42,6 +51,7 @@ export const useCheckoutStore = defineStore('checkout', () => {
       customerLastName: customerInfo.value.lastName,
       email: customerInfo.value.email,
       phone: customerInfo.value.phone,
+      cooperatorNumber: customerInfo.value.cooperatorNumber,
       timeSlotId: selectedTimeSlotId.value ?? undefined,
       idempotencyKey: idempotencyKey.value,
       items: cartStore.items.map((item) => ({
@@ -79,7 +89,7 @@ export const useCheckoutStore = defineStore('checkout', () => {
   }
 
   function reset() {
-    customerInfo.value = { firstName: '', lastName: '', email: '', phone: '' }
+    customerInfo.value = emptyCustomerInfo()
     selectedTimeSlotId.value = null
     currentStep.value = 2
     isSubmitting.value = false

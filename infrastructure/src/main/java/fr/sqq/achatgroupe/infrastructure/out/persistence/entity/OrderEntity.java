@@ -42,6 +42,9 @@ public class OrderEntity {
     @Column(name = "customer_phone", nullable = false)
     private String customerPhone;
 
+    @Column(name = "cooperator_number", nullable = false)
+    private String cooperatorNumber;
+
     @Column(name = "time_slot_id", nullable = true)
     private Long timeSlotId;
 
@@ -94,6 +97,9 @@ public class OrderEntity {
 
     public String getCustomerPhone() { return customerPhone; }
     public void setCustomerPhone(String customerPhone) { this.customerPhone = customerPhone; }
+
+    public String getCooperatorNumber() { return cooperatorNumber; }
+    public void setCooperatorNumber(String cooperatorNumber) { this.cooperatorNumber = cooperatorNumber; }
 
     public Long getTimeSlotId() { return timeSlotId; }
     public void setTimeSlotId(Long timeSlotId) { this.timeSlotId = timeSlotId; }

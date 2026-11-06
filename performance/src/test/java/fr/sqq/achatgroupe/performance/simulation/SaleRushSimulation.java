@@ -54,7 +54,8 @@ public class SaleRushSimulation extends Simulation {
                     "customerFirstName", firstName,
                     "customerLastName", lastName,
                     "email", "user" + index + "@test-perf.sqq.fr",
-                    "phone", String.format("06%08d", index)
+                    "phone", String.format("06%08d", index),
+                    "cooperatorNumber", String.format("%06d", index)
             );
         }).iterator();
     }
@@ -130,6 +131,7 @@ public class SaleRushSimulation extends Simulation {
                                               "customerLastName": "#{customerLastName}",
                                               "email": "#{email}",
                                               "phone": "#{phone}",
+                                              "cooperatorNumber": "#{cooperatorNumber}",
                                               "timeSlotId": #{selectedTimeSlotId},
                                               "items": #{orderItems}
                                             }

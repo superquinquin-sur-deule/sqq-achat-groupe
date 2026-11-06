@@ -19,7 +19,7 @@ class PdfBoxPreparationPdfGeneratorScreenshotTest {
                 UUID.fromString("00000000-0000-0000-0000-000000000001"),
                 "AG-2025-00000001",
                 "Alice", "Dupont",
-                "alice.dupont@email.com", "06 12 34 56 78",
+                "alice.dupont@email.com", "06 12 34 56 78", "1001",
                 "Samedi 18/01 — 10h00-11h00",
                 List.of(
                         new PreparationItem("Pommes Golden 1kg", "Ferme du Soleil", 2, 0),
@@ -39,7 +39,7 @@ class PdfBoxPreparationPdfGeneratorScreenshotTest {
                 UUID.fromString("00000000-0000-0000-0000-000000000002"),
                 "AG-2025-00000002",
                 "Bob", "Martin",
-                "bob.martin@email.com", "06 98 76 54 32",
+                "bob.martin@email.com", "06 98 76 54 32", "1002",
                 "Samedi 18/01 — 11h00-12h00",
                 List.of(
                         new PreparationItem("Pommes Golden 1kg", "Ferme du Soleil", 2, 0),
@@ -81,7 +81,7 @@ class PdfBoxPreparationPdfGeneratorScreenshotTest {
                 UUID.fromString("00000000-0000-0000-0000-000000000003"),
                 "AG-2025-00000003",
                 "Charlotte", "Lefebvre",
-                "charlotte.lefebvre@email.com", "06 11 22 33 44",
+                "charlotte.lefebvre@email.com", "06 11 22 33 44", "1003",
                 "Samedi 18/01 — 10h00-11h00",
                 items
         );

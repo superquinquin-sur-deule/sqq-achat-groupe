@@ -6,7 +6,15 @@ import Input from '@/components/ui/Input.vue'
 import Button from '@/components/ui/Button.vue'
 
 const emit = defineEmits<{
-  submit: [info: { firstName: string; lastName: string; email: string; phone: string }]
+  submit: [
+    info: {
+      firstName: string
+      lastName: string
+      email: string
+      phone: string
+      cooperatorNumber: string
+    },
+  ]
   back: []
 }>()
 
@@ -22,6 +30,11 @@ const schema = toTypedSchema(
       .string()
       .min(1, "Merci d'indiquer votre téléphone")
       .regex(/^[\d\s+()-]{10,}$/, "Merci d'indiquer un numéro valide"),
+    cooperatorNumber: z
+      .string()
+      .min(1, "Merci d'indiquer votre numéro de coopérateur")
+      .max(50, 'Numéro de coopérateur trop long')
+      .regex(/^\d+$/, 'Le numéro de coopérateur ne doit contenir que des chiffres'),
   }),
 )
 
@@ -39,6 +52,11 @@ const {
 } = useField<string>('firstName')
 const { value: email, errorMessage: emailError, handleBlur: emailBlur } = useField<string>('email')
 const { value: phone, errorMessage: phoneError, handleBlur: phoneBlur } = useField<string>('phone')
+const {
+  value: cooperatorNumber,
+  errorMessage: cooperatorNumberError,
+  handleBlur: cooperatorNumberBlur,
+} = useField<string>('cooperatorNumber')
 
 const onSubmit = handleSubmit((values) => {
   emit('submit', values)
@@ -90,6 +108,17 @@ const onSubmit = handleSubmit((values) => {
       :error="phoneError ?? ''"
       required
       @blur="phoneBlur"
+    />
+    <Input
+      id="customer-cooperator-number"
+      v-model="cooperatorNumber"
+      label="Numéro de coopérateur"
+      type="text"
+      inputmode="numeric"
+      placeholder="123456"
+      :error="cooperatorNumberError ?? ''"
+      required
+      @blur="cooperatorNumberBlur"
     />
     <div class="mt-4 flex flex-col gap-2 sm:flex-row-reverse">
       <Button type="submit" variant="primary" class="w-full sm:w-auto sm:min-w-[200px]">

@@ -54,6 +54,7 @@ function handleCustomerSubmit(info: {
   lastName: string
   email: string
   phone: string
+  cooperatorNumber: string
 }) {
   checkoutStore.setCustomerInfo(info, !venteUsesTimeSlots.value)
 }

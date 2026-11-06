@@ -7,10 +7,10 @@ Fonctionnalité: Liste des commandes back-office
   Contexte:
     Étant donné qu'une vente existe avec des produits et des créneaux
     Et les commandes suivantes existent
-      | prénom | nom    | email            | téléphone  | créneau | produits | statut    | raison              |
-      | Marie  | Dupont | marie@exemple.fr | 0612345678 | 0       | 0:2      | CONFIRMED |                     |
-      | Jean   | Martin | jean@exemple.fr  | 0698765432 | 1       | 0:1      | CONFIRMED |                     |
-      | Paul   | Durand | paul@exemple.fr  | 0611223344 | 0       | 0:1      | CANCELLED | Commande abandonnée |
+      | prénom | nom    | email            | téléphone  | coopérateur | créneau | produits | statut    | raison              |
+      | Marie  | Dupont | marie@exemple.fr | 0612345678 | 1001        | 0       | 0:2      | CONFIRMED |                     |
+      | Jean   | Martin | jean@exemple.fr  | 0698765432 | 1002        | 1       | 0:1      | CONFIRMED |                     |
+      | Paul   | Durand | paul@exemple.fr  | 0611223344 | 1003        | 0       | 0:1      | CANCELLED | Commande abandonnée |
 
   Scénario: Affichage de la sidenav d'administration unifiée avec sélecteur de vente
     Quand je navigue vers la page backoffice commandes
@@ -37,6 +37,11 @@ Fonctionnalité: Liste des commandes back-office
     Et je saisis "Dupont" dans le champ de recherche backoffice
     Alors seules les commandes contenant "Dupont" sont affichées
 
+  Scénario: Recherche par numéro de coopérateur dans les commandes
+    Quand je navigue vers la page backoffice commandes
+    Et je saisis "1002" dans le champ de recherche backoffice
+    Alors seules les commandes contenant "Martin" sont affichées
+
   Scénario: Filtre par créneau
     Quand je navigue vers la page backoffice commandes
     Et je sélectionne un créneau dans le filtre backoffice
@@ -51,6 +56,7 @@ Fonctionnalité: Liste des commandes back-office
     Quand je navigue vers la page backoffice commandes
     Et je clique sur une commande dans la liste backoffice
     Alors je vois les coordonnées du client
+    Et je vois le numéro de coopérateur dans le détail backoffice
     Et je vois le créneau de retrait dans le détail backoffice
     Et je vois le tableau des produits avec quantités et prix
     Et je vois le total de la commande
